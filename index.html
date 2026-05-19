@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asia Adventure 2026 — Phil &amp; Nelie</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0ede6;
+    --muted: #888;
+    --china: #c9622f;
+    --japan: #d4596a;
+    --vietnam: #5a9e6f;
+    --cambodia: #7b6fa0;
+    --thailand: #c4a84f;
+    --korea: #5b7fa6;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 4rem 2rem 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+  h1 em { font-style: italic; color: var(--muted); }
+  .header-meta { display: flex; gap: 2rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .meta-item { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); letter-spacing: 0.05em; }
+  .meta-item span { color: var(--text); font-weight: 500; }
+
+  /* ── TIMELINE ── */
+  .timeline-wrap { max-width: 900px; margin: 3rem auto 0; padding: 0 2rem; }
+  .timeline-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  .timeline {
+    display: flex;
+    height: 48px;
+    border-radius: 4px;
+    overflow: hidden;
+    gap: 2px;
+    background: var(--bg);
+  }
+  .seg {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.2s, transform 0.15s;
+    border-radius: 2px;
+  }
+  .seg:hover { filter: brightness(1.25); }
+  .seg.active { filter: brightness(1.35); transform: scaleY(1.08); z-index: 2; }
+  .seg-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .seg[data-country="korea"]    { background: var(--korea);    flex: 11; }
+  .seg[data-country="china"]    { background: var(--china);    flex: 17; }
+  .seg[data-country="japan"]    { background: var(--japan);    flex: 25; }
+  .seg[data-country="vietnam"]  { background: var(--vietnam);  flex: 6; }
+  .seg[data-country="cambodia"] { background: var(--cambodia); flex: 6; }
+  .seg[data-country="bangkok"]  { background: var(--thailand); flex: 5; }
+  .seg[data-country="chiangmai"]{ background: color-mix(in srgb, var(--thailand) 70%, white 30%); flex: 30; }
+  .timeline-dates {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+  .hint {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-top: 0.75rem;
+  }
+
+  /* ── MAP ── */
+  .map-wrap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .map-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+  #trip-map { height: 460px; border-radius: 8px; border: 1px solid var(--border); background: #111; }
+
+  /* Leaflet overrides */
+  .leaflet-popup-content-wrapper {
+    background: #1e1e1e !important;
+    color: var(--text) !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-content { margin: 0 !important; }
+  .leaflet-popup-tip { background: #1e1e1e !important; }
+  .leaflet-popup-close-button { color: #888 !important; padding: 6px 8px !important; }
+  .leaflet-popup-close-button:hover { color: #f0ede6 !important; }
+  .leaflet-container { background: #111 !important; }
+  .leaflet-control-attribution { background: rgba(0,0,0,0.5) !important; color: #555 !important; }
+  .leaflet-control-attribution a { color: #777 !important; }
+  .leaflet-control-zoom a { background: #1e1e1e !important; color: #f0ede6 !important; border-color: rgba(255,255,255,0.1) !important; }
+  .leaflet-control-zoom a:hover { background: #2a2a2a !important; }
+
+  /* Custom numbered map markers */
+  .city-marker-wrap { background: transparent !important; border: none !important; box-shadow: none !important; }
+  .city-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.65);
+    cursor: pointer;
+    transition: opacity 0.3s;
+    line-height: 1;
+    user-select: none;
+  }
+  .city-marker.dimmed { opacity: 0.18; }
+  .city-marker.city-active {
+    box-shadow: 0 3px 16px rgba(0,0,0,0.8), 0 0 0 3px rgba(255,255,255,0.28);
+  }
+
+  /* Popup */
+  .map-popup { padding: 0.9rem 1.1rem; min-width: 190px; max-width: 250px; }
+  .popup-num { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
+  .popup-city { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 0.2rem; color: #f0ede6; }
+  .popup-dates { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: #888; margin-bottom: 0.5rem; }
+  .popup-note { font-size: 0.78rem; color: #bbb; line-height: 1.5; margin-bottom: 0.75rem; }
+  .popup-explore {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.14);
+    color: #ccc;
+    padding: 0.4rem 0.8rem;
+    border-radius: 3px;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .popup-explore:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.28); }
+  .popup-daytip { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: #666; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.25rem; }
+
+  /* ── DETAIL PANELS ── */
+  .detail-wrap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .detail-panel {
+    display: none;
+    background: var(--bg2);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    animation: fadeUp 0.25s ease;
+  }
+  .detail-panel.visible { display: block; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .panel-header {
+    padding: 1.75rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .panel-header-inner { display: flex; gap: 1rem; align-items: flex-start; flex: 1; }
+  .color-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; flex-shrink: 0; }
+  .panel-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 400; line-height: 1.2; }
+  .panel-dates { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-top: 0.3rem; letter-spacing: 0.05em; }
+  .panel-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; flex-shrink: 0; }
+  .panel-duration { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); white-space: nowrap; }
+  .panel-explore-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: none;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted);
+    padding: 0.3rem 0.65rem;
+    border-radius: 3px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .panel-explore-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+
+  .panel-body { padding: 1.75rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  @media (max-width: 600px) { .panel-body { grid-template-columns: 1fr; } }
+  .panel-section h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  /* Stop list with clickable items */
+  .stop-list { list-style: none; }
+  .stop-list li {
+    padding: 0.6rem 0.3rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 0 -0.3rem;
+    transition: background 0.15s;
+  }
+  .stop-list li:last-child { border-bottom: none; }
+  .stop-list li:hover { background: rgba(255,255,255,0.04); }
+  .stop-list li > div { flex: 1; display: flex; flex-direction: column; gap: 0.15rem; }
+  .stop-name { font-size: 0.9rem; font-weight: 500; }
+  .stop-dates { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+  .stop-note { font-size: 0.78rem; color: #aaa; line-height: 1.4; }
+  .stop-arr {
+    font-size: 0.72rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    padding-top: 3px;
+    transition: color 0.15s, transform 0.15s;
+  }
+  .stop-list li:hover .stop-arr { color: var(--text); transform: translateX(2px); }
+
+  /* Highlight list */
+  .highlight-list { list-style: none; }
+  .highlight-list li {
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: #ccc;
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    line-height: 1.4;
+  }
+  .highlight-list li:last-child { border-bottom: none; }
+  .bullet { font-size: 0.5rem; color: var(--muted); margin-top: 5px; flex-shrink: 0; }
+
+  /* Tags */
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    padding: 0.2rem 0.5rem;
+    border-radius: 2px;
+    margin-right: 0.3rem;
+    margin-top: 0.3rem;
+    text-transform: uppercase;
+  }
+  .tag-flex     { background: rgba(123,111,160,0.2); color: #b8aedc; }
+  .tag-anchor   { background: rgba(201,98,47,0.15);  color: #e8a07a; }
+  .tag-family   { background: rgba(90,158,111,0.15); color: #8ecfa3; }
+  .tag-pokemon  { background: rgba(212,89,106,0.15); color: #e89aa5; }
+  .tag-work     { background: rgba(196,168,79,0.15); color: #dfc97f; }
+
+  /* ── ANCHORS ── */
+  .anchors-wrap { max-width: 900px; margin: 3rem auto; padding: 0 2rem 4rem; }
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+  .anchors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .anchor-item { background: var(--bg2); padding: 1rem 1.25rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .anchor-date { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); white-space: nowrap; padding-top: 2px; min-width: 72px; }
+  .anchor-text { font-size: 0.82rem; line-height: 1.4; color: var(--text); }
+  .anchor-fixed { font-family: 'DM Mono', monospace; font-size: 0.55rem; color: #c9622f; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-top: 0.2rem; }
+
+  /* ── CITY PAGE OVERLAY ── */
+  .city-page {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 500;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .city-page.open { transform: translateX(0); }
+
+  .city-back {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    background: rgba(14,14,14,0.93);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: none;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: color 0.2s;
+  }
+  .city-back:hover { color: var(--text); }
+
+  .city-hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .city-country-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .city-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 400;
+    line-height: 1.05;
+    margin-bottom: 0.5rem;
+  }
+  .city-dates-line {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.04em;
+  }
+  .city-tagline { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.05rem; color: #bbb; }
+
+  /* Photo grid */
+  .photo-grid {
+    max-width: 900px;
+    margin: 2rem auto 5rem;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  @media (max-width: 580px) { .photo-grid { grid-template-columns: 1fr; padding: 0 1rem; } }
+
+  .photo-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .photo-card:hover { border-color: rgba(255,255,255,0.16); }
+
+  .photo-card-img {
+    height: 210px;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg3);
+  }
+  .photo-card-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+  .photo-card:hover .photo-card-img img { transform: scale(1.05); }
+
+  /* Emoji fallback — hidden until img fails or no img provided */
+  .photo-card-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 4.5rem;
+  }
+  .photo-card-img.no-img { border: none; }
+  .photo-card-img.no-img img { display: none; }
+  .photo-card-img.no-img .photo-card-fallback { display: flex; }
+
+  .photo-card-body { padding: 1rem 1.1rem 1.15rem; }
+  .photo-card-name { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.35rem; }
+  .photo-card-desc { font-size: 0.78rem; color: #999; line-height: 1.55; }
+
+  /* ── TABS ── */
+  .tab-nav {
+    max-width: 900px;
+    margin: 2rem auto 0;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.8rem 1.35rem 0.7rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--text); }
+
+  /* Per-tab accent colors */
+  .tab-btn[data-tab="overview"]            { color: #aaa; }
+  .tab-btn[data-tab="budget"]              { color: #b8996e; }
+  .tab-btn[data-tab="logistics"]           { color: #8aabb8; }
+  .tab-btn[data-tab="procedures"]          { color: var(--korea); }
+  .tab-btn[data-tab="constraints"]         { color: #c07a5a; }
+  .tab-btn[data-tab="packing"]             { color: #7ab899; }
+  .tab-btn[data-tab="overview"].active     { color: var(--text);  border-bottom-color: var(--text); }
+  .tab-btn[data-tab="budget"].active       { color: #d4ac7a;      border-bottom-color: #d4ac7a; }
+  .tab-btn[data-tab="logistics"].active    { color: #9ec4d4;      border-bottom-color: #9ec4d4; }
+  .tab-btn[data-tab="procedures"].active   { color: var(--korea); border-bottom-color: var(--korea); }
+  .tab-btn[data-tab="constraints"].active  { color: #e8916a;      border-bottom-color: #e8916a; }
+  .tab-btn[data-tab="packing"].active      { color: #8ecfa3;      border-bottom-color: #8ecfa3; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  /* ── BUDGET TAB ── */
+  .budget-wrap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem 5rem; }
+  .budget-section { margin-bottom: 2rem; }
+  .budget-section-header {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.7rem 1rem; border-radius: 5px; margin-bottom: 0.4rem;
+  }
+  .budget-section-label {
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+  }
+  .budget-section-meta {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #777;
+  }
+  .budget-section-total {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; margin-left: auto;
+  }
+  .budget-table {
+    width: 100%; border-collapse: collapse;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+  }
+  .budget-table th {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--muted); text-align: left;
+    padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); font-weight: 400;
+  }
+  .budget-table td {
+    padding: 0.8rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top; font-size: 0.82rem;
+  }
+  .budget-table tr:last-child td { border-bottom: none; }
+  .budget-table tbody tr:hover td { background: rgba(255,255,255,0.02); }
+  .b-city { font-weight: 500; }
+  .b-nights { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-top: 0.1rem; }
+  .b-type {
+    font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 0.15rem 0.4rem; border-radius: 2px;
+    display: inline-block; margin-bottom: 0.25rem;
+  }
+  .b-hotel  { background: rgba(255,255,255,0.07); color: #aaa; }
+  .b-airbnb { background: rgba(255,87,87,0.15); color: #f08080; }
+  .b-rate { font-size: 0.78rem; color: #bbb; }
+  .b-note { font-size: 0.7rem; color: #666; margin-top: 0.2rem; font-style: italic; }
+  .b-range { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--text); }
+  .budget-summary {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1.35rem 1.5rem; margin-top: 0.75rem;
+  }
+  .budget-summary-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 0.45rem 0;
+  }
+  .budget-summary-label {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
+  }
+  .budget-summary-val {
+    font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--text);
+  }
+  .budget-summary-divider { height: 1px; background: var(--border); margin: 0.6rem 0; }
+  .budget-summary-row.grand .budget-summary-label { color: var(--text); font-size: 0.7rem; }
+  .budget-summary-row.grand .budget-summary-val { font-size: 1.05rem; }
+  .budget-disclaimer {
+    font-size: 0.72rem; color: #555; font-style: italic;
+    margin-top: 1rem; line-height: 1.5;
+  }
+
+  /* ── LOGISTICS TAB ── */
+  .logistics-wrap {
+    max-width: 900px; margin: 2.5rem auto 0;
+    padding: 0 2rem 5rem; display: flex; flex-direction: column; gap: 2.5rem;
+  }
+  .log-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .log-card-head {
+    padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+  .log-card-icon { font-size: 1rem; }
+  .log-card-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; }
+  .log-card-sub {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem;
+    color: var(--muted); margin-left: auto; letter-spacing: 0.06em;
+  }
+  .log-row {
+    display: grid; padding: 0.9rem 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04); gap: 0.35rem;
+    transition: background 0.15s;
+  }
+  .log-row:last-child { border-bottom: none; }
+  .log-row:hover { background: rgba(255,255,255,0.02); }
+  .log-row.visa-row { grid-template-columns: 110px 1fr; align-items: start; }
+  .log-row.flight-row { grid-template-columns: 24px 1fr auto; align-items: start; gap: 0.5rem 0.85rem; }
+  .log-row.train-row  { grid-template-columns: 24px 1fr auto; align-items: start; gap: 0.5rem 0.85rem; }
+  .log-row.accom-row  { grid-template-columns: 1fr auto; align-items: start; }
+  .log-flag { font-size: 1.2rem; line-height: 1; padding-top: 1px; }
+  .log-num  { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); padding-top: 3px; }
+  .log-label { font-size: 0.88rem; font-weight: 500; }
+  .log-sub   { font-size: 0.75rem; color: #999; line-height: 1.45; margin-top: 0.1rem; }
+  .log-badge {
+    font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 0.18rem 0.45rem; border-radius: 2px;
+    display: inline-block; white-space: nowrap;
+  }
+  .lb-required { background: rgba(201,98,47,0.2);  color: #e8a07a; }
+  .lb-free     { background: rgba(90,158,111,0.2); color: #8ecfa3; }
+  .lb-evisa    { background: rgba(123,111,160,0.2); color: #b8aedc; }
+  .lb-urgent   { background: rgba(212,89,106,0.2);  color: #e89aa5; }
+  .lb-soon     { background: rgba(196,168,79,0.2);  color: #dfc97f; }
+  .lb-ok       { background: rgba(90,158,111,0.15); color: #8ecfa3; }
+  .lb-airbnb   { background: rgba(255,87,87,0.15);  color: #f08080; }
+  .lb-hotel    { background: rgba(255,255,255,0.07); color: #aaa; }
+  .log-country-badge {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+  }
+  .accom-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 620px) { .accom-grid { grid-template-columns: 1fr; } }
+
+  /* ── STOP CARDS ── */
+  .stop-cards-wrap { max-width: 900px; margin: 3rem auto 0; padding: 0 2rem; }
+  .sc-list {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .sc-card {
+    display: grid; grid-template-columns: 52px 1fr auto;
+    background: var(--bg2); cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    text-decoration: none; color: inherit;
+  }
+  .sc-card:last-child { border-bottom: none; }
+  .sc-card:hover { background: var(--bg3); }
+  .sc-num-col {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0.9rem 0; border-right: 1px solid var(--border);
+  }
+  .sc-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem; font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+  .sc-info { padding: 0.85rem 1.1rem; flex: 1; }
+  .sc-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; flex-wrap: wrap; }
+  .sc-flag { font-size: 0.9rem; line-height: 1; }
+  .sc-country-label {
+    font-family: 'DM Mono', monospace; font-size: 0.58rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+  }
+  .sc-weather {
+    margin-left: auto; font-family: 'DM Mono', monospace;
+    font-size: 0.6rem; color: #666; white-space: nowrap;
+  }
+  .sc-city { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; margin-bottom: 0.15rem; }
+  .sc-dates-nights { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-bottom: 0.3rem; }
+  .sc-nights { opacity: 0.7; }
+  .sc-vibe { font-size: 0.78rem; color: #999; font-style: italic; }
+  .sc-actions {
+    display: flex; align-items: center; padding: 0 1rem;
+    border-left: 1px solid var(--border);
+  }
+  .sc-explore-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.6rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    background: none; border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted); padding: 0.35rem 0.7rem; border-radius: 3px;
+    cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+  }
+  .sc-explore-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.28); }
+  @media (max-width: 600px) {
+    .sc-card { grid-template-columns: 44px 1fr; }
+    .sc-actions { display: none; }
+  }
+
+  /* ── COMPANIONS ── */
+  .companions-wrap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem; }
+  .companion-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .companion-card { background: var(--bg2); padding: 1rem 1.25rem; }
+  .companion-name { font-size: 0.88rem; font-weight: 500; margin-bottom: 0.2rem; }
+  .companion-leg { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--muted); margin-bottom: 0.1rem; line-height: 1.5; }
+  .companion-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 0.4rem; vertical-align: middle; }
+
+  /* ── PRE-DEPARTURE TIMELINE ── */
+  .predep-list { display: flex; flex-direction: column; }
+  .predep-row {
+    display: grid; grid-template-columns: 130px 1fr;
+    padding: 0.85rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 0.5rem 1rem; align-items: start;
+  }
+  .predep-row:last-child { border-bottom: none; }
+  .predep-row:hover { background: rgba(255,255,255,0.02); }
+  .predep-date { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--muted); padding-top: 2px; }
+  .predep-label { font-size: 0.85rem; font-weight: 500; }
+  .predep-sub { font-size: 0.75rem; color: #999; line-height: 1.45; margin-top: 0.1rem; }
+
+  /* ── PACKING LIST ── */
+  .packing-wrap { max-width: 900px; margin: 2.5rem auto 0; padding: 0 2rem 5rem; display: flex; flex-direction: column; gap: 2rem; }
+  .pack-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .pack-section-head { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+  .pack-section-icon { font-size: 1rem; }
+  .pack-section-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 400; }
+  .pack-items { padding: 0.5rem 0; }
+  .pack-item {
+    display: flex; align-items: center; gap: 0.9rem;
+    padding: 0.55rem 1.5rem; cursor: pointer;
+    transition: background 0.1s; border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .pack-item:last-child { border-bottom: none; }
+  .pack-item:hover { background: rgba(255,255,255,0.02); }
+  .pack-cb {
+    width: 15px; height: 15px; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 3px; flex-shrink: 0; display: flex; align-items: center;
+    justify-content: center; transition: background 0.15s, border-color 0.15s;
+  }
+  .pack-item.checked .pack-cb { background: #5a9e6f; border-color: #5a9e6f; }
+  .pack-item.checked .pack-cb::after { content: '✓'; font-size: 0.65rem; color: white; font-weight: 700; }
+  .pack-item.checked .pack-text { text-decoration: line-through; color: #555; }
+  .pack-text { font-size: 0.82rem; color: #ccc; line-height: 1.4; }
+  .pack-note { font-size: 0.72rem; color: #555; margin-left: auto; font-style: italic; font-family: 'DM Mono', monospace; }
+  .pack-progress { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--muted); margin-left: auto; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ MAIN PAGE ═══════════════════════════ -->
+
+<header>
+  <!-- header content below -->
+  <p class="eyebrow">Sep 2026 — Jan 2027</p>
+  <h1>Asia <em>Adventure</em> 2026</h1>
+  <p style="font-family:'Playfair Display',serif;font-style:italic;font-size:1.05rem;color:#888;margin-top:0.6rem;line-height:1.55">One final hurrah before the next chapter — 15 weeks of soul-searching, career reset, and cultural immersion across East and Southeast Asia.</p>
+  <div class="header-meta">
+    <div class="meta-item">Who <span>Phil &amp; Nelie</span></div>
+    <div class="meta-item">Departure <span>Sep 26, SFO</span></div>
+    <div class="meta-item">Return <span>Jan 8, 2027</span></div>
+    <div class="meta-item">Countries <span>Korea · China · Japan · Vietnam · Cambodia · Thailand</span></div>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" data-tab="budget" onclick="switchTab('budget')">Budget</button>
+  <button class="tab-btn" data-tab="logistics" onclick="switchTab('logistics')">Logistics</button>
+  <button class="tab-btn" data-tab="procedures" onclick="switchTab('procedures')" style="color:var(--korea)">Korea Rx</button>
+  <button class="tab-btn" data-tab="constraints" onclick="switchTab('constraints')">Constraints</button>
+  <button class="tab-btn" data-tab="packing" onclick="switchTab('packing')">Packing</button>
+</nav>
+
+<div id="tab-overview" class="tab-pane active">
+<div class="timeline-wrap">
+  <p class="timeline-label">Trip timeline — click a segment</p>
+  <div class="timeline">
+    <div class="seg" data-country="korea"    onclick="show('korea')">    <span class="seg-label">KOR</span></div>
+    <div class="seg" data-country="china"    onclick="show('china')">    <span class="seg-label">China</span></div>
+    <div class="seg" data-country="japan"    onclick="show('japan')">    <span class="seg-label">Japan</span></div>
+    <div class="seg" data-country="vietnam"  onclick="show('vietnam')">  <span class="seg-label">VN</span></div>
+    <div class="seg" data-country="cambodia" onclick="show('cambodia')"> <span class="seg-label">CAM</span></div>
+    <div class="seg" data-country="bangkok"  onclick="show('bangkok')">  <span class="seg-label">BKK</span></div>
+    <div class="seg" data-country="chiangmai"onclick="show('chiangmai')"><span class="seg-label">CNX</span></div>
+  </div>
+  <div class="timeline-dates">
+    <span>Sep 26</span><span>Oct 8</span><span>Oct 25</span><span>Nov 19</span>
+    <span>Nov 26</span><span>Dec 2</span><span>Dec 7</span><span>Jan 8</span>
+  </div>
+  <p class="hint">↑ tap any segment for details</p>
+</div>
+
+<!-- MAP -->
+<div class="map-wrap">
+  <p class="map-label">Route map — bubbles sized by nights stayed · click any city</p>
+  <div id="trip-map"></div>
+</div>
+
+<!-- DETAIL PANELS -->
+<div class="detail-wrap">
+
+  <!-- KOREA -->
+  <div class="detail-panel" id="panel-korea">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--korea)"></div>
+        <div>
+          <div class="panel-title">Korea</div>
+          <div class="panel-dates">Sep 26 – Oct 7 · 11 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">11 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('seoul')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Base</h3>
+        <ul class="stop-list">
+          <li onclick="openCityPage('seoul')">
+            <div><span class="stop-name">Seoul — Gangnam</span><span class="stop-dates">Sep 26 – Oct 7 · 11 nights</span><span class="stop-note">Opening stop. Aesthetic procedures at world-class clinics at 30–50% US prices. Gangnam Beauty Belt + Bukhansan hiking + cafe culture.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+        </ul>
+        <h3 style="margin-top:1.25rem">While there</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Gangnam-gu beauty clinics — masseter botox, pico laser, RF microneedling</li>
+          <li><span class="bullet">◆</span>Gyeongbokgung Palace + Bukchon Hanok Village</li>
+          <li><span class="bullet">◆</span>Bukhansan National Park — granite ridgelines above the city</li>
+          <li><span class="bullet">◆</span>Yeonnam-dong + Mangwon market — best cafe neighborhoods</li>
+          <li><span class="bullet">◆</span>Myeongdong + Insadong for street food and culture</li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>No visa required for US citizens — 90 days on arrival.</li>
+          <li><span class="bullet">◆</span>Opens trip before China Golden Week (Oct 1–7).</li>
+          <li><span class="bullet">◆</span>Sep is the best weather month in East Asia — clear skies, 20–26°C.</li>
+          <li><span class="bullet">◆</span>Procedures should be front-loaded days 1–6; leave days 7–11 for recovery + sightseeing.</li>
+          <li><span class="bullet">◆</span>Fly ICN → PEK (Beijing) on Oct 8.</li>
+        </ul>
+        <div style="margin-top:1rem">
+          <span class="tag" style="background:rgba(91,127,166,0.2);color:#a3bdd6">Medical tourism</span>
+          <span class="tag" style="background:rgba(91,127,166,0.15);color:#a3bdd6">Sep = peak weather</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHINA -->
+  <div class="detail-panel" id="panel-china">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--china)"></div>
+        <div>
+          <div class="panel-title">China</div>
+          <div class="panel-dates">Oct 8 – 25 · 17 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">~17 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('beijing')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Stops</h3>
+        <ul class="stop-list">
+          <li onclick="openCityPage('beijing')">
+            <div><span class="stop-name">Beijing</span><span class="stop-dates">Oct 8 – 12 · 4 nights</span><span class="stop-note">Great Wall, Forbidden City, hutongs, Summer Palace. Golden Week is over — sites are open and clear.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+          <li onclick="openCityPage('zjj')">
+            <div><span class="stop-name">Zhangjiajie</span><span class="stop-dates">Oct 12 – 15 · 3 nights</span><span class="stop-note">Avatar mountains, Bailong elevator, hiking. Post-Golden Week crowds have cleared.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+          <li onclick="openCityPage('chongqing')">
+            <div><span class="stop-name">Chongqing</span><span class="stop-dates">Oct 15 – 18 · 3 nights</span><span class="stop-note">Cyberpunk vertical city, neon bridges, authentic Chongqing hot pot.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+          <li onclick="openCityPage('chengdu')">
+            <div><span class="stop-name">Chengdu</span><span class="stop-dates">Oct 18 – 21 · 3 nights</span><span class="stop-note">Giant pandas, Sichuan teahouses, dan dan noodles.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+          <li onclick="openCityPage('shanghai')">
+            <div><span class="stop-name">Shanghai</span><span class="stop-dates">Oct 21 – 25 · 4 nights</span><span class="stop-note">The Bund, French Concession, futuristic Pudong skyline. Exit city → fly Osaka.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Arrive after Golden Week — no crowds, no price surges.</li>
+          <li><span class="bullet">◆</span>Oct weather 15–25°C. Carry-on only is feasible.</li>
+          <li><span class="bullet">◆</span>One domestic flight: Beijing→Zhangjiajie. Chengdu→Shanghai direct flight.</li>
+          <li><span class="bullet">◆</span>Chongqing and Chengdu connected by high-speed rail (~1.5hr).</li>
+          <li><span class="bullet">◆</span>China visa required — apply well in advance of Sep 26 departure.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAPAN -->
+  <div class="detail-panel" id="panel-japan">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--japan)"></div>
+        <div>
+          <div class="panel-title">Japan</div>
+          <div class="panel-dates">Oct 25 – Nov 19 · 25 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">~25 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('osaka')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Base</h3>
+        <ul class="stop-list">
+          <li onclick="openCityPage('osaka')">
+            <div><span class="stop-name">Osaka</span><span class="stop-dates">Oct 25 – Nov 19 · 25 nights</span><span class="stop-note">2BR Airbnb with Jose + GF. Home-base mode — work days, neighborhoods, food. Slightly shorter than planned but still the big anchor.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+        </ul>
+        <h3 style="margin-top:1.25rem">Day trips</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Kyoto — 15 min by shinkansen</li>
+          <li><span class="bullet">◆</span>Nara — deer park, easy half-day</li>
+          <li><span class="bullet">◆</span>Hiroshima — ~1.5hr, powerful visit</li>
+          <li><span class="bullet">◆</span>Tokyo solo trip — 4–5 days optional</li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Home-base vibe. Not tourist grind — already did extensive Japan trip.</li>
+          <li><span class="bullet">◆</span>Osaka is cheaper + better food than Tokyo for slow living.</li>
+          <li><span class="bullet">◆</span>Dedicated AI/laptop work blocks throughout.</li>
+          <li><span class="bullet">◆</span>Visa-free entry for US citizens.</li>
+          <li><span class="bullet">◆</span>Autumn foliage peaks late Oct–Nov.</li>
+        </ul>
+        <div style="margin-top:1rem">
+          <span class="tag tag-work">Deep work</span>
+          <span class="tag tag-family">With Jose</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIETNAM -->
+  <div class="detail-panel" id="panel-vietnam">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--vietnam)"></div>
+        <div>
+          <div class="panel-title">Vietnam</div>
+          <div class="panel-dates">Nov 20 – Nov 26 · 6 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">~6 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('hcmc')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Stops</h3>
+        <ul class="stop-list">
+          <li onclick="openCityPage('hcmc')">
+            <div><span class="stop-name">Ho Chi Minh City (Saigon)</span><span class="stop-dates">Nov 20 – 24 · 4 nights</span><span class="stop-note">First time. Street food, Ben Thanh market, Cu Chi tunnels, Mekong day trip.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+          <li onclick="openCityPage('danang')">
+            <div><span class="stop-name">Da Nang</span><span class="stop-dates">Nov 24 – 26 · 2 nights</span><span class="stop-note">First time. Main draw: Hoi An Ancient Town day trip (30 min away).</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Joining cousin David for Saigon + Da Nang portion of his trip.</li>
+          <li><span class="bullet">◆</span>Skipping Hanoi and Phuket (David continues there solo).</li>
+          <li><span class="bullet">◆</span>E-visa required for US citizens — apply online in advance.</li>
+          <li><span class="bullet">◆</span>Nov is ideal weather for southern + central Vietnam.</li>
+        </ul>
+        <div style="margin-top:1rem"><span class="tag tag-family">With cousin David</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAMBODIA -->
+  <div class="detail-panel" id="panel-cambodia">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--cambodia)"></div>
+        <div>
+          <div class="panel-title">Angkor Wat · Cambodia</div>
+          <div class="panel-dates">Nov 26 – Dec 2 · 6 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">6 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('siemreap')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Base</h3>
+        <ul class="stop-list">
+          <li onclick="openCityPage('siemreap')">
+            <div><span class="stop-name">Siem Reap</span><span class="stop-dates">Nov 26 – Dec 2</span><span class="stop-note">Gateway to Angkor. Short flight from Da Nang. Fly to Bangkok Dec 2 to meet David.</span></div>
+            <span class="stop-arr">→</span>
+          </li>
+        </ul>
+        <h3 style="margin-top:1.25rem">Temples</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Angkor Wat — sunrise at the reflection pool</li>
+          <li><span class="bullet">◆</span>Angkor Thom + the Bayon — 216 carved faces</li>
+          <li><span class="bullet">◆</span>Ta Prohm — jungle roots swallowing ruins</li>
+          <li><span class="bullet">◆</span>Banteay Srei — pink sandstone, 30km out</li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>One of the genuinely unmissable sites on earth.</li>
+          <li><span class="bullet">◆</span>Potentially meeting parents here during this window.</li>
+          <li><span class="bullet">◆</span>Dec 2 is a hard anchor — must reach Bangkok that day.</li>
+          <li><span class="bullet">◆</span>E-visa available for US citizens (apply online).</li>
+          <li><span class="bullet">◆</span>Dec weather is ideal — dry season, 25–30°C.</li>
+        </ul>
+        <div style="margin-top:1rem">
+          <span class="tag tag-family">Maybe parents</span>
+          <span class="tag tag-anchor">Hard out Dec 2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BANGKOK -->
+  <div class="detail-panel" id="panel-bangkok">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:var(--thailand)"></div>
+        <div>
+          <div class="panel-title">Bangkok</div>
+          <div class="panel-dates">Dec 2 – Dec 6 · 5 days</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">5 days</span>
+        <button class="panel-explore-btn" onclick="openCityPage('bangkok')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Highlights</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Pokémon Center Bangkok — priority visit for business/inventory</li>
+          <li><span class="bullet">◆</span>Wat Pho + Wat Arun</li>
+          <li><span class="bullet">◆</span>Chatuchak Weekend Market</li>
+          <li><span class="bullet">◆</span>Street food + local neighborhoods</li>
+          <li><span class="bullet">◆</span>No clubs, beach scenes, or tourist traps needed</li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Dec 2 is a fixed anchor — cousin David arrives same day.</li>
+          <li><span class="bullet">◆</span>Visa-free entry for US citizens (60 days).</li>
+          <li><span class="bullet">◆</span>Dec is peak season — dry, cool, best weather of the year.</li>
+        </ul>
+        <div style="margin-top:1rem">
+          <span class="tag tag-anchor">Fixed anchor</span>
+          <span class="tag tag-family">With cousin David</span>
+          <span class="tag tag-pokemon">Pokémon Center</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHIANG MAI -->
+  <div class="detail-panel" id="panel-chiangmai">
+    <div class="panel-header">
+      <div class="panel-header-inner">
+        <div class="color-dot" style="background:color-mix(in srgb, var(--thailand) 70%, white 30%)"></div>
+        <div>
+          <div class="panel-title">Chiang Mai</div>
+          <div class="panel-dates">Dec 7 – Jan 6 · open-ended base</div>
+        </div>
+      </div>
+      <div class="panel-right">
+        <span class="panel-duration">~4 weeks</span>
+        <button class="panel-explore-btn" onclick="openCityPage('chiangmai')">Explore →</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="panel-section">
+        <h3>Why Chiang Mai</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Cheapest base of the entire trip</li>
+          <li><span class="bullet">◆</span>World-class cafe culture + coworking infrastructure</li>
+          <li><span class="bullet">◆</span>Mountains, temples, no beaches needed</li>
+          <li><span class="bullet">◆</span>Dec–Jan is coolest, driest, best time of year</li>
+          <li><span class="bullet">◆</span>Old City as base neighborhood</li>
+        </ul>
+        <h3 style="margin-top:1.25rem">Day trips</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Doi Inthanon — Thailand's highest peak</li>
+          <li><span class="bullet">◆</span>Elephant sanctuaries</li>
+          <li><span class="bullet">◆</span>Pai — ultra-slow mountain town</li>
+        </ul>
+      </div>
+      <div class="panel-section">
+        <h3>Notes</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>Primary soul-searching + AI deep work base — for both Phil and Nelie.</li>
+          <li><span class="bullet">◆</span>Open-ended stay — leave when ready.</li>
+          <li><span class="bullet">◆</span>Depart ~Jan 6–7, back in US Jan 8.</li>
+        </ul>
+        <h3 style="margin-top:1.25rem">Return calendar</h3>
+        <ul class="highlight-list">
+          <li><span class="bullet">◆</span>~Jan 17–18 · Front Row San Diego</li>
+          <li><span class="bullet">◆</span>~Jan 31–Feb 1 · Front Row Pasadena (optional)</li>
+          <li><span class="bullet">◆</span>~Feb 27–28 · Front Row Portland (must-do)</li>
+        </ul>
+        <div style="margin-top:1rem">
+          <span class="tag tag-work">Soul-searching base</span>
+          <span class="tag tag-work">Deep work</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /detail-wrap -->
+
+<!-- STOP CARDS -->
+<div class="stop-cards-wrap">
+  <p class="section-title">The itinerary — click any stop to explore</p>
+  <div class="sc-list" id="stop-cards"></div>
+</div>
+
+<!-- COMPANIONS -->
+<div class="companions-wrap">
+  <p class="section-title">Who's joining when</p>
+  <div class="companion-grid">
+    <div class="companion-card">
+      <div class="companion-name"><span class="companion-dot" style="background:#a3bdd6"></span>Phil &amp; Nelie</div>
+      <div class="companion-leg" style="color:#888">Entire trip — Sep 26 → Jan 6</div>
+      <div class="companion-leg">Korea · China · Japan · Vietnam · Cambodia · Thailand</div>
+    </div>
+    <div class="companion-card">
+      <div class="companion-name"><span class="companion-dot" style="background:#8ecfa3"></span>Jose</div>
+      <div class="companion-leg" style="color:#888">Oct 25 – Nov 19</div>
+      <div class="companion-leg">Osaka — shared Airbnb</div>
+    </div>
+    <div class="companion-card">
+      <div class="companion-name"><span class="companion-dot" style="background:#e89aa5"></span>Cousin David</div>
+      <div class="companion-leg" style="color:#888">Nov 20 – Dec 6</div>
+      <div class="companion-leg">HCMC · Da Nang · Bangkok</div>
+    </div>
+    <div class="companion-card">
+      <div class="companion-name"><span class="companion-dot" style="background:#dfc97f"></span>Parents</div>
+      <div class="companion-leg" style="color:#888">Nov 26 – Dec 2 · maybe</div>
+      <div class="companion-leg">Siem Reap · Angkor Wat (unconfirmed)</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /tab-overview -->
+
+<!-- ═══════════════════════════ BUDGET TAB ═══════════════════════════ -->
+<div id="tab-budget" class="tab-pane">
+<div class="budget-wrap">
+
+  <!-- KOREA -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(91,127,166,0.1)">
+      <span class="budget-section-label" style="color:#5b7fa6">🇰🇷 Korea</span>
+      <span class="budget-section-meta">Sep 26 – Oct 7 · 11 nights</span>
+      <span class="budget-section-total" style="color:#5b7fa6">$2,760 – $4,840</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Seoul — Gangnam</div><div class="b-nights">11 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$120–180 / night</div><div class="b-note">Gangnam-gu area — near clinics</div></td>
+          <td><div class="b-range">$40–60 / day</div><div class="b-note">Food + transport + sightseeing</div></td>
+          <td><div class="b-range">$1,760 – $2,640</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Procedures</div><div class="b-nights">Gangnam clinics</div></td>
+          <td colspan="2"><div class="b-rate">Masseter botox · facial botox · pico laser · RF microneedling · rejuran · skinboosters · teeth whitening</div><div class="b-note">30–50% of US prices. See Korea Rx tab for full breakdown.</div></td>
+          <td><div class="b-range">$1,000 – $2,200</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHINA -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(201,98,47,0.1)">
+      <span class="budget-section-label" style="color:#c9622f">🇨🇳 China</span>
+      <span class="budget-section-meta">Oct 8 – 25 · 17 nights</span>
+      <span class="budget-section-total" style="color:#c9622f">$1,770 – $2,570</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Beijing</div><div class="b-nights">4 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$75–100 / night</div></td>
+          <td><div class="b-range">$40–60 / day</div><div class="b-note">Post-Golden Week — no crowds, normal prices</div></td>
+          <td><div class="b-range">$460 – $640</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Zhangjiajie</div><div class="b-nights">3 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$40–65 / night</div></td>
+          <td><div class="b-range">$35–55 / day</div><div class="b-note">Park entrance ~$30 one-time</div></td>
+          <td><div class="b-range">$225 – $360</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Chongqing</div><div class="b-nights">3 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$50–80 / night</div></td>
+          <td><div class="b-range">$35–55 / day</div></td>
+          <td><div class="b-range">$255 – $405</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Chengdu</div><div class="b-nights">3 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$55–80 / night</div></td>
+          <td><div class="b-range">$35–55 / day</div><div class="b-note">Panda base ~$20 one-time</div></td>
+          <td><div class="b-range">$270 – $405</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Shanghai</div><div class="b-nights">4 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$85–120 / night</div></td>
+          <td><div class="b-range">$50–70 / day</div><div class="b-note">Most expensive China city</div></td>
+          <td><div class="b-range">$540 – $760</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- JAPAN -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(212,89,106,0.1)">
+      <span class="budget-section-label" style="color:#d4596a">🇯🇵 Japan</span>
+      <span class="budget-section-meta">Oct 25 – Nov 19 · 25 nights</span>
+      <span class="budget-section-total" style="color:#d4596a">$1,875 – $2,875</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Osaka</div><div class="b-nights">25 nights</div></td>
+          <td><span class="b-type b-airbnb">Airbnb</span><div class="b-rate">$750–1,250 / month prorated</div><div class="b-note">Split with Jose = discount. ~25 of 30 days.</div></td>
+          <td><div class="b-range">$45–65 / day</div><div class="b-note">Food + day trips to Kyoto, Nara, Hiroshima</div></td>
+          <td><div class="b-range">$1,875 – $2,875</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- VIETNAM -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(90,158,111,0.1)">
+      <span class="budget-section-label" style="color:#5a9e6f">🇻🇳 Vietnam</span>
+      <span class="budget-section-meta">Nov 20 – 26 · 6 nights</span>
+      <span class="budget-section-total" style="color:#5a9e6f">$360 – $580</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Ho Chi Minh City</div><div class="b-nights">4 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$35–60 / night</div></td>
+          <td><div class="b-range">$25–40 / day</div><div class="b-note">Vietnam is among cheapest on the trip</div></td>
+          <td><div class="b-range">$240 – $400</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Da Nang / Hoi An</div><div class="b-nights">2 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$35–60 / night</div></td>
+          <td><div class="b-range">$25–40 / day</div><div class="b-note">Day trip to Hoi An from Da Nang base</div></td>
+          <td><div class="b-range">$120 – $200</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CAMBODIA -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(123,111,160,0.1)">
+      <span class="budget-section-label" style="color:#7b6fa0">🇰🇭 Cambodia</span>
+      <span class="budget-section-meta">Nov 26 – Dec 2 · 6 nights</span>
+      <span class="budget-section-total" style="color:#7b6fa0">$430 – $660</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Siem Reap</div><div class="b-nights">6 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$30–55 / night</div></td>
+          <td><div class="b-range">$30–45 / day</div><div class="b-note">Angkor 7-day pass = $72 one-time</div></td>
+          <td><div class="b-range">$430 – $660</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- THAILAND -->
+  <div class="budget-section">
+    <div class="budget-section-header" style="background:rgba(196,168,79,0.1)">
+      <span class="budget-section-label" style="color:#c4a84f">🇹🇭 Thailand</span>
+      <span class="budget-section-meta">Dec 2 – Jan 6 · 35 nights</span>
+      <span class="budget-section-total" style="color:#c4a84f">$1,850 – $3,275</span>
+    </div>
+    <table class="budget-table">
+      <thead><tr>
+        <th>City</th><th>Accommodation</th><th>Daily Spend</th><th>Est. Total</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Bangkok</div><div class="b-nights">5 nights</div></td>
+          <td><span class="b-type b-hotel">Hotel</span><div class="b-rate">$55–90 / night</div></td>
+          <td><div class="b-range">$35–55 / day</div><div class="b-note">Dec is peak season — book early</div></td>
+          <td><div class="b-range">$450 – $725</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Chiang Mai</div><div class="b-nights">~30 nights</div></td>
+          <td><span class="b-type b-airbnb">Airbnb</span><div class="b-rate">$650–1,200 / month</div></td>
+          <td><div class="b-range">$25–45 / day</div><div class="b-note">Cheapest base of the trip. Old City area.</div></td>
+          <td><div class="b-range">$1,400 – $2,550</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- GRAND TOTAL SUMMARY -->
+  <div class="budget-summary">
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#5b7fa6">🇰🇷 Korea (11 nights + procedures)</span>
+      <span class="budget-summary-val">$2,760 – $4,840</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#c9622f">🇨🇳 China (17 nights)</span>
+      <span class="budget-summary-val">$1,770 – $2,570</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#d4596a">🇯🇵 Japan (25 nights)</span>
+      <span class="budget-summary-val">$1,875 – $2,875</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#5a9e6f">🇻🇳 Vietnam (6 nights)</span>
+      <span class="budget-summary-val">$360 – $580</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#7b6fa0">🇰🇭 Cambodia (6 nights)</span>
+      <span class="budget-summary-val">$430 – $660</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label" style="color:#c4a84f">🇹🇭 Thailand (35 nights)</span>
+      <span class="budget-summary-val">$1,850 – $3,275</span>
+    </div>
+    <div class="budget-summary-divider"></div>
+    <div class="budget-summary-row grand">
+      <span class="budget-summary-label">On-ground total (100 nights)</span>
+      <span class="budget-summary-val">$9,045 – $14,800</span>
+    </div>
+    <div class="budget-summary-row">
+      <span class="budget-summary-label">International flights (estimated)</span>
+      <span class="budget-summary-val">$2,200 – $3,950</span>
+    </div>
+    <div class="budget-summary-divider"></div>
+    <div class="budget-summary-row grand">
+      <span class="budget-summary-label">All-in rough estimate</span>
+      <span class="budget-summary-val" style="font-size:1.2rem">$11,200 – $18,750</span>
+    </div>
+    <p class="budget-disclaimer">Korea procedures ($1,000–$2,200) are included and represent the biggest swing factor. Ranges assume mid-range travel (no luxury hotels, no shoestring hostels). Japan and peak-season Bangkok skew toward the upper end. China domestic flights and train tickets not included in city estimates — see Logistics tab. Split Osaka Airbnb with Jose reduces Japan total significantly.</p>
+  </div>
+
+</div><!-- /budget-wrap -->
+</div><!-- /tab-budget -->
+
+<!-- ═══════════════════════════ LOGISTICS TAB ═══════════════════════════ -->
+<div id="tab-logistics" class="tab-pane">
+<div class="logistics-wrap">
+
+  <!-- VISAS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🛂</span>
+      <span class="log-card-title">Visas</span>
+      <span class="log-card-sub">US passport</span>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇰🇷</span> <span class="log-country-badge" style="color:#5b7fa6">Korea</span></div>
+      <div>
+        <div class="log-label">Visa-free — <span class="log-badge lb-free">No Visa Needed</span></div>
+        <div class="log-sub">US passport: up to 90 days visa-free on arrival. Nothing to do. Sep 26–Oct 7 is well within limits.</div>
+      </div>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇨🇳</span> <span class="log-country-badge" style="color:#c9622f">China</span></div>
+      <div>
+        <div class="log-label">Tourist Visa (L Visa) — <span class="log-badge lb-required">Required</span></div>
+        <div class="log-sub">Apply via Chinese e-visa portal or US consulate. ~$140 fee. 10-year validity, 60 days per entry. <strong>Apply 4–6 weeks before Sep 26 departure.</strong> This is the one that takes the most lead time — don't wait.</div>
+        <div style="margin-top:0.4rem"><span class="log-badge lb-urgent">Book now</span></div>
+      </div>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇯🇵</span> <span class="log-country-badge" style="color:#d4596a">Japan</span></div>
+      <div>
+        <div class="log-label">Visa-free — <span class="log-badge lb-free">No Visa Needed</span></div>
+        <div class="log-sub">US passport: up to 90 days on arrival. Nothing to do.</div>
+      </div>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇻🇳</span> <span class="log-country-badge" style="color:#5a9e6f">Vietnam</span></div>
+      <div>
+        <div class="log-label">E-Visa — <span class="log-badge lb-evisa">$25 Online</span></div>
+        <div class="log-sub">Apply at evisa.xuatnhapcanh.gov.vn. 90-day validity. Takes 3–5 business days — apply a week before arrival. Covers both HCMC and Da Nang entries.</div>
+        <div style="margin-top:0.4rem"><span class="log-badge lb-soon">Apply ~Nov 13</span></div>
+      </div>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇰🇭</span> <span class="log-country-badge" style="color:#7b6fa0">Cambodia</span></div>
+      <div>
+        <div class="log-label">E-Visa — <span class="log-badge lb-evisa">$30 Online</span></div>
+        <div class="log-sub">Apply at evisa.gov.kh. 30-day single entry from arrival. Valid for 3 months from issue date. Apply ~1–2 weeks before Nov 26.</div>
+        <div style="margin-top:0.4rem"><span class="log-badge lb-soon">Apply ~Nov 14</span></div>
+      </div>
+    </div>
+    <div class="log-row visa-row">
+      <div><span class="log-flag">🇹🇭</span> <span class="log-country-badge" style="color:#c4a84f">Thailand</span></div>
+      <div>
+        <div class="log-label">Visa-exempt — <span class="log-badge lb-free">No Visa Needed</span></div>
+        <div class="log-sub">US passport: 60 days on arrival (extendable once for 30 more days at ~$65). Covers Bangkok + full Chiang Mai stay. Nothing to do upfront.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLIGHTS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">✈️</span>
+      <span class="log-card-title">Flights &amp; Trains</span>
+      <span class="log-card-sub">13 flights · 2 trains</span>
+    </div>
+
+    <!-- International & major flights -->
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">1</span>
+      <div>
+        <div class="log-label">SFO → Seoul (ICN) <span class="log-badge lb-urgent">Book now</span></div>
+        <div class="log-sub">Sep 26 departure · ~11hr direct (Korean Air, Asiana) or 1-stop · $700–1,100 · Book 3–4 months out for best fares</div>
+      </div>
+      <span class="log-badge lb-urgent" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">2</span>
+      <div>
+        <div class="log-label">Seoul (ICN) → Beijing (PEK) <span class="log-badge lb-urgent">Book now</span></div>
+        <div class="log-sub">Oct 8 · ~2hr · $150–300 · Korean Air, Air China, Asiana. Book early — this is an international leg.</div>
+      </div>
+      <span class="log-badge lb-urgent" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">3</span>
+      <div>
+        <div class="log-label">Beijing → Zhangjiajie (DYG)</div>
+        <div class="log-sub">Oct 12 · ~2.5hr · $80–150 · Book on Trip.com or Ctrip after China visa confirmed</div>
+      </div>
+      <span class="log-badge lb-soon" style="white-space:nowrap;align-self:center">Domestic CN</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">4</span>
+      <div>
+        <div class="log-label">Zhangjiajie → Chongqing <span class="log-badge lb-ok">Train option</span></div>
+        <div class="log-sub">Oct 15 · High-speed rail ~4hrs is better than flying here — scenic route through Yangtze gorge area. Book on Trip.com.</div>
+      </div>
+      <span class="log-badge lb-soon" style="white-space:nowrap;align-self:center">Train/Flight</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">5</span>
+      <div>
+        <div class="log-label">Chongqing → Chengdu <span class="log-badge lb-ok">Train</span></div>
+        <div class="log-sub">Oct 18 · High-speed G-train ~1.5hrs · $10–20 · Frequent departures. No need to fly this leg.</div>
+      </div>
+      <span class="log-badge lb-ok" style="white-space:nowrap;align-self:center">High-speed</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">6</span>
+      <div>
+        <div class="log-label">Chengdu → Shanghai (PVG)</div>
+        <div class="log-sub">Oct 21 · ~2.5hr flight · $80–150 · Direct — skip Guangzhou on this trip. Book on Ctrip.</div>
+      </div>
+      <span class="log-badge lb-soon" style="white-space:nowrap;align-self:center">Domestic CN</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">7</span>
+      <div>
+        <div class="log-label">Shanghai (PVG) → Osaka (KIX) <span class="log-badge lb-urgent">Book now</span></div>
+        <div class="log-sub">Oct 25 · ~2.5hr · $150–300 · International — book early alongside SFO→ICN</div>
+      </div>
+      <span class="log-badge lb-urgent" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">8</span>
+      <div>
+        <div class="log-label">Osaka (KIX) → Ho Chi Minh City (SGN)</div>
+        <div class="log-sub">Nov 19/20 · ~5hr · $200–400 · AirAsia or Scoot often cheapest. Book ~3 months out.</div>
+      </div>
+      <span class="log-badge lb-soon" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">9</span>
+      <div>
+        <div class="log-label">Ho Chi Minh City (SGN) → Da Nang (DAD)</div>
+        <div class="log-sub">Nov 24 · ~1.5hr · $50–100 · Vietnam Airlines, VietJet, Bamboo. Cheap — book last.</div>
+      </div>
+      <span class="log-badge lb-ok" style="white-space:nowrap;align-self:center">Domestic VN</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">10</span>
+      <div>
+        <div class="log-label">Da Nang (DAD) → Siem Reap (REP)</div>
+        <div class="log-sub">Nov 26 · ~2–3hr, likely 1-stop via HCMC or BKK · $150–300 · Check Cambodia Angkor Air direct option.</div>
+      </div>
+      <span class="log-badge lb-soon" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">11</span>
+      <div>
+        <div class="log-label">Siem Reap (REP) → Bangkok (BKK/DMK)</div>
+        <div class="log-sub">Dec 2 — hard anchor · ~1hr · $80–150 · Bangkok Airways or AirAsia. Book early given the fixed date.</div>
+      </div>
+      <span class="log-badge lb-urgent" style="white-space:nowrap;align-self:center">Hard date</span>
+    </div>
+    <div class="log-row flight-row">
+      <span class="log-num">12</span>
+      <div>
+        <div class="log-label">Bangkok (BKK) → Chiang Mai (CNX)</div>
+        <div class="log-sub">Dec 7 · ~1.5hr · $50–100 · Thai Airways, Bangkok Airways, Nok Air. Overnight train is a great experience (~$30).</div>
+      </div>
+      <span class="log-badge lb-ok" style="white-space:nowrap;align-self:center">Domestic TH</span>
+    </div>
+    <div class="log-row flight-row" style="background:rgba(255,255,255,0.015)">
+      <span class="log-num">13</span>
+      <div>
+        <div class="log-label">Chiang Mai (CNX) → SFO <span class="log-badge lb-urgent">Book now</span></div>
+        <div class="log-sub">Jan 6–7 · ~20hr with connection(s) · $700–1,200 · Book at same time as outbound. CNX→BKK→SFO is common routing.</div>
+      </div>
+      <span class="log-badge lb-urgent" style="white-space:nowrap;align-self:center">International</span>
+    </div>
+  </div>
+
+  <!-- ACCOMMODATION -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🏨</span>
+      <span class="log-card-title">Accommodation</span>
+      <span class="log-card-sub">11 hotels · 2 Airbnbs</span>
+    </div>
+    <div class="accom-grid">
+      <div class="log-row accom-row" style="border-left:2px solid var(--korea)">
+        <div>
+          <div class="log-label">Seoul — Gangnam <span class="log-badge lb-hotel">Hotel · 11 nights</span></div>
+          <div class="log-sub">Gangnam-gu or Apgujeong area — walking distance to major clinics. COEX Mall nearby. Sep 26–Oct 7.</div>
+        </div>
+        <span class="log-badge lb-urgent" style="align-self:start">Book now</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Beijing <span class="log-badge lb-hotel">Hotel · 4 nights</span></div>
+          <div class="log-sub">Wangfujing or Drum Tower area — walkable to Forbidden City and hutongs</div>
+        </div>
+        <span class="log-badge lb-soon" style="align-self:start">Book 2–3 mo out</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Zhangjiajie <span class="log-badge lb-hotel">Hotel · 3 nights</span></div>
+          <div class="log-sub">Near Wulingyuan entrance / National Forest Park gate</div>
+        </div>
+        <span class="log-badge lb-ok" style="align-self:start">Flexible</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Chongqing <span class="log-badge lb-hotel">Hotel · 3 nights</span></div>
+          <div class="log-sub">Jiefangbei / Hongyadong area for walkability to the good stuff</div>
+        </div>
+        <span class="log-badge lb-ok" style="align-self:start">Flexible</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Chengdu <span class="log-badge lb-hotel">Hotel · 3 nights</span></div>
+          <div class="log-sub">Near Jinli Street or Chunxi Road — central and walkable</div>
+        </div>
+        <span class="log-badge lb-ok" style="align-self:start">Flexible</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Shanghai <span class="log-badge lb-hotel">Hotel · 4 nights</span></div>
+          <div class="log-sub">French Concession or Jing'an — best neighborhoods for walkability and cafes</div>
+        </div>
+        <span class="log-badge lb-soon" style="align-self:start">Book 2–3 mo out</span>
+      </div>
+      <div class="log-row accom-row" style="border-left:2px solid #e8796a">
+        <div>
+          <div class="log-label">Osaka <span class="log-badge lb-airbnb">Airbnb · 25 nights</span></div>
+          <div class="log-sub">Namba / Dotonbori / Shinsaibashi. Book ASAP — good monthly Airbnbs get taken far out. Split with Jose.</div>
+        </div>
+        <span class="log-badge lb-urgent" style="align-self:start">Book now</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Ho Chi Minh City <span class="log-badge lb-hotel">Hotel · 4 nights</span></div>
+          <div class="log-sub">District 1 — central, near Ben Thanh, most walkable area</div>
+        </div>
+        <span class="log-badge lb-ok" style="align-self:start">Flexible</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Da Nang <span class="log-badge lb-hotel">Hotel · 2 nights</span></div>
+          <div class="log-sub">Stay near An Thượng area or close to the Hoi An road — easier for the day trip</div>
+        </div>
+        <span class="log-badge lb-ok" style="align-self:start">Flexible</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Siem Reap <span class="log-badge lb-hotel">Hotel · 6 nights</span></div>
+          <div class="log-sub">Near Pub Street or Old Market — easy tuk-tuk access to Angkor complex</div>
+        </div>
+        <span class="log-badge lb-soon" style="align-self:start">Book 2 mo out</span>
+      </div>
+      <div class="log-row accom-row">
+        <div>
+          <div class="log-label">Bangkok <span class="log-badge lb-hotel">Hotel · 5 nights</span></div>
+          <div class="log-sub">Sukhumvit corridor or Silom — BTS Skytrain accessible. Dec is peak season.</div>
+        </div>
+        <span class="log-badge lb-soon" style="align-self:start">Book 2–3 mo out</span>
+      </div>
+      <div class="log-row accom-row" style="border-left:2px solid #e8796a">
+        <div>
+          <div class="log-label">Chiang Mai <span class="log-badge lb-airbnb">Airbnb · ~4 weeks</span></div>
+          <div class="log-sub">Nimman Road or Old City walls. Look for a proper apartment setup — you'll be working here. Book early.</div>
+        </div>
+        <span class="log-badge lb-soon" style="align-self:start">Book 2–3 mo out</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /logistics-wrap -->
+</div><!-- /tab-logistics -->
+
+<!-- ═══════════════════════════ KOREA PROCEDURES TAB ═══════════════════════════ -->
+<div id="tab-procedures" class="tab-pane">
+<div class="logistics-wrap">
+
+  <!-- INTRO -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🇰🇷</span>
+      <span class="log-card-title" style="color:var(--korea)">Seoul — Gangnam Aesthetic Work</span>
+      <span class="log-card-sub">Sep 26 – Oct 7 · 11 days</span>
+    </div>
+    <div class="log-row" style="display:block;padding:1.1rem 1.5rem">
+      <div class="log-sub" style="font-size:0.84rem;color:#ccc;line-height:1.7">
+        Korea — specifically the Gangnam district of Seoul — is the global leader in aesthetic medicine. Clinics are staffed by board-certified plastic surgeons and dermatologists who perform thousands of procedures per year. Prices run 30–50% below US rates with no compromise on technique or technology. Many clinics have English-speaking coordinators and handle foreign patients daily. The plan: front-load procedures on days 1–6, let day 7–11 be recovery + sightseeing. Leave for China Oct 8 with fresh skin.
+      </div>
+    </div>
+  </div>
+
+  <!-- SUN SPOTS NOTE -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">☀️</span>
+      <span class="log-card-title">Sun Spots — Yes, Laser Can Remove These</span>
+      <span class="log-card-sub">Priority treatment</span>
+    </div>
+    <div class="log-row" style="display:block;padding:1.1rem 1.5rem">
+      <div class="log-sub" style="font-size:0.84rem;color:#ccc;line-height:1.7">
+        Solar lentigines (sun spots / "birthmark-like" flat brown patches) are directly targeted by pico laser — specifically PicoWay and PicoSure systems. The ultra-short pulse shatters melanin pigment without damaging surrounding tissue. In Korea, pico laser for pigmentation is one of the most-performed procedures. Expect 1–3 sessions for significant clearance. Each session is 15–30 minutes, 2–3 days of mild redness/flaking, then the spots gradually fade over 2–4 weeks. Get your first session on day 2 or 3 so the healing window falls within your Seoul stay.
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCEDURE TABLE -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">💉</span>
+      <span class="log-card-title">Treatment Plan</span>
+      <span class="log-card-sub">$1,000 – $2,200 estimated</span>
+    </div>
+    <table class="budget-table" style="margin:0;border-radius:0;border:none;border-top:1px solid var(--border)">
+      <thead><tr>
+        <th>Treatment</th><th>Purpose</th><th>Seoul Price</th><th>Downtime</th><th>Sessions</th>
+      </tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="b-city">Masseter Botox</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">TMJ pain relief + jaw asymmetry correction. Slims the face over time.</div></td>
+          <td><div class="b-range">$100–200</div></td>
+          <td><div style="font-size:0.78rem;color:#8ecfa3">None</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1 · repeat q4mo</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Facial Botox</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Forehead, frown lines, crow's feet — preventative and corrective.</div></td>
+          <td><div class="b-range">$100–250</div></td>
+          <td><div style="font-size:0.78rem;color:#8ecfa3">None</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1 · repeat q3-4mo</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Pico Laser</div><div style="font-size:0.68rem;color:var(--korea)">Sun spots / pigmentation</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">PicoWay / PicoSure — shatters melanin clusters. Directly treats solar lentigines.</div></td>
+          <td><div class="b-range">$100–200 / session</div></td>
+          <td><div style="font-size:0.78rem;color:#dfc97f">2–3 days redness</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1–3 sessions</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">SYLFIRM X</div><div style="font-size:0.68rem;color:var(--korea)">RF Microneedling</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Stimulates collagen, tightens pores, improves overall tone and texture.</div></td>
+          <td><div class="b-range">$150–300</div></td>
+          <td><div style="font-size:0.78rem;color:#dfc97f">2–4 days redness</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1–2 sessions</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Rejuran Healer</div><div style="font-size:0.68rem;color:var(--korea)">PN injection</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Polynucleotide skin healing injection — elasticity, hydration, scar repair.</div></td>
+          <td><div class="b-range">$150–300</div></td>
+          <td><div style="font-size:0.78rem;color:#dfc97f">1–2 days</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1 initial</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Skinboosters</div><div style="font-size:0.68rem;color:var(--korea)">Juvederm Volite / Restylane</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Microinjections of hyaluronic acid — deep hydration and glow from within.</div></td>
+          <td><div class="b-range">$150–250</div></td>
+          <td><div style="font-size:0.78rem;color:#dfc97f">1–2 days</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Chemical Peel</div><div style="font-size:0.68rem;color:var(--korea)">Jessner / light TCA</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Resurfaces skin tone, fades pigmentation, improves texture. Pairs well with pico laser.</div></td>
+          <td><div class="b-range">$80–180</div></td>
+          <td><div style="font-size:0.78rem;color:#e89aa5">3–5 days peeling</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Hydrafacial</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Deep cleanse, extraction, and hydration. Great first or last treatment — no downtime.</div></td>
+          <td><div class="b-range">$80–150</div></td>
+          <td><div style="font-size:0.78rem;color:#8ecfa3">None</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">Optional</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Filler</div><div style="font-size:0.68rem;color:var(--korea)">Nasolabial / jaw contour</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Hyaluronic acid filler to address asymmetry and define jawline. Complements masseter botox.</div></td>
+          <td><div class="b-range">$150–300 / syringe</div></td>
+          <td><div style="font-size:0.78rem;color:#dfc97f">1–3 days swelling</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1</div></td>
+        </tr>
+        <tr>
+          <td><div class="b-city">Teeth Whitening</div></td>
+          <td><div style="font-size:0.8rem;color:#bbb">Professional in-office whitening — easy to fit in, no downtime, big visual impact.</div></td>
+          <td><div class="b-range">$50–150</div></td>
+          <td><div style="font-size:0.78rem;color:#8ecfa3">None</div></td>
+          <td><div style="font-size:0.78rem;color:#bbb">1</div></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 11-DAY SCHEDULE -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">📅</span>
+      <span class="log-card-title">Suggested 11-Day Schedule</span>
+      <span class="log-card-sub">Front-load procedures, back-load recovery</span>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Day 1 · Sep 26</div>
+      <div class="log-sub">Arrive ICN. Hotel in Gangnam. Light dinner, rest — long flight from SFO. Walk the neighborhood, scout clinic locations.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:var(--korea)">Day 2 · Sep 27</div>
+      <div class="log-sub">Clinic consultations (book ahead). Hydrafacial or teeth whitening — no-downtime procedures to ease in.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:var(--korea)">Day 3 · Sep 28</div>
+      <div class="log-sub"><strong>Pico laser (sun spots)</strong> + masseter botox + facial botox. Botox has zero downtime. Pico: 2–3 days mild redness.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Day 4 · Sep 29</div>
+      <div class="log-sub">Rest day. Laser redness still present — wear SPF, stay out of direct sun. Explore Yeonnam-dong cafes, local food.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:var(--korea)">Day 5 · Sep 30</div>
+      <div class="log-sub"><strong>SYLFIRM X RF microneedling</strong> + Rejuran Healer. 2–4 days downtime — schedule carefully before any public commitments.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Day 6 · Oct 1</div>
+      <div class="log-sub">Recovery day. Korea's Golden Week (Chuseok) may affect clinic hours — confirm availability. Skinboosters if clinic open.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:var(--korea)">Day 7 · Oct 2</div>
+      <div class="log-sub"><strong>Skinboosters + optional filler</strong> if deferred. Also consider second pico laser session for stubborn sun spots.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Days 8–11 · Oct 3–7</div>
+      <div class="log-sub">Sightseeing and recovery. Gyeongbokgung, Bukhansan hike, Insadong, Myeongdong street food. Skin has largely settled. Enjoy Seoul. Oct 7 evening: pack for Beijing.</div>
+    </div>
+    <div class="log-row" style="grid-template-columns:90px 1fr;display:grid;align-items:start;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Oct 8</div>
+      <div class="log-sub">Fly ICN → PEK (Beijing). China begins.</div>
+    </div>
+  </div>
+
+  <!-- CLINICS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🏥</span>
+      <span class="log-card-title">English-Friendly Clinics to Research</span>
+      <span class="log-card-sub">All Gangnam-area · foreign patient coordinators</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Banobagi</div>
+      <div class="log-sub">Large Gangnam plastic surgery / dermatology group. Full-service, English coordinator. <span style="color:#5b7fa6">banobagi.com</span></div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#ccc">ID Hospital</div>
+      <div class="log-sub">Major foreign-patient focused clinic. Strong reputation for botox, filler, laser. <span style="color:#5b7fa6">idhospital.com</span></div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:#ccc">JK Plastic Surgery</div>
+      <div class="log-sub">One of the most well-known Gangnam clinics for non-invasive work. English-friendly. <span style="color:#5b7fa6">jkplastic.com</span></div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem 1rem;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#ccc">RealSelf</div>
+      <div class="log-sub">Review platform to read English-language patient reviews for Korean clinics before booking. <span style="color:#5b7fa6">realself.com</span></div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:140px 1fr;gap:0.5rem 1rem">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Gangnam Unni</div>
+      <div class="log-sub">Korean app for finding and reviewing clinics — has English version. Best resource for recent reviews. <span style="color:#5b7fa6">gangnamunni.com</span></div>
+    </div>
+    <div class="log-row" style="display:block;padding:1rem 1.5rem">
+      <div class="log-sub" style="font-size:0.78rem;color:#666;font-style:italic">Tip: book consultations online 2–4 weeks before arrival. Many clinics offer free consultations for foreign patients. Bring photos of your skin concerns. Note that some clinics are closed on Sundays and Korean public holidays (Chuseok is Oct 1–3, 2026).</div>
+    </div>
+  </div>
+
+  <!-- BOTOX TIMING NOTE -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">⏱</span>
+      <span class="log-card-title">Timing Notes — When to Repeat</span>
+    </div>
+    <div class="log-row" style="display:block;padding:1.1rem 1.5rem">
+      <div class="log-sub" style="font-size:0.84rem;color:#ccc;line-height:1.7">
+        <strong style="color:var(--text)">Masseter botox:</strong> Results peak at 4–6 weeks and last 4–6 months. First treatment in Seoul will be showing results by the time you reach Osaka. Plan a top-up when back in the US ~Feb 2027.<br><br>
+        <strong style="color:var(--text)">Facial botox:</strong> Same timeline — 3–4 months. One treatment in Korea covers the whole trip.<br><br>
+        <strong style="color:var(--text)">Pico laser:</strong> Multiple sessions spaced 4–6 weeks apart give best pigmentation results. You can do session 1 in Seoul (Sep 28), session 2 optionally in Thailand (Dec — clinics in Chiang Mai also do pico), and the spots will continue fading through January.<br><br>
+        <strong style="color:var(--text)">RF microneedling / Rejuran:</strong> Results build over 4–8 weeks post-treatment. You'll be seeing the full benefit by the time you're in Japan.<br><br>
+        <strong style="color:var(--text)">Note on sun exposure:</strong> After laser treatments, strict SPF 50 is critical for 4–6 weeks. Wear a hat in Vietnam and Cambodia especially — or time pico laser so it's at least 2 weeks before intense sun exposure.
+      </div>
+    </div>
+  </div>
+
+</div><!-- /logistics-wrap -->
+</div><!-- /tab-procedures -->
+
+<!-- ═══════════════════════════ CONSTRAINTS TAB ═══════════════════════════ -->
+<div id="tab-constraints" class="tab-pane">
+<div class="logistics-wrap">
+
+  <!-- PRE-DEPARTURE TIMELINE -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🗓️</span>
+      <span class="log-card-title">Pre-Departure Timeline</span>
+      <span class="log-card-sub">Aug → Sep 26 runway</span>
+    </div>
+    <div class="predep-list">
+      <div class="predep-row">
+        <div class="predep-date">Aug 10</div>
+        <div><div class="predep-label">Move out of Miami</div><div class="predep-sub">Vacate apartment. Go nomadic — stay with family / west coast base while doing the show circuit.</div></div>
+      </div>
+      <div class="predep-row" style="background:rgba(255,255,255,0.015)">
+        <div class="predep-date">Aug 15 weekend</div>
+        <div><div class="predep-label">Collect-a-Con San Antonio</div><div class="predep-sub">First post-move-out show. Last major summer event.</div></div>
+      </div>
+      <div class="predep-row">
+        <div class="predep-date">Aug 28 weekend</div>
+        <div><div class="predep-label">Pokémon Worlds</div><div class="predep-sub">High-priority event — biggest Pokémon show of the year. Scout, sell, network.</div></div>
+      </div>
+      <div class="predep-row" style="background:rgba(255,255,255,0.015)">
+        <div class="predep-date">~Sep 12–14</div>
+        <div><div class="predep-label">Collect-a-Con San Francisco</div><div class="predep-sub">Final show before the trip. After this — wrap inventory, prep bags, get to SFO.</div></div>
+      </div>
+      <div class="predep-row">
+        <div class="predep-date">Sep 14–25</div>
+        <div><div class="predep-label">Final prep window</div><div class="predep-sub">~10 days: apply China visa (if not already done), finalize Korea clinic bookings, pack, say goodbyes.</div></div>
+      </div>
+      <div class="predep-row" style="background:rgba(255,255,255,0.015)">
+        <div class="predep-date" style="color:var(--korea);font-weight:500">Sep 26</div>
+        <div><div class="predep-label" style="color:var(--text)">Depart SFO → Seoul</div><div class="predep-sub">The show schedule naturally creates this window. Nothing after SF Collect-a-Con and before departure is wasted.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARD DATES -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">📌</span>
+      <span class="log-card-title">Hard Dates — Cannot Move</span>
+      <span class="log-card-sub">These are fixed anchors</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Sep 26</div>
+      <div class="log-sub">Depart SFO. This is the confirmed trip start — nonrefundable flight window. Cannot push earlier or later without major restructuring.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Oct 1–7</div>
+      <div class="log-sub"><strong>Do not be in mainland China during Golden Week.</strong> Every major site is at extreme capacity. Hotels price-gouge. Solved by opening in Seoul.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Nov 20</div>
+      <div class="log-sub">Must be in Ho Chi Minh City. Cousin David flies in this date — this is the agreed meet-up point. Non-negotiable.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Dec 2</div>
+      <div class="log-sub"><strong>Must be in Bangkok.</strong> David arrives Bangkok Dec 2 — hard anchor agreed with him in advance. Miss this and the entire Thailand segment with him falls apart.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Jan 8</div>
+      <div class="log-sub">Back in the US. Working backward from Jan 17–18 Front Row San Diego — need buffer time to land, recover, and prep inventory.</div>
+    </div>
+  </div>
+
+  <!-- SOCIAL OBLIGATIONS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">👥</span>
+      <span class="log-card-title">Social Obligations</span>
+      <span class="log-card-sub">People who are part of this trip</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:130px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Cousin David</div>
+      <div class="log-sub">Ho Chi Minh City Nov 20–24 · Da Nang Nov 24–26 · Bangkok Dec 2–6. Three separate legs together. David continues solo to Hanoi and Phuket after Bangkok — we split there.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:130px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Jose (friend)</div>
+      <div class="log-sub">Osaka full base — has booked a 2BR Airbnb in advance. We share it for the duration. This is why Osaka is a proper home base and not a hotel sprint.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:130px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Parents</div>
+      <div class="log-sub">Possibly joining for Siem Reap / Angkor Wat window (Nov 26 – Dec 2). Not confirmed — keep the itinerary open to accommodate if they come. A family Angkor sunrise would be a good memory.</div>
+    </div>
+  </div>
+
+  <!-- BUSINESS REQUIREMENTS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">📦</span>
+      <span class="log-card-title">Business Requirements — Pokémon Cards</span>
+      <span class="log-card-sub">Pre-departure shows set the Sep 26 date</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Aug 15 weekend</div>
+      <div class="log-sub">Collect-a-Con San Antonio. Last major show before the summer winds down.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Aug 28 weekend</div>
+      <div class="log-sub">Pokémon Worlds. High-priority event — big inventory and community moment.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Mid-Sep (~Sep 12–14)</div>
+      <div class="log-sub">Collect-a-Con San Francisco. Final show before trip — after this, wrap up inventory, move out of Miami Aug 10 window, and get to SFO for Sep 26 departure.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Sep 26</div>
+      <div class="log-sub">Depart SFO. The show schedule naturally leads here — after SF Collect-a-Con there's ~2 weeks to settle affairs and leave.</div>
+    </div>
+    <div style="height:1px;background:var(--border);margin:0 1.5rem"></div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Jan 17–18, 2027</div>
+      <div class="log-sub">Front Row San Diego. Need to be back stateside by Jan 8 minimum to prep inventory. West coast only.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#dfc97f">Jan 31–Feb 1</div>
+      <div class="log-sub">Front Row Pasadena (optional — attend if inventory and energy allow).</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">Feb 27–28</div>
+      <div class="log-sub"><strong>Front Row Portland — must-do.</strong> Most important show of the winter. Block this date firmly.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Bangkok</div>
+      <div class="log-sub">Pokémon Center Bangkok is a priority Dec 2–6 — scout exclusive Thai-release merch and limited sets. No East Coast shows, no sports cards. West Coast circuit only.</div>
+    </div>
+  </div>
+
+  <!-- PRACTICAL CONSTRAINTS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🧳</span>
+      <span class="log-card-title">Practical Constraints</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Moving out</div>
+      <div class="log-sub">Vacating Miami apartment ~Aug 10, 2026. Trip starts Sep 26. Roughly 7 weeks to be somewhere stateside (family, storage, pre-trip prep) before departure.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#e8a07a">China visa</div>
+      <div class="log-sub">Requires active planning — only country on this trip with a required visa that needs lead time. Apply 4–6 weeks before Sep 26. Everything else is visa-free or e-visa.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Long-term housing</div>
+      <div class="log-sub">Osaka (Airbnb · full-ish month · split with Jose) and Chiang Mai (Airbnb · ~4 weeks) are the two anchor stays that need to be booked far out. Seoul hotel in Gangnam also benefits from advance booking.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:160px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#ccc">Carry-on strategy</div>
+      <div class="log-sub">Aim for carry-on only through Asia. China, Korea, and Japan legs are manageable. Buy toiletries and laundry-do as you go. Pokémon Center Bangkok purchases may need a checked bag or shipping solution on the way home.</div>
+    </div>
+  </div>
+
+  <!-- TRAVEL PREFERENCES -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🧭</span>
+      <span class="log-card-title">Travel Preferences</span>
+      <span class="log-card-sub">What this trip is and is not</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#8ecfa3">Yes</div>
+      <div class="log-sub">Hiking · cafe culture · temples + history · local food markets · coworking · mountain towns · cultural immersion · independent exploration</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#e89aa5">No</div>
+      <div class="log-sub">Beaches · beach resorts · clubs · bars · tourist trap restaurants · Michelin-starred dinners · excessive nightlife · guided tours</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="font-weight:500;color:#aaa">Food</div>
+      <div class="log-sub">No Taiwanese food. Everywhere else is wide open — especially China (Sichuan, Cantonese, Shanghai), Korea (Korean BBQ, ramyeon), Japan (everything), Vietnam (pho, banh mi), Thailand (khao soi, som tam).</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:120px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="font-weight:500;color:#aaa">Work setup</div>
+      <div class="log-sub">Needs laptop-friendly cafes and reliable wifi at all major bases. Chiang Mai is the primary deep work base. Osaka is secondary. Korea has excellent cafe infrastructure.</div>
+    </div>
+  </div>
+
+  <!-- TRIP GOALS -->
+  <div class="log-card">
+    <div class="log-card-head">
+      <span class="log-card-icon">🎯</span>
+      <span class="log-card-title">Trip Goals</span>
+      <span class="log-card-sub">Phil &amp; Nelie</span>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">The final hurrah.</strong> Before marriage, kids, and the next chapter — this is the trip you take while you still can. 15 weeks of freedom, together, before life changes permanently.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">Soul-searching — for both.</strong> Chiang Mai is the intentional base for this. 4 weeks of quiet, mountains, cafes, and space to think without the noise of corporate life or routine.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">Career reset.</strong> A break from corporate life to figure out what's next. Exploring AI product / program management as a direction. Use the sabbatical to research, think, and decide — without pressure.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">Skin + health reset.</strong> Korea procedures front-load the trip with a physical refresh. Start the journey looking and feeling intentionally better.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">See the unmissable.</strong> Great Wall, Angkor Wat, Avatar mountains, Osaka with Jose — the kind of experiences that don't happen on a long weekend trip.</div>
+    </div>
+    <div class="log-row" style="display:grid;grid-template-columns:20px 1fr;gap:0.5rem 1rem;align-items:start;background:rgba(255,255,255,0.015)">
+      <div class="log-sub" style="color:var(--korea)">◆</div>
+      <div class="log-sub"><strong style="color:var(--text)">Come back ready.</strong> Return Jan 8 with clarity, energy, and a shared plan — for careers, for the next chapter, for what you both want to build.</div>
+    </div>
+  </div>
+
+</div><!-- /logistics-wrap -->
+</div><!-- /tab-constraints -->
+
+<!-- ═══════════════════════════ PACKING TAB ═══════════════════════════ -->
+<div id="tab-packing" class="tab-pane">
+<div class="packing-wrap" id="packing-list"></div>
+</div><!-- /tab-packing -->
+
+<!-- ═══════════════════════════ CITY PAGE OVERLAY ═══════════════════════════ -->
+<div id="city-page" class="city-page" aria-hidden="true">
+  <button class="city-back" onclick="closeCityPage()">← Back to trip</button>
+  <div id="city-page-content"></div>
+</div>
+
+<!-- ═══════════════════════════ SCRIPTS ═══════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+/* ─── COLORS ─── */
+const COLORS = {
+  korea:     '#5b7fa6',
+  china:     '#c9622f',
+  japan:     '#d4596a',
+  vietnam:   '#5a9e6f',
+  cambodia:  '#7b6fa0',
+  bangkok:   '#c4a84f',
+  chiangmai: '#d4bc6a'
+};
+
+const FLAGS = {
+  korea: '🇰🇷', china: '🇨🇳', japan: '🇯🇵',
+  vietnam: '🇻🇳', cambodia: '🇰🇭', bangkok: '🇹🇭', chiangmai: '🇹🇭'
+};
+
+const COUNTRY_LABELS = {
+  korea: 'Korea', china: 'China', japan: 'Japan',
+  vietnam: 'Vietnam', cambodia: 'Cambodia', bangkok: 'Thailand', chiangmai: 'Thailand'
+};
+
+/* ─── STOPS (ordered = route order = marker number) ─── */
+const STOPS = [
+  { id:'seoul',     num:1,  country:'korea',     name:'Seoul',            nights:11, lat:37.5172, lng:127.0473, dates:'Sep 26 – Oct 7',  note:'Gangnam procedures + exploring. Best September weather in East Asia. No visa required.',
+    vibe:'Skincare, cafes & city exploring', weather:'☀️ 72°F · dry' },
+  { id:'beijing',   num:2,  country:'china',     name:'Beijing',          nights:4,  lat:39.9042, lng:116.4074, dates:'Oct 8 – 12',      note:'Great Wall, Forbidden City, hutongs, Summer Palace. Arriving after Golden Week — no crowds.',
+    vibe:'Imperial history, Great Wall & hutongs', weather:'🌤️ 61°F · clear' },
+  { id:'zjj',       num:3,  country:'china',     name:'Zhangjiajie',      nights:3,  lat:29.1171, lng:110.4792, dates:'Oct 12 – 15',     note:'Avatar mountains, Bailong elevator, hiking. Post-Golden Week, crystal clear skies.',
+    vibe:'Avatar mountains & serious hiking', weather:'🌤️ 64°F · mild' },
+  { id:'chongqing', num:4,  country:'china',     name:'Chongqing',        nights:3,  lat:29.5630, lng:106.5516, dates:'Oct 15 – 18',     note:'Cyberpunk vertical city built into cliffsides. Neon bridges, authentic hot pot.',
+    vibe:'Cyberpunk city built into cliffs', weather:'⛅ 68°F · overcast' },
+  { id:'chengdu',   num:5,  country:'china',     name:'Chengdu',          nights:3,  lat:30.5728, lng:104.0668, dates:'Oct 18 – 21',     note:'Giant pandas, Sichuan teahouses, dan dan noodles.',
+    vibe:'Giant pandas & Sichuan teahouse culture', weather:'⛅ 64°F · misty' },
+  { id:'shanghai',  num:6,  country:'china',     name:'Shanghai',         nights:4,  lat:31.2304, lng:121.4737, dates:'Oct 21 – 25',     note:'The Bund, French Concession, futuristic Pudong skyline. Exit city → fly Osaka.',
+    vibe:'The Bund, French Concession & skyline', weather:'🌤️ 68°F · clear' },
+  { id:'osaka',     num:7,  country:'japan',     name:'Osaka',            nights:25, lat:34.6937, lng:135.5023, dates:'Oct 25 – Nov 19', note:'Home base with Jose. Neighborhoods, food, cafes, AI deep work. Day trips to Kyoto, Nara, Hiroshima.',
+    vibe:'Japanese immersion, remote work & Pokémon', weather:'🍂 63°F · autumn foliage' },
+  { id:'hcmc',      num:8,  country:'vietnam',   name:'Ho Chi Minh City', nights:4,  lat:10.8231, lng:106.6297, dates:'Nov 20 – 24',     note:'Street food, Ben Thanh market, Cu Chi tunnels, Mekong day trip. First time.',
+    vibe:'Street food, history & first-time Vietnam', weather:'☀️ 82°F · dry season' },
+  { id:'danang',    num:9,  country:'vietnam',   name:'Da Nang',          nights:2,  lat:16.0471, lng:108.2068, dates:'Nov 24 – 26',     note:'Hoi An Ancient Town day trip (30 min away) is the main draw.',
+    vibe:'Gateway to Hoi An Ancient Town', weather:'🌧️ 77°F · rainy season' },
+  { id:'siemreap',  num:10, country:'cambodia',  name:'Siem Reap',        nights:6,  lat:13.3633, lng:103.8564, dates:'Nov 26 – Dec 2',  note:'Angkor Wat at sunrise, Angkor Thom + the Bayon, Ta Prohm jungle ruins.',
+    vibe:'Angkor Wat at sunrise — unmissable', weather:'☀️ 82°F · dry season' },
+  { id:'bangkok',   num:11, country:'bangkok',   name:'Bangkok',          nights:5,  lat:13.7563, lng:100.5018, dates:'Dec 2 – 6',       note:'Pokémon Center Bangkok, Wat Pho, Wat Arun, Chatuchak market.',
+    vibe:'Pokémon Center, temples & street food', weather:'☀️ 84°F · peak season' },
+  { id:'chiangmai', num:12, country:'chiangmai', name:'Chiang Mai',       nights:30, lat:18.7883, lng:98.9853,  dates:'Dec 7 – Jan 6',   note:'Soul-searching base. World-class cafes, coworking, mountain temples.',
+    vibe:'Expat base, remote work & soul-searching', weather:'☀️ 72°F · coolest & driest' },
+];
+
+/* Day trips (no city page, popup only) */
+const DAY_TRIPS = [
+  { country:'japan', name:'Kyoto',     lat:35.0116, lng:135.7681, note:'Day trip — 15 min by shinkansen from Osaka' },
+  { country:'japan', name:'Nara',      lat:34.6851, lng:135.8048, note:'Day trip — deer park, easy half-day from Osaka' },
+  { country:'japan', name:'Hiroshima', lat:34.3853, lng:132.4553, note:'Day trip — ~1.5hr, one of the most powerful visits in Japan' },
+];
+
+/* ─── CITY PAGE DATA ─── */
+/* img: full Wikimedia Commons URL or null (shows emoji fallback) */
+const CITY_PAGES = {
+  seoul: {
+    country:'korea', dates:'Sep 26 – Oct 7 · 11 nights', tagline:'Where the procedure begins and the trip opens.',
+    highlights:[
+      { name:'Gangnam Beauty Belt', emoji:'💉',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/Gangnam-gu_seoul_tower.jpg/960px-Gangnam-gu_seoul_tower.jpg',
+        desc:"Gangnam-daero and Apgujeong-ro are lined with world-class aesthetic clinics — masseter botox, pico laser, RF microneedling. English-speaking staff, transparent pricing at 30–50% of US rates. Book consultations in the first two days." },
+      { name:'Gyeongbokgung Palace', emoji:'🏯',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Gyeongbokgung_Palace_Geunjeongjeon.jpg/960px-Gyeongbokgung_Palace_Geunjeongjeon.jpg',
+        desc:"The main Joseon dynasty palace, reconstructed in full. The Changing of the Guard ceremony runs twice daily. Bukchon Hanok Village of traditional courtyard houses is a 10-minute walk north." },
+      { name:'Bukhansan National Park', emoji:'⛰️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Bugaksan_from_Bukhansan.jpg/960px-Bugaksan_from_Bukhansan.jpg',
+        desc:"Granite ridgelines rising directly out of the city to 836m. Well-marked trails, pagodas on the summits, and views over the entire Seoul basin. A 30-min subway ride from Gangnam. Perfect for recovery-day light hiking." },
+      { name:'Yeonnam-dong Cafes', emoji:'☕',
+        img:null,
+        desc:"Seoul's most dense cafe neighborhood — converted hanoks, specialty roasters, and design studios packed into a single walkable district. Excellent wifi. The perfect base for laptop work during recovery days." },
+    ]
+  },
+  beijing: {
+    country:'china', dates:'Oct 8 – 12 · 4 nights', tagline:"China's imperial heartland",
+    highlights:[
+      { name:'Great Wall of China', emoji:'🏯',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Badaling_China_Great-Wall-of-China-01.jpg/960px-Badaling_China_Great-Wall-of-China-01.jpg',
+        desc:"Mutianyu section is the move — less crowded, fully restored, stunning ridgeline hikes. Go first thing in the morning." },
+      { name:'Forbidden City', emoji:'🏛️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/f/f3/Beijing%2C_Forbidden_City%2C_Hall_of_Supreme_Harmony_%286170352582%29.jpg',
+        desc:"980 buildings, 8,707 rooms. The world's largest palace complex. Massive and genuinely overwhelming." },
+      { name:'Hutong Alleys', emoji:'🛺',
+        img:'https://upload.wikimedia.org/wikipedia/commons/f/f9/Beijingcourtyard1.jpg',
+        desc:"Narrow courtyard neighborhoods north of the palace — the real Beijing that's been here for 700 years." },
+      { name:'Summer Palace', emoji:'🌿',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Kunming_Lake_%28Summer_Palace%2C_Beijing%29_in_summer.JPG/960px-Kunming_Lake_%28Summer_Palace%2C_Beijing%29_in_summer.JPG',
+        desc:"Imperial garden on Kunming Lake. Covered promenades, marble boat, and a completely different pace. Worth a full afternoon." },
+    ]
+  },
+  zjj: {
+    country:'china', dates:'Oct 12 – 15 · 3 nights', tagline:'The mountains that inspired Avatar',
+    highlights:[
+      { name:'Tianzi Mountain', emoji:'⛰️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/7/77/1_tianzishan_wulingyuan_zhangjiajie_2012.jpg',
+        desc:"The towering sandstone pillars that inspired Pandora's Hallelujah Mountains. Mist rolls through at dawn — worth the early wake-up." },
+      { name:'Bailong Elevator', emoji:'🛗', img:null,
+        desc:"World's tallest outdoor elevator at 326m — glass-sided, running straight up a cliff face. More thrilling than it sounds." },
+      { name:'Tianmen Mountain', emoji:'🌫️', img:null,
+        desc:"Glass-bottomed walkway pinned to a clifftop 1,400m up. Below: nothing. Reached by the world's longest cable car." },
+      { name:'Forest Park Trails', emoji:'🥾', img:null,
+        desc:"Hike the ridgelines between pillar formations. Best in morning mist before tour groups show up. Carry snacks." },
+    ]
+  },
+  chongqing: {
+    country:'china', dates:'Oct 15 – 18 · 3 nights', tagline:'The city that looks like a Cyberpunk city',
+    highlights:[
+      { name:'Hongya Cave', emoji:'🌆',
+        img:'https://upload.wikimedia.org/wikipedia/commons/8/86/Hongya_Cave_20180520.jpg',
+        desc:"11-story stacked cliffside complex lit up in neon at night. Restaurants, bars, and the insane view over the river. Go after dark." },
+      { name:'Chongqing Hot Pot', emoji:'🫕',
+        img:'https://upload.wikimedia.org/wikipedia/commons/c/c6/Chongqing_Hot_Pot.jpg',
+        desc:"The original. Numbing Sichuan peppercorn broth with everything cooked tableside. This is where the dish was invented — don't skip it." },
+      { name:'Liziba Monorail', emoji:'🚝', img:null,
+        desc:"A metro line that passes directly through floors 6–8 of a residential tower. The residents just live with it. Wild urban engineering." },
+      { name:'Yangtze Riverfront', emoji:'🌉',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Chongqing_Skyline_At_Night.png/960px-Chongqing_Skyline_At_Night.png',
+        desc:"The city stacks up sheer cliffs above two rivers meeting. Best seen at dusk from the Nanbin Road promenade." },
+    ]
+  },
+  chengdu: {
+    country:'china', dates:'Oct 18 – 21 · 3 nights', tagline:'Pandas, teahouses, and Sichuan fire',
+    highlights:[
+      { name:'Giant Panda Base', emoji:'🐼',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Panda_eating_bamboo_in_Panda_Base.jpg/960px-Panda_eating_bamboo_in_Panda_Base.jpg',
+        desc:"The world's best giant panda conservation center. Over 80 pandas across the facility. Go at 8am — they're most active feeding in the morning." },
+      { name:'Sichuan Hot Pot', emoji:'🌶️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Dandan_noodles_%28%E6%93%94%E6%93%94%E9%BA%B5%29.jpg/960px-Dandan_noodles_%28%E6%93%94%E6%93%94%E9%BA%B5%29.jpg',
+        desc:"Dan dan noodles, mapo tofu, and the real Chengdu hot pot. The Sichuan peppercorn numbs your lips in the best possible way." },
+      { name:'Jinli Old Street', emoji:'🏮',
+        img:'https://upload.wikimedia.org/wikipedia/commons/d/de/ChengduJinli.jpg',
+        desc:"Lantern-lit pedestrian street with snacks, tea stalls, and occasional Sichuan opera face-changing performances." },
+      { name:'Teahouse Culture', emoji:'🍵', img:null,
+        desc:"Chengdu's parks fill with locals playing mahjong, getting ear-cleaning, and drinking tea all day. Sit down and join them." },
+    ]
+  },
+  guangzhou: {
+    country:'china', dates:'Oct 11 – 13 · 2 nights', tagline:'The dim sum capital of the world',
+    highlights:[
+      { name:'Yum Cha Breakfast', emoji:'🥟',
+        img:'https://upload.wikimedia.org/wikipedia/commons/3/30/Dim_Sum_Steam_Baskets_by_tracyhunter_in_HK.jpg',
+        desc:"Guangzhou invented dim sum. The morning tea ritual here is serious — locals arrive at 6am for the best trolleys. Order everything." },
+      { name:'Canton Tower', emoji:'📡',
+        img:'https://upload.wikimedia.org/wikipedia/commons/7/79/Canton_tower_in_asian_games_opening_ceremony.jpg',
+        desc:"600m twisting lattice tower. The observation deck gives you all of the Pearl River Delta spread out below." },
+      { name:'Shamian Island', emoji:'🌳',
+        img:'https://upload.wikimedia.org/wikipedia/commons/f/f2/Our_Lady_of_Lourdes_Chapel.jpg',
+        desc:"Quiet colonial-era island of French and British concession buildings. Leafy, calm, barely any tourists — a total contrast to central GZ." },
+      { name:'Night Food Markets', emoji:'🍜', img:null,
+        desc:"Late-night roast goose joints, rice noodle soup stalls, and barbecue spots. Eat like a local and stay out late." },
+    ]
+  },
+  shanghai: {
+    country:'china', dates:'Oct 21 – 25 · 4 nights', tagline:'The future and the past, side by side',
+    highlights:[
+      { name:'The Bund', emoji:'🌇',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Pudong_Shanghai_November_2017_HDR_panorama.jpg/960px-Pudong_Shanghai_November_2017_HDR_panorama.jpg',
+        desc:"The colonial waterfront promenade, facing the Pudong skyline across the river. Iconic in daylight. Transcendent at night." },
+      { name:'French Concession', emoji:'🌿',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Yongkang_Road_Shanghai_11.jpg/960px-Yongkang_Road_Shanghai_11.jpg',
+        desc:"Tree-lined streets with boutiques, cafes, and art deco architecture. Best neighborhood in Shanghai for aimless wandering." },
+      { name:'Pudong Skyline', emoji:'🏙️', img:null,
+        desc:"Oriental Pearl, Shanghai Tower, Jin Mao — the most photogenic skyline in Asia, lit up every night." },
+      { name:'Tianzifang Lanes', emoji:'☕',
+        img:'https://upload.wikimedia.org/wikipedia/commons/a/a6/Tianzifangbyday.jpg',
+        desc:"Narrow alleyway district of galleries, coffee shops, and boutiques. Good contrast to the grand scale of everything else." },
+    ]
+  },
+  osaka: {
+    country:'japan', dates:'Oct 25 – Nov 19 · 25 nights', tagline:'Home base. Eat everything.',
+    highlights:[
+      { name:'Dotonbori', emoji:'🌃',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Dotonbori%2C_Osaka%2C_at_night%2C_November_2016.jpg/960px-Dotonbori%2C_Osaka%2C_at_night%2C_November_2016.jpg',
+        desc:"The neon canal district. Eat takoyaki under the glowing Glico runner sign. Loud, chaotic, perfect at midnight." },
+      { name:'Osaka Street Food', emoji:'🍱',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/Food_street_in_Dotonbori%2C_Osaka%3B_January_2016.jpg/960px-Food_street_in_Dotonbori%2C_Osaka%3B_January_2016.jpg',
+        desc:"Okonomiyaki, kushikatsu, ramen, and takoyaki. Osaka is Japan's food capital and proud of it — the locals eat constantly." },
+      { name:'Kyoto Day Trip', emoji:'⛩️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/0/0e/Torii_path_with_lantern_at_Fushimi_Inari_Taisha_Shrine%2C_Kyoto%2C_Japan.jpg',
+        desc:"Fushimi Inari gate tunnels, Arashiyama bamboo grove, Gion at dusk. 15 min by shinkansen from Osaka." },
+      { name:'Nara Deer Park', emoji:'🦌',
+        img:'https://upload.wikimedia.org/wikipedia/commons/a/ac/Sika_deer_in_Nara_Park%2C_November_2016.jpg',
+        desc:"Wild sika deer bow in exchange for crackers. Easy half-day from Osaka. More surreal than any guidebook prepares you for." },
+    ]
+  },
+  hcmc: {
+    country:'vietnam', dates:'Nov 20 – 24 · 4 nights', tagline:'Saigon never sleeps',
+    highlights:[
+      { name:'Ben Thanh Market', emoji:'🛍️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Ben_Thanh%2C_Ciudad_Ho_Chi_Minh%2C_Vietnam%2C_2013-08-14%2C_DD_01.JPG/960px-Ben_Thanh%2C_Ciudad_Ho_Chi_Minh%2C_Vietnam%2C_2013-08-14%2C_DD_01.JPG',
+        desc:"Saigon's iconic central market and the surrounding night market stalls. Good for street food and the chaotic energy of the city." },
+      { name:'Cu Chi Tunnels', emoji:'⛏️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Lascar_Booby-trap_-_Cu_Chi_tunnels_%284607383295%29.jpg/960px-Lascar_Booby-trap_-_Cu_Chi_tunnels_%284607383295%29.jpg',
+        desc:"250km of underground tunnels used by Viet Cong during the war. You can crawl through sections. Sobering and fascinating in equal measure." },
+      { name:'Mekong Delta', emoji:'🚤',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Ferry_boat_on_Mekong_River_in_My_Tho.jpg/960px-Ferry_boat_on_Mekong_River_in_My_Tho.jpg',
+        desc:"Day trip by boat through floating markets, orchards, and river villages. A completely different side of Vietnam from the city." },
+      { name:'Saigon Street Food', emoji:'🍜',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Ho-Chi-Minh-City_Vietnam_Hawker-01.jpg/960px-Ho-Chi-Minh-City_Vietnam_Hawker-01.jpg',
+        desc:"Banh mi for $1, pho for breakfast, com tam (broken rice) for lunch. Some of the best eating in the world at the cheapest prices." },
+    ]
+  },
+  danang: {
+    country:'vietnam', dates:'Nov 24 – 26 · 2 nights', tagline:'Gateway to Hoi An',
+    highlights:[
+      { name:'Hoi An Ancient Town', emoji:'🏮',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/H%E1%BB%99i_An%2C_Ancient_Town%2C_2020-01_CN-11.jpg/960px-H%E1%BB%99i_An%2C_Ancient_Town%2C_2020-01_CN-11.jpg',
+        desc:"UNESCO old town with lantern-lit canals, tailor shops, and wooden merchant houses. The evening when the lanterns are lit is one of the most beautiful things in Southeast Asia." },
+      { name:'My Son Sanctuary', emoji:'🗿',
+        img:'https://upload.wikimedia.org/wikipedia/commons/5/5c/0040223_My_Son_UNESCO_site_entrance%2C_Cham_Hindu_temples_complex%2C_Vietnam.jpg',
+        desc:"Ancient Cham Hindu temples in a jungle valley, active from the 4th to 14th century. Half-day trip from Da Nang." },
+      { name:'Marble Mountains', emoji:'⛰️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/9/9d/Marble_Mountains_-_Ngu_Hanh_Son_District_-_South_of_Da_Nang_City_-_Vietnam_%281%29.jpg',
+        desc:"Five marble and limestone hills with Buddhist shrines, caves, and natural grottos cut inside. Short climb, big reward." },
+      { name:'White Rose Dumplings', emoji:'🌸', img:null,
+        desc:"Hoi An's signature dish — delicate rice paper dumplings that exist almost nowhere else. Eat them at their origin." },
+    ]
+  },
+  siemreap: {
+    country:'cambodia', dates:'Nov 26 – Dec 2 · 6 nights', tagline:'One of the great sites on earth',
+    highlights:[
+      { name:'Angkor Wat Sunrise', emoji:'🌅',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Angkor_Wat_at_sunrise_3.jpg/960px-Angkor_Wat_at_sunrise_3.jpg',
+        desc:"Watch dawn light turn the main towers gold above the reflection pool. Arrive at 5am to secure a spot. Worth every second of the early alarm." },
+      { name:'Angkor Thom + the Bayon', emoji:'🗿',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/2016_Angkor%2C_Angkor_Thom%2C_Bajon_%2847%29.jpg/960px-2016_Angkor%2C_Angkor_Thom%2C_Bajon_%2847%29.jpg',
+        desc:"The walled city of Angkor Thom, dominated by the Bayon temple — 216 massive stone faces gazing in every direction. Eerie, beautiful, unforgettable." },
+      { name:'Ta Prohm', emoji:'🌿',
+        img:'https://upload.wikimedia.org/wikipedia/commons/0/04/Ta_Prohm_Angkor_2000.jpg',
+        desc:"Jungle trees with roots that swallow entire walls and towers whole. Left deliberately unrestored to show what the whole complex looked like when rediscovered." },
+      { name:'Banteay Srei', emoji:'🏯',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Cambodia-2698_%283618853967%29.jpg/960px-Cambodia-2698_%283618853967%29.jpg',
+        desc:"The 'citadel of women' — pink sandstone temple 30km north with the most intricate and refined carvings in the entire Angkor complex." },
+    ]
+  },
+  bangkok: {
+    country:'bangkok', dates:'Dec 2 – 6 · 5 nights', tagline:'Temples, street food, and a Pokémon Center',
+    highlights:[
+      { name:'Pokémon Center Bangkok', emoji:'⚡', img:null,
+        desc:"Priority stop for the business. Thailand-exclusive merch, limited editions. Scout inventory, buy product, enjoy it." },
+      { name:'Wat Pho', emoji:'🙏',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Wat_Pho%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_02.jpg/960px-Wat_Pho%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_02.jpg',
+        desc:"Home of the 46m gold reclining Buddha. The temple complex surrounding it is one of the most beautiful in Bangkok — and it predates the city itself." },
+      { name:'Chatuchak Weekend Market', emoji:'🛒',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Chatuchak_Weekend_Market%2C_Bangkok%2C_Thailand_%284570440063%29.jpg/960px-Chatuchak_Weekend_Market%2C_Bangkok%2C_Thailand_%284570440063%29.jpg',
+        desc:"One of the world's largest weekend markets — over 15,000 stalls across 35 acres. Go early before the midday heat hits." },
+      { name:'Bangkok Street Food', emoji:'🍛',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/A_man_prepares_food_in_a_market_in_Bangkok%2C_Thailand.jpg/960px-A_man_prepares_food_in_a_market_in_Bangkok%2C_Thailand.jpg',
+        desc:"Pad thai, mango sticky rice, khao man gai, som tam. Bangkok has arguably the world's greatest street food scene and it's everywhere." },
+    ]
+  },
+  chiangmai: {
+    country:'chiangmai', dates:'Dec 7 – Jan 6 · ~4 weeks', tagline:"Soul-searching base. The world's best cafe city.",
+    highlights:[
+      { name:'Old City Temples', emoji:'⛩️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/20171106_Wat_Phra_That_Doi_Suthep_0103_DxO.jpg/960px-20171106_Wat_Phra_That_Doi_Suthep_0103_DxO.jpg',
+        desc:"Over 300 temples inside and around the walled old city. Doi Suthep gleams on the mountain above town. Walk to a new one every morning." },
+      { name:'Cafe + Cowork Culture', emoji:'☕',
+        img:'https://upload.wikimedia.org/wikipedia/commons/8/8a/Kafae_boran_Chiang_Mai.jpg',
+        desc:"Chiang Mai has more quality cafes per capita than almost anywhere on earth. Fast wifi, good coffee, laptop-friendly spaces at every corner of the old city." },
+      { name:'Elephant Sanctuary', emoji:'🐘',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Thailand_-_fully_clothed_people_giving_bath_to_elephants.jpg/960px-Thailand_-_fully_clothed_people_giving_bath_to_elephants.jpg',
+        desc:"Ethical rescue sanctuaries where retired elephants roam free. You bathe and feed them in the river. One of the best experiences in Thailand." },
+      { name:'Doi Inthanon', emoji:'🏔️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Mae_Ya_Waterfall_in_Doi_Inthanon_National_Park%2C_Chiang_Mai%2C_Thailand.jpg/960px-Mae_Ya_Waterfall_in_Doi_Inthanon_National_Park%2C_Chiang_Mai%2C_Thailand.jpg',
+        desc:"Thailand's highest peak, 1.5hr south of the city. Twin royal chedis, dramatic waterfalls, and genuinely cool mountain air in December." },
+    ]
+  },
+};
+
+/* ─── MAP SETUP ─── */
+const map = L.map('trip-map', {
+  center: [25, 115],
+  zoom: 4,
+  zoomControl: true,
+  scrollWheelZoom: false
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; OSM contributors',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+/* Route polyline */
+L.polyline(STOPS.map(s => [s.lat, s.lng]), {
+  color: 'rgba(255,255,255,0.14)',
+  weight: 1.5,
+  dashArray: '5 7',
+  lineCap: 'round'
+}).addTo(map);
+
+/* Marker radius based on nights (sqrt scale) */
+function nightsToRadius(n) {
+  return Math.round(8 + Math.sqrt(n) * 1.9);
+}
+
+/* Build divIcon for a numbered, sized marker */
+function makeMarkerIcon(stop) {
+  const r = nightsToRadius(stop.nights);
+  const d = r * 2;
+  const color = COLORS[stop.country];
+  const fs = r <= 10 ? 8 : r <= 13 ? 9 : r <= 16 ? 10 : 11;
+  return L.divIcon({
+    className: 'city-marker-wrap',
+    html: `<div class="city-marker" id="cm-${stop.id}" style="width:${d}px;height:${d}px;background:${color};font-size:${fs}px;">${stop.num}</div>`,
+    iconSize: [d, d],
+    iconAnchor: [r, r],
+    popupAnchor: [0, -r - 5]
+  });
+}
+
+/* Spawn markers */
+const markerMap = {}; // id → L.marker
+STOPS.forEach(stop => {
+  const marker = L.marker([stop.lat, stop.lng], { icon: makeMarkerIcon(stop) }).addTo(map);
+
+  marker.bindPopup(`
+    <div class="map-popup">
+      <div class="popup-num">Stop ${stop.num} of 12</div>
+      <div class="popup-city">${stop.name}</div>
+      <div class="popup-dates">${stop.dates} · ${stop.nights} nights</div>
+      <div class="popup-note">${stop.note}</div>
+      <button class="popup-explore" onclick="map.closePopup(); openCityPage('${stop.id}')">Explore city →</button>
+    </div>
+  `, { maxWidth: 270, minWidth: 210 });
+
+  marker.on('click', () => show(stop.country));
+  markerMap[stop.id] = marker;
+});
+
+/* Day trip markers (hollow, small, popup only) */
+DAY_TRIPS.forEach(dt => {
+  const color = COLORS[dt.country];
+  L.circleMarker([dt.lat, dt.lng], {
+    radius: 5,
+    fillColor: 'transparent',
+    color: color,
+    weight: 1.5,
+    fillOpacity: 0,
+    opacity: 0.5
+  }).addTo(map).bindPopup(`
+    <div class="map-popup">
+      <div class="popup-daytip">Day trip from Osaka</div>
+      <div class="popup-city">${dt.name}</div>
+      <div class="popup-note">${dt.note}</div>
+    </div>
+  `, { maxWidth: 240 });
+});
+
+/* ─── HIGHLIGHT MAP SEGMENT ─── */
+function getBounds(country) {
+  const pts = STOPS.filter(s => s.country === country);
+  if (!pts.length) return null;
+  const lats = pts.map(s => s.lat), lngs = pts.map(s => s.lng);
+  const pad = (country === 'cambodia' || country === 'bangkok') ? 4.5 : 3;
+  return L.latLngBounds([Math.min(...lats)-pad, Math.min(...lngs)-pad], [Math.max(...lats)+pad, Math.max(...lngs)+pad]);
+}
+
+function highlightMapSegment(country) {
+  STOPS.forEach(stop => {
+    const el = document.getElementById('cm-' + stop.id);
+    if (!el) return;
+    if (stop.country === country) {
+      el.classList.remove('dimmed');
+      el.classList.add('city-active');
+    } else {
+      el.classList.add('dimmed');
+      el.classList.remove('city-active');
+    }
+  });
+  const bounds = getBounds(country);
+  if (bounds) map.flyToBounds(bounds, { padding: [65, 65], duration: 0.7, maxZoom: 8 });
+}
+
+/* ─── SHOW (timeline + panel + map) ─── */
+function show(country) {
+  document.querySelectorAll('.detail-panel').forEach(p => p.classList.remove('visible'));
+  document.querySelectorAll('.seg').forEach(s => s.classList.remove('active'));
+  const panel = document.getElementById('panel-' + country);
+  const seg   = document.querySelector('[data-country="' + country + '"]');
+  if (panel) { panel.classList.add('visible'); panel.scrollIntoView({ behavior:'smooth', block:'nearest' }); }
+  if (seg)   seg.classList.add('active');
+  highlightMapSegment(country);
+}
+
+/* ─── TAB SWITCHING ─── */
+function switchTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelector('[data-tab="' + name + '"]').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ─── CITY PAGE ─── */
+function openCityPage(cityId) {
+  const data = CITY_PAGES[cityId];
+  if (!data) return;
+  const color = COLORS[data.country];
+
+  const cardsHTML = data.highlights.map(h => {
+    const hasImg = !!h.img;
+    const imgURL = hasImg ? h.img : '';
+    const imgTag = hasImg
+      ? `<img src="${imgURL}" alt="${h.name}" onerror="this.parentElement.classList.add('no-img')">`
+      : '';
+    const grad = `linear-gradient(135deg, color-mix(in srgb, ${color} 28%, transparent), color-mix(in srgb, ${color} 10%, transparent))`;
+    return `
+      <div class="photo-card" style="border-top:3px solid ${color}">
+        <div class="photo-card-img${hasImg ? '' : ' no-img'}">
+          ${imgTag}
+          <div class="photo-card-fallback" style="background:${grad}">${h.emoji}</div>
+        </div>
+        <div class="photo-card-body">
+          <div class="photo-card-name">${h.name}</div>
+          <div class="photo-card-desc">${h.desc}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('city-page-content').innerHTML = `
+    <div class="city-hero" style="border-left:4px solid ${color};padding-left:calc(2rem - 4px)">
+      <div class="city-country-label" style="color:${color}">${data.country.toUpperCase()}</div>
+      <div class="city-headline">${STOPS.find(s=>s.id===cityId)?.name || cityId}</div>
+      <div class="city-dates-line">${data.dates}</div>
+      <div class="city-tagline">${data.tagline}</div>
+    </div>
+    <div class="photo-grid">${cardsHTML}</div>
+  `;
+
+  const page = document.getElementById('city-page');
+  page.classList.add('open');
+  page.removeAttribute('aria-hidden');
+  page.scrollTop = 0;
+  document.addEventListener('keydown', handleEscKey);
+}
+
+function closeCityPage() {
+  const page = document.getElementById('city-page');
+  page.classList.remove('open');
+  page.setAttribute('aria-hidden', 'true');
+  document.removeEventListener('keydown', handleEscKey);
+}
+
+function handleEscKey(e) {
+  if (e.key === 'Escape') closeCityPage();
+}
+
+/* ─── STOP CARDS ─── */
+function renderStopCards() {
+  const hasCityPage = Object.keys(CITY_PAGES);
+  const container = document.getElementById('stop-cards');
+  if (!container) return;
+  container.innerHTML = STOPS.map(stop => {
+    const color = COLORS[stop.country];
+    const flag  = FLAGS[stop.country] || '';
+    const label = COUNTRY_LABELS[stop.country] || stop.country;
+    const hasExplore = hasCityPage.includes(stop.id);
+    const num = String(stop.num).padStart(2, '0');
+    return `
+      <div class="sc-card" onclick="show('${stop.country}')">
+        <div class="sc-num-col">
+          <div class="sc-num" style="background:${color}">${num}</div>
+        </div>
+        <div class="sc-info">
+          <div class="sc-head">
+            <span class="sc-flag">${flag}</span>
+            <span class="sc-country-label">${label}</span>
+            <span class="sc-weather">${stop.weather || ''}</span>
+          </div>
+          <div class="sc-city">${stop.name}</div>
+          <div class="sc-dates-nights">${stop.dates} <span class="sc-nights">· ${stop.nights} nights</span></div>
+          <div class="sc-vibe">${stop.vibe || ''}</div>
+        </div>
+        <div class="sc-actions">
+          ${hasExplore ? `<button class="sc-explore-btn" onclick="event.stopPropagation();openCityPage('${stop.id}')">Explore →</button>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ─── PACKING LIST ─── */
+const PACK_ITEMS = {
+  'Documents & Finance': [
+    { text: 'Passport (valid 6+ months past Jan 8, 2027)', note: 'check expiry' },
+    { text: 'China visa — apply 4–6 weeks before Sep 26', note: 'urgent' },
+    { text: 'Vietnam e-visa (~Nov 13)', note: '$25 online' },
+    { text: 'Cambodia e-visa (~Nov 14)', note: '$30 online' },
+    { text: 'Travel insurance documents' },
+    { text: 'Credit cards — notify banks of travel dates', note: '2+ cards' },
+    { text: 'Some USD cash for border/arrival fees' },
+    { text: 'International SIM or eSIM plan' },
+    { text: 'Printed emergency contacts + copies of key docs' },
+  ],
+  'Tech & Connectivity': [
+    { text: 'Laptop + charger', note: 'remote work essential' },
+    { text: 'Universal travel adapter', note: 'Korea/China/TH plugs vary' },
+    { text: 'Portable power bank (10,000+ mAh)' },
+    { text: 'Phone + charging cable' },
+    { text: 'Earbuds / headphones' },
+    { text: 'VPN installed (required for China)', note: 'set up before arrival' },
+    { text: 'Download offline maps — Maps.me or Google Offline' },
+    { text: 'WeChat + Alipay set up before China', note: 'needed for payments' },
+  ],
+  'Clothing (carry-on friendly)': [
+    { text: '5–6 t-shirts / lightweight tops' },
+    { text: '2 long-sleeve layers (Korea Sep evenings are cool)' },
+    { text: '1 light jacket or fleece (Chiang Mai Dec is 18–22°C at night)' },
+    { text: '3 pairs pants / joggers (no shorts needed — no beaches)' },
+    { text: '5–6 underwear + socks' },
+    { text: 'Comfortable walking shoes (you\'ll walk 10–15km/day)' },
+    { text: 'Packable rain jacket (Da Nang Nov is rainy season)' },
+    { text: 'Temple-appropriate clothing (shoulders + knees covered)' },
+  ],
+  'Skincare & Health': [
+    { text: 'SPF 50+ sunscreen — critical post-laser', note: 'buy more in Korea' },
+    { text: 'Post-procedure care: gentle cleanser, recovery cream', note: 'clinic will advise' },
+    { text: 'Basic first aid: ibuprofen, antihistamines, Imodium' },
+    { text: 'Prescription medications (3-month supply)' },
+    { text: 'Insect repellent (Vietnam/Cambodia/Thailand)' },
+    { text: 'Hand sanitizer + wipes' },
+    { text: 'Rehydration sachets (for hot weather days)' },
+  ],
+  'Business — Pokémon': [
+    { text: 'Inventory tracking spreadsheet updated before departure' },
+    { text: 'Pokémon Center Bangkok — research exclusive releases in advance' },
+    { text: 'Shipping solution for Bangkok purchases → US', note: 'or checked bag' },
+    { text: 'Front Row SD (Jan 17–18) added to calendar' },
+    { text: 'Front Row Portland (Feb 27–28) added to calendar', note: 'must-do' },
+  ],
+};
+
+function renderPackingList() {
+  const wrap = document.getElementById('packing-list');
+  if (!wrap) return;
+  let html = '';
+  Object.entries(PACK_ITEMS).forEach(([section, items]) => {
+    const total = items.length;
+    const sectionId = section.replace(/\s+/g,'_');
+    const itemsHtml = items.map((item, i) => `
+      <div class="pack-item" id="pi_${sectionId}_${i}" onclick="togglePack('pi_${sectionId}_${i}')">
+        <div class="pack-cb"></div>
+        <div class="pack-text">${item.text}</div>
+        ${item.note ? `<div class="pack-note">${item.note}</div>` : ''}
+      </div>`).join('');
+    const icon = section.includes('Doc') ? '📄' : section.includes('Tech') ? '💻' : section.includes('Cloth') ? '👕' : section.includes('Skin') ? '🧴' : '📦';
+    html += `
+      <div class="pack-section">
+        <div class="pack-section-head">
+          <span class="pack-section-icon">${icon}</span>
+          <span class="pack-section-title">${section}</span>
+          <span class="pack-progress" id="prog_${sectionId}">0 / ${total}</span>
+        </div>
+        <div class="pack-items">${itemsHtml}</div>
+      </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+function togglePack(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('checked');
+  const sectionId = id.split('_').slice(1,-1).join('_');
+  const allItems = document.querySelectorAll(`[id^="pi_${sectionId}_"]`);
+  const checked = document.querySelectorAll(`[id^="pi_${sectionId}_"].checked`).length;
+  const prog = document.getElementById('prog_' + sectionId);
+  if (prog) prog.textContent = `${checked} / ${allItems.length}`;
+}
+
+/* Init */
+renderStopCards();
+renderPackingList();
+</script>
+</body>
+</html>

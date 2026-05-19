@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Miami Trip — Jon's 32nd Birthday 🌴</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --coral: #FF6B6B; --teal: #4ECDC4; --gold: #FFD166; --purple: #C77DFF;
+      --dark: #0f1117; --card: #1a1d27; --card2: #22263a;
+      --text: #e0e0e0; --muted: #6b7280; --border: rgba(255,255,255,0.07);
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--dark); color: var(--text); min-height: 100vh; }
+
+    /* HEADER */
+    .header { background: linear-gradient(135deg, #b83040 0%, #d95f35 40%, #1f8c82 100%); padding: 26px 24px 20px; text-align: center; position: relative; overflow: hidden; }
+    .header::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,0.18); pointer-events: none; }
+    .header-inner { position: relative; z-index: 1; }
+    .header h1 { font-size: 1.8rem; font-weight: 900; color: #fff; letter-spacing: -0.5px; }
+    .header-sub { font-size: 0.88rem; color: rgba(255,255,255,0.88); margin-top: 3px; }
+    .flight-row { display: flex; gap: 8px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+    .flight-chip { background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 4px 12px; font-size: 0.71rem; color: #fff; backdrop-filter: blur(6px); }
+
+    /* PERSON SELECTOR */
+    .person-bar { background: var(--card); padding: 9px 20px; display: flex; align-items: center; gap: 7px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+    .person-bar label { font-size: 0.73rem; color: var(--muted); margin-right: 2px; }
+    .person-btn { padding: 4px 13px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.13); background: transparent; color: var(--muted); font-size: 0.76rem; cursor: pointer; transition: all 0.18s; }
+    .person-btn.active { background: var(--coral); border-color: var(--coral); color: #fff; font-weight: 700; }
+
+    /* TABS */
+    .tab-nav { background: var(--card); display: flex; overflow-x: auto; border-bottom: 1px solid var(--border); scrollbar-width: none; }
+    .tab-nav::-webkit-scrollbar { display: none; }
+    .tab-btn { padding: 12px 16px; background: none; border: none; color: var(--muted); font-size: 0.8rem; cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.18s; }
+    .tab-btn.active { color: var(--coral); border-bottom-color: var(--coral); font-weight: 700; }
+    .tab-btn:hover:not(.active) { color: var(--text); }
+
+    /* PANELS */
+    .panel { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
+    .panel.active { display: block; }
+    #panel-map { padding: 12px; max-width: none; }
+
+    /* OVERVIEW */
+    .overview-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .day-card { background: var(--card); border-radius: 12px; padding: 14px; border: 1px solid var(--border); cursor: pointer; transition: all 0.18s; }
+    .day-card:hover { border-color: rgba(255,107,107,0.4); transform: translateY(-1px); }
+    .day-card-date { font-size: 0.7rem; color: var(--coral); font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; }
+    .day-card-title { font-size: 0.95rem; font-weight: 700; color: #fff; margin: 4px 0; }
+    .day-card-bullets { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+    .crew-row { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .crew-chip { background: var(--card2); border-radius: 20px; padding: 7px 14px; font-size: 0.82rem; color: var(--text); border: 1px solid var(--border); }
+    .book-asap { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.25); border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    .book-asap-title { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: var(--gold); margin-bottom: 10px; }
+    .book-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.8rem; color: var(--text); padding: 6px 0; border-top: 1px solid rgba(255,255,255,0.04); line-height: 1.4; }
+    .book-item:first-of-type { border-top: none; }
+    .book-num { font-weight: 800; color: var(--gold); flex-shrink: 0; min-width: 18px; }
+
+    /* DAY HEADER */
+    .day-hd { margin-bottom: 16px; }
+    .day-hd h2 { font-size: 1.25rem; font-weight: 800; color: #fff; }
+    .day-hd p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+    /* SEC LABEL */
+    .sec-label { font-size: 0.63rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px; color: var(--muted); margin: 16px 0 8px; }
+
+    /* CARDS */
+    .card { background: var(--card); border-radius: 12px; padding: 13px 15px; margin-bottom: 8px; border: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
+    .card.is-locked  { border-left: 3px solid var(--teal); }
+    .card.is-optional{ border-left: 3px solid rgba(255,107,107,0.45); }
+    .card.is-flex    { border-left: 3px solid rgba(255,209,102,0.5); }
+    .card.is-top     { border-left: 3px solid var(--teal); background: rgba(78,205,196,0.05); }
+    .card-icon { font-size: 1.25rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); border-radius: 9px; flex-shrink: 0; }
+    .card-body { flex: 1; min-width: 0; }
+    .card-title { font-size: 0.9rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .badge { font-size: 0.58rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
+    .badge-locked  { background: var(--teal); color: #0f1117; }
+    .badge-flex    { background: rgba(255,209,102,0.2); color: var(--gold); border: 1px solid rgba(255,209,102,0.4); }
+    .badge-top     { background: rgba(78,205,196,0.2); color: var(--teal); border: 1px solid rgba(78,205,196,0.4); }
+    .badge-scene   { background: rgba(199,125,255,0.2); color: var(--purple); border: 1px solid rgba(199,125,255,0.4); }
+    .card-desc { font-size: 0.77rem; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+    .card-time { font-size: 0.71rem; color: var(--gold); margin-top: 4px; }
+    .card-meta { font-size: 0.71rem; color: var(--teal); margin-top: 3px; }
+
+    /* DIVIDER */
+    .divider { display: flex; align-items: center; gap: 10px; margin: 12px 0; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .divider span { font-size: 0.68rem; color: var(--gold); white-space: nowrap; }
+
+    /* VOTE */
+    .vote-row { display: flex; gap: 5px; margin-top: 9px; }
+    .vbtn { padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: var(--muted); font-size: 0.72rem; cursor: pointer; transition: all 0.15s; }
+    .vbtn:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+    .vbtn.v-in    { background: rgba(78,205,196,0.18); border-color: var(--teal); color: var(--teal); }
+    .vbtn.v-maybe { background: rgba(255,209,102,0.15); border-color: var(--gold); color: var(--gold); }
+    .vbtn.v-pass  { background: rgba(255,107,107,0.12); border-color: rgba(255,107,107,0.5); color: var(--coral); }
+    .vote-pills { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+    .vpill { font-size: 0.67rem; padding: 2px 8px; border-radius: 10px; }
+    .vpill.in    { background: rgba(78,205,196,0.15); color: var(--teal); }
+    .vpill.maybe { background: rgba(255,209,102,0.12); color: var(--gold); }
+    .vpill.pass  { background: rgba(255,107,107,0.1); color: var(--coral); }
+
+    /* CARD LINKS */
+    .card-links { display: flex; gap: 6px; margin-top: 7px; flex-wrap: wrap; }
+    .card-link { font-size: 0.7rem; color: var(--muted); text-decoration: none; padding: 3px 9px; border-radius: 5px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+    .card-link:hover { color: #fff; border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.05); }
+
+    /* SECTION INTRO */
+    .sec-intro { background: var(--card); border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; border: 1px solid var(--border); font-size: 0.8rem; color: var(--muted); line-height: 1.55; }
+    .sec-intro strong { color: var(--text); }
+
+    /* AMENITIES */
+    .amenity-hero { background: linear-gradient(135deg, rgba(78,205,196,0.15), rgba(255,209,102,0.1)); border: 1px solid rgba(78,205,196,0.2); border-radius: 14px; padding: 20px; margin-bottom: 16px; text-align: center; }
+    .amenity-hero h3 { font-size: 1.1rem; font-weight: 800; color: #fff; }
+    .amenity-hero p { font-size: 0.8rem; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+    .amenity-hero .lagoon-stat { font-size: 1.6rem; font-weight: 900; color: var(--teal); display: block; margin-top: 10px; }
+    .amenity-hero .lagoon-label { font-size: 0.75rem; color: var(--muted); }
+    .amenity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .amenity-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 13px; display: flex; gap: 10px; align-items: flex-start; }
+    .amenity-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .amenity-name { font-size: 0.85rem; font-weight: 700; color: #fff; }
+    .amenity-desc { font-size: 0.73rem; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+    .amenity-links { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .amenity-link { display: inline-flex; align-items: center; gap: 6px; background: var(--teal); color: #0f1117; font-weight: 700; font-size: 0.78rem; padding: 8px 16px; border-radius: 8px; text-decoration: none; transition: opacity 0.15s; }
+    .amenity-link:hover { opacity: 0.85; }
+    .amenity-link.secondary { background: transparent; color: var(--teal); border: 1px solid var(--teal); }
+
+    /* MAP */
+    #map-el { height: calc(100vh - 155px); border-radius: 10px; overflow: hidden; }
+
+    /* WEATHER */
+    .wx-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .wx-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+    .wx-date { font-size: 0.73rem; color: var(--muted); }
+    .wx-icon { font-size: 2.2rem; margin: 7px 0 3px; }
+    .wx-temp { font-size: 1.4rem; font-weight: 800; color: #fff; }
+    .wx-desc { font-size: 0.71rem; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+    .wx-rows { margin-top: 9px; }
+    .wx-row { display: flex; justify-content: space-between; font-size: 0.71rem; padding: 3px 0; border-top: 1px solid var(--border); }
+    .wx-row span:first-child { color: var(--muted); }
+    .wx-row span:last-child { color: #fff; font-weight: 600; }
+    .wx-tip { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.2); border-radius: 10px; padding: 13px; font-size: 0.78rem; color: rgba(255,255,255,0.8); line-height: 1.55; }
+
+    /* PACK */
+    .pack-cat { margin-bottom: 16px; }
+    .pack-cat-title { font-size: 0.78rem; font-weight: 800; color: var(--coral); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid rgba(255,107,107,0.2); }
+    .pack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .pack-item { display: flex; align-items: center; gap: 8px; font-size: 0.79rem; color: var(--text); cursor: pointer; padding: 6px 9px; border-radius: 7px; background: var(--card); border: 1px solid var(--border); transition: all 0.15s; user-select: none; }
+    .pack-item:hover { border-color: rgba(255,255,255,0.14); }
+    .pack-item.done { color: var(--muted); }
+    .pack-item.done span { text-decoration: line-through; }
+    .pack-check { width: 15px; height: 15px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+    .pack-item.done .pack-check { background: var(--teal); border-color: var(--teal); color: #0f1117; }
+
+    @media (max-width: 520px) {
+      .pack-grid { grid-template-columns: 1fr; }
+      .wx-grid { grid-template-columns: 1fr 1fr; }
+      .overview-grid { grid-template-columns: 1fr; }
+      .amenity-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <h1>🌴 Miami Trip</h1>
+    <p class="header-sub">Jon's 32nd Birthday &nbsp;·&nbsp; July 2–5, 2026</p>
+    <div class="flight-row">
+      <span class="flight-chip">✈️ AA2799 &nbsp;SFO→MIA &nbsp;Jul 2 · 8:39 AM</span>
+      <span class="flight-chip">✈️ AA2035 &nbsp;MIA→SFO &nbsp;Jul 5 · 5:15 PM</span>
+    </div>
+  </div>
+</header>
+
+<div class="person-bar">
+  <label>Voting as:</label>
+  <button class="person-btn active" onclick="setPerson('Phil',this)">Phil</button>
+  <button class="person-btn" onclick="setPerson('Jon',this)">Jon 🎂</button>
+  <button class="person-btn" onclick="setPerson('Monique',this)">Monique</button>
+  <button class="person-btn" onclick="setPerson('Nelie',this)">Nelie</button>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active"  onclick="showTab('overview',this)">🏠 Overview</button>
+  <button class="tab-btn"         onclick="showTab('thu',this)">Thu Jul 2</button>
+  <button class="tab-btn"         onclick="showTab('fri',this)">Fri Jul 3</button>
+  <button class="tab-btn"         onclick="showTab('sat',this)">Sat Jul 4 🎆</button>
+  <button class="tab-btn"         onclick="showTab('sun',this)">Sun Jul 5</button>
+  <button class="tab-btn"         onclick="showTab('options',this)">🎯 Options</button>
+  <button class="tab-btn"         onclick="showTab('scene',this)">🎉 Seen &amp; Be Seen</button>
+  <button class="tab-btn"         onclick="showTab('restaurants',this)">🍽️ Restaurants</button>
+  <button class="tab-btn"         onclick="showTab('activities',this)">🏄 Activities</button>
+  <button class="tab-btn"         onclick="showTab('keylargo',this)">🐠 Key Largo</button>
+  <button class="tab-btn"         onclick="showTab('amenities',this)">🏠 Amenities</button>
+  <button class="tab-btn"         onclick="showTab('map',this)">📍 Map</button>
+  <button class="tab-btn"         onclick="showTab('weather',this)">🌤️ Weather</button>
+  <button class="tab-btn"         onclick="showTab('pack',this)">🎒 Pack</button>
+</nav>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div class="panel active" id="panel-overview">
+  <div class="day-hd" style="margin-top:4px">
+    <h2>The Trip 🌴</h2>
+    <p>4 nights in Miami for Jon's 32nd — July 2–5, 2026</p>
+  </div>
+
+  <div class="sec-label">The Crew</div>
+  <div class="crew-row">
+    <div class="crew-chip">🤙 Phil &nbsp;<span style="color:var(--muted);font-size:0.72rem">Host</span></div>
+    <div class="crew-chip">🎂 Jon &nbsp;<span style="color:var(--muted);font-size:0.72rem">Birthday Boy</span></div>
+    <div class="crew-chip">🌸 Monique</div>
+    <div class="crew-chip">✨ Nelie</div>
+  </div>
+  <div style="text-align:center; margin: 16px 0;">
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCAMgAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1/aKQrUu3imkV8UfWkTL7UwrUxFNIoAgIxTSKmIphFNAREU0ipStNK1SAhK1Gy1ORTGFUBARUZWp2Wo2WqTEQFajK1YIqMrVoRCVppFTMtMK0wIitNIqQrTSKpCIitNK1KRTSKYiLFIRUhppFMBmKQjmnmmmmIbSUtFMBMUmKcEY9FJ/CpFtJW/hC/U0wITSVcXTz/E/5CpFsol7Z+tMDOxnpzT1t5X6IfxrUWNVHyqB+FBFAWM8WEh6kAe1SLYRj7xJq5ikxTAhW3jXogqQADpS4pQKAG0YpxFFADaKXFGKYCGkIpSKMUAJSYpwFFMBuKMU6kxQAhFJinUmKYCYpMU7FJQAmKSnUlAhKCKXFFADcUCnUlMBMUmKdSUAJRilxiigBKKKWgQmKMUtGaYDaKU0hoEJTadikxQA2jFLSUCG0nWnGkoASiigUCEJooxRQB3+KaVqTFIRXinSREU0ipCKaRQMiI4phFTEU0imBCRTSKlIpCKoCEimMKmK00rVJhcrsKjK1YZajZapCIGWo2WpmFMK1SAgIxTSKlYUwirQiIimNUrVHtJ6AmmBGaaam+zyN/Dj604WZ/if8qpCsVTTDya0BaRr1y31p4RVHyqB+FMLGaIZG6I1SLZSE8kLV8ikximFioLFB95i1SrbRL0QfjUuKMUwsIFA6AD6UUtFAhKKUUYpgNxRSkUYoASkIp2KSmAmKSlxRTEJSYp2KMUANoIpaKAEpKdiimA0CiloIoAbS0UUwENJinUmKAEpKdSUAJSGnUmKAExSYp2KKBDTRS0mKYBSUuMUlACUUtJTAKKKKADFBooIoASkNLRTEN70GlpKQhtIadTTQIQ0hp1NIpgJRilxzRQITFFBooA9CxSEU7FBFeGdFyMimlalIppFMCErSbalK00rTGREU0rUpWmkU7gRFaYVqcik8pm6KadwKzLUbCrv2Zj1IFIbVOpJNWmBnMtM8tn6Ka0jGi9FFMaqTFczzbOeuBSfZV/iYmrb1E1WgIfJjXoo/HmkPA44qQ0wirQDDRTsc0mKoBuKMUuKMU7gNxzSYFPxSUwG4pMYp9IRQA3FIRT8UhFMBuKDSkUYpoQ3FGKWjFAhuKXFLijFADcUEUuKMUANxRS4opiG4op2KSmAmKMU7FJQA3FFOoxTAZilxxS0YoAbRilI70hpgNoIxS0UAJSUtGKAEoIoooEJSUtFAAabTqSgBKSlNFMBKKWkxTASgUtJQAGkpaQ0EiUhpSKSgBCKaadSYoEJSUtFACUUtIaBCGig8A0UCPRcUhFOUFhwCad5LntivFNrkWKQ1N5Pq1HlqO2frRYOYr8noKTy2PbH1qwaQ0x3IfI9Wo8lB1BNS0lA7jAqr0AFIaeaYxpjGMaiY09jUTGqQDG61Cx5qRmqFjVoBjHmo2p7U01ogIyKTFPIppFUA0ikxTjSEVQDcUlOpMUwEIpKdikpgJSGnGkpgJ2pKcRSUwE6UEUUUAJikp1GKYhtJT6QigQ2kp3SkoASloooEJSYpaKYBikNLRTASiiimAmKKWjpQA3FIRTsUmKAG4oxS0GgBpopaSgBKKKKYg7U2nUmKACm06koATGaTpTqSmAhpKU0lMAxSGlooEJSGlJpDQIQ0lLSGgGJSUtFAhKQ0403vQAlFFJQIWimN060UxHqnamkU/FIRXiiIyKaRUpFMIoKTIiKaRUhFNxQWmNxTTTzUbGgtDWNRsacxqJjmmihrGomNPY1ExrRIBjGozzTzTDVIBhFNIpxFJirAYaQ0403FUhjSKQinUhFMQ2kxTsUlMBMUmKdSYpgIRSU6kNMBtGKWjGaYCUmMU7FJimISilxxRQIbRS4oxQA3rSEU6kNMBueKKXFJigBKMUuKXFAhtFLSVQBRRRQAlFLig0wEpKWkoAQjmkNOpKAG0U7FJQIbR0pTSEUAJRS4pKYCUGlooAbRS4pDQAhpKXFIRTEHWkopCaYgpKKKAEpKcaSgBtFKaQ0CEpKWkoASkNKaaeKBMRqKG6UUwPVqKXFGK8UzGkU0ipMU1uKBoiYVG3FSO1QsaDWKGsajY05jUbGmaoYxqNjTmNRsatIYxjk0w080w1QDDTSKeaaRmqQDDTTTzTSKpAMIppFPpOtUAwikpxFJimMbSYp2KCOaBDMUU4igiqAbSYpxFFADcUYpaKYhMUYpaKYhuKQinUYpgMxRTsUY4oAaRSYp1JTAbikxTzSUCG4pMU8ikxQA3FFOxSYpgNxRinYoxTAbRS4oxQA3FFLRTAaaSnYpKAEpMU7FJigQ3FBFOppoATFGKXFFMBuKTFOIooAaaTFONJQIYaSnGmmmIKQ0uKTFMBMUlOpKAEpKdSUANpDTqTPFAhtJ3p2KSgBpppp5ppoEMfpiihqKYHrWKMU6mE14rRiBOKic05mqB2oNIoa55qJjTmNRk0zdIRjUTGnMajamkWhpppFONNNWMYaaacaaaYhpplPNNNUgGmmmnGkNUgGGkpTSVSASkNOpppgJSYp2KSgBpopSKMUwGmkpxFJimAmKKXFGKYCUhFOxRimIbijFKaKYhMUYpaMUANxzSFacaKYDCKTFPpCKAG4opSKPamA2inEUmKBCYopTSUwExRilooAZikxTyKTFMBtFLRigQ2ilxikxQAmKQinUUANxSYzTqSmA00UpooEMNJTjSGgQw0hpxpKAExSU6kpoBtGKWimA0ikp1IRQA00mOOKdRSEMpMYp1IeaYDaQilNIeaBMjfpRSSnCk+gzRQI9azmmE0Fqid68clIJGqFmoZqYTTNoxEY0w04000GiGNTDTzTTTKGGmmnmmmqQhjUw09qYaoBppppxpppjENNNONNNUIaabTjSGmgEpKWiqAaaKXFJQAlFFGKYCYpDTqSmAhpaKKAEopaDTENxRinUlNCG4oxTqMUwG0GlxSUAIRSEU6g0wG0YpaSmAhHNFLRimA3FJTqQigQmKSnYooAbRilIoIoAaRRS0EUxMbikxTsUYoAYaTFOxRTAaaTFOIpDSAbSU4jikpkjTTcU40hoAbSUtFACGkxSmigBtIacaTFMBKTHrS0lAhKTFKaKQDabT6Q0wGmm040UAV7shLaVj2Rj+lFRau3l6Xdt6RN/hRVxjzGNSVmeqtJUZakyaCa8Y6UrCE000ppKCkNNIacaaaChpphp5ppqgGGmmnGmmmhjDTTTjTTVoBhpppxppNMBDTTTjSGmA0im0402mhCUUtJVCCkxS0UANNHeiimAlFLRTATvRS0YoASjvS0UwEpDTqKYDcUU7FBpiGUmKeRSEUANxQaWg0wG0UuKMUANxRinUlMBKSnUlMQ2jFOxRQAzFFOIpMUwG4oxS0UANopaKBDcUmKcaTFADSKbTzTcUANNIadikoEN60hp1IRTENpKcaSgBppMU6kxQAlJinGk7UANxSEU7FBoEMxRilxSGgBtIadRQAzFGM06kxTAzfETbNGufcAfqKKi8UtjSSP70ij+tFaQdkc1Xc9XooorxTtENJSmkNMaGmkNKaaaChDTGp5pjGmA00w040000MaaYacaaatANNNNKaaaYCUhpTSUwENNNKaQ0xCUUtFMBKKWkpiEoxS0mKYBijFLRQAmKKXFFMQEUYpRRimA3FLilpKYxMUEUtFAhuKQin0mKYDCKMU/FIRTQDMUYp2KMUAMxminEUhoAbRTqQ0xCUlOxSYpgIaQ0tFADaTFOxRQA2g0uKMUxDDRTiKbQAhHFN9qcaQigBppCKU8UlAhtFONNxQISkNLiigBtJTjSdadwEpMUtFACU3FOxSGkA3FIacRSYpgNNJTiOKSgQlGKXFIaAMHxe+LKFfVyfyFFQ+M32wwrnACu1FbQvY5anxHsVBopCa8U7xKQ0tJQMQ000pppoGIaYacaYaYxDTDTjTTTQDTTDTjTTVoBppuKcabTAQ0lKaQ0wEpKKMUwEooNGKYgooopiEopaMUxCUtIeKguL6G2x5sip6kmgaRYoOAMkgD3qOK4jnBMTqcdea5vXtbtot1rcyGJSN0zq2SqdAo9CT37AGqSuOxq3euR21pNdIY5VRxEq7wNzE4yT2H+FUrLxJc3YeSGKG7VOStujHPqA3r+Febanr8nnrBYRL9jwTEsyb3Kn+LAxxnOM1n6frQs5EkDAqMg7WZB+h4Nbqk7Ec6ue5RXiXdvFPbtlJcAEjoSccj2pwlaTAUDI4bB7ivOtF8axWodN5uIXlQqu4mVeMnr97BHX6V1et69DpmmPfQMhM6/u1Y4ydoy1ZuDTsUmnsb4HTinbCR0rxu2+LkEdyq3GjF1DfNKJmDn3+tdHL40t9SuCY7m7WJlTyZGn8louucgAhjnue1V7KRKknsd8cUuK4eH4hJZo1tqAW5uExsmtsFZVPQkdj61r23jOzliWSW2u4Fb+JkBUfUg8VLi0UdBijFVbXUre7kKRSxswAJUMCQDVvHFIQ0ikxTsUmKYDcUEU7FJigBtFLijFADaSnEUmKYhtJTqMUwG0lOIooAbRS0mKAENNNOIpCM0XENpCKcRSUwGmmkU/FJQAykNOxSYoENpDTqTFAhMUlLijFADaMUuKOlADcUlOIpMUAIRTacRRigBhFJin4puKYMSkp1GKBHI+OG+6uekJ/U0VF40YG5cHsiD9c0Vstjkm/eZ7bSUUV4p6AlIaWmk0FAaYaUmmk0AIaYacaaaoYhphpxpppgNNNNOppqkA002nGmmqAQ0lLSGgBKSlpKYBSUpopiEop1MZlUZZgAPWmIUnAyTXMa78QdL0h2ihD30qMA6wsAB7AnqfYZpPEPiGxRQ8t4zWARw6QHmWQNt2E9ceoFcafGVtZTZ07w/bxR4wWnYF2HXt0xWsIX3B7HYwfELRrm3E0czhlBYwuuHx9K4nxJrMGs38rSvKY/+WUQyAh7lvpWfda9Fd3FzfmBERkxzj52HbP0/lWdqt2iWsLowLy/MTnnNaRp2YnNWLVtrl1a3FxaC9kjtrlPs7SNk7BkYcYPbH61Q1rULnem+6jlfGCqLjPYE+px/OsWS/3Eo7DB445NM3Eo4Ycr/F611Rhbc5pVb7Fw30oDfvHDOmCV4Ptz+VUUuZlk3Oc/3s/xVEbgbDITkjjFEjozjcTsA7dvetEjFyNjTb+a0nW4tJliZQcZwdp6fyovda1DU54bV5y4QFVzwqjuaxZmEZADqwPdTT4rkRSBXPUdaXItxqfQ2tUvLWe28qG0jjcNnzM849PpVawkkGYn+43zhs/d/wDrVmXAijfdJO0rHkAD9KZLeny9q5C+melPl0sHtLO50UlxbMxw+w4A+Q9/WtLT/Er2DxM8ryIMAtuIJHQj6Yrj7W4R1ZiSMY4qNrsp8uTtz+dQ6dyvb21PdfB2paXcTzLpxVYCBIvYhujA+3TjtXbQsWU5GDnFfN/hbxO2hazFLIcwD5ZVAzuQ9/qOtfQtnfLPaR3MEscqOA+DxuBHY/SuWtBxZ006imi9TaEkEihlzg+tOIrIsbijFLRQIbikIp1FMY0ikIp1JQAwiinYpCKYhtGKWigBtJTqQimA2ilooAYRRinUmKBDKSn4ptADTzTTT6QigBlBpSKCKYhtJTqKBDaQ07FBFADSKTFOxSYoAaaTFOIpDQA2kxmnYpMUANxigCnEUAUxHCeLmzfz+zqv6UVF4kfzL+Y5zmVv0orojscctz3UGikFFeGemFNJpSaaTTAQ000400mgY00007NNJpgNNNNONNNUgGmkNKaaapANNJSmkpgIaSlopgNNH0pcUUAJRilxQBnjjJpiIpCxRyGKhVJOOtcrca09xa3Nm2JGNskPJ+ZpZATj6AU+08aLILz7UlrbrE7IY3m2yDqOc8Zrzq8v7i68shCYzKZSWbAYgBRj6YraEGF7EWozNYwRWnlo5BLsZDkknk/TnrXPfbiQ58zzA/Bx0rYvJpJbg3MuHIGCP8+vNYLNDcxPPDAFkRc7Qfve9ddOOhz1Za6ENzcMm6P+EnJANQT3LXcm1TsCD5RntVd5gZcgHBFNXaGL5Ix+tdKjY43O5ObfyYhJtDMf0qeG6kSL5l+Q8HI61Elx+7JB6ioLWSSbzIiSRjcDnpzRYL2I7ht7PsGATnApVm2RqwyHB5z6VL5aoSQRx6Uk0S9CRyOKdxWM/wA3Dnjg84pwkaSQs/0NQyRSo5GCferFrE5YZHUc57CrexkrieaM47U+JDJkZzippjDsAA59qImVJFK4ViOCejH0qLl2GRyFPl2gjuO9PuYC+142DKTlf8+tRS3EL3BDDyieuOQKbcSGQokBLBcncBjNAmxoMkd2mVY5PB9vSvUfAHxAl0m7i0K+jUWwGVmJ+6D6+1eYxSSDjcVIPX0NaVi0y6isp+eYjy177s8VnUipKzNKUnF6H0j4a1yy12z8y0lL7eWBUjHPbPUVsEVxfw7Pkabo8AChvs0qSAddwc5z+NdsRzXnyVnoeindDCKTFPIpMUhjDSU/FJigBvWkp2KSmA0iginYpDQIZijFOxSYoAaaTFONGKYDMUU7FJimA2kp2KQ0ANxTSKeRxTSKBDcUUpFJQAhFNxTjRQhMZiinYpDTENopTRigBvWkp1JigBDTafikIoAbikxTsUYoAbigdaXFMkJSN27hSf0oBnnGquJZy3Yux/WimXfMg78UV0LY42e+g0E00UteKemIaQ0tIaYDTTTTjSUANPWmmnGkNMBpppp1NNUgENMNPNNNMBhpKcaTFMBKKWkxTASilooExKguX8mINt3M7BFz2NWMcVka5PLPC1raoWlwWDZwFIH8/amgS1OM8Y6tFHqAgtbWwkuXQvJcGPeQOnGeD061xU1zcCcGRw88alVBA4APp9TU/ie+lttSlkhk+3yJHEHeFfljAUDa3ofauabVXurx2jJjR8s397Gcnmu+nB2MalVJ2NByS7q0pLyrlvY5rOj2213GeAvOcnjG3BqPzZJ7+NUkKoh6DuT1NR6hLlWPQbSOa3jG2hzynfUzo9s5kTG08sn+FQM2Vx056UeYIpFYE8VCJQ8wB7muhI5Gy2G2YUfNxyameRbaxynBkbFUbhmRkweDzU5KiALcNgNggD+GpaKTK6zOtwOSDmprxyhUrkBhu/oaWRIl2uG3c8cdqivJMLEp5OCP1p7i2RBPO83A7dBViznKxlHT73BPtVbYH+VD8w6rT7aZYnG4Zx1HrTa0JT1LLDc+0c+9PnRY4BG5YPu4GOB+NQ7g1wuwcNzUV3ciQqDn5DjOetQU2LLFuZWb7xFOgGIgSTkHFVZ7t2dWH8IwKfHOCHXPXkCnZk3VzR4YJL03/I4P8Y9frU+iXRs79JJY/METZ2sOGFZQuHdQp4VeRUR1KVPkRjsBzip5b6D57O59CfDHWdIl05pLIhbrLl4ZH/eKm7PAPBH05r0ZWEiK69GAYfQ18qaBq8dlcmdZdhIynH3X7Z9vWvpPwjqkmq6BZ3E8yTTEFXdRgMQeuK4a9Pldz0aNTnibGKTFPppFYGo0ikxT6TFMBmKQin4xTSKAEpKdikxTAaaMUuKKAG4pMU80hFADCKKXFIaAGmkxTjTaYCGkNLQaYhhFIaU0mKAEopcUhoEJSYp1GKBDcUYpaCKYDcUmKcRSYoAbikpxpKBiEUlOpDQITHNVtRYx2Nww4xG1Wqo622zS7g+q4/WmtxS2PProDzz7AUUS8zN9aK3OQ96HSlpF6Uprxj0xKQ0tJQA00lONNoEJTTTjTaoY00hpxpDTQDDTTTzTTTAaabTjSUwEooooEFFFFMBkpIjYgEn0FeZeP/GUFr9qtNO3RtDGvmyxnBJbHyj6DJJr0yaRUUZ5z2HX8K8H+IV5ay67qMECtGiz7nD8F2xg5/w9K3oQ5pakVJcsbow/+Ehe2sZLWAlYZOWT1bsT61h2skoLbVJzkZ9qlkMRhKKvzYx1zSPNJYwImSWYZx2Ar1IxS2POlJvVk9s4SVrjnzFGAM9zxTpwtxbu5HAG/j6ZIrOgkknkCqDlzWzL9mtFVbjJVFIBHQk+v50noyou6MT7FLPtAXBfnnimf2dCDtkm2OemQcfnWlLdWyqSjDLcg96oNMGPlyN8h+6f7pq02ZyjFFbYyTJFLzluKjv2d52zxz+VXGjjZll88b0P3GHPFMkEcjB26GquQ0VxMBGit/D3p0iGdI5UxlDgj1pJIY3yY3UD0JqNISM8kCgRFG5juQ54HQ1O+zdkjB60xYlQbvvH3plw7KNxGcnmgWw+WVv4TtwOtR28bSzYbJXqaQSRypgDmpLeTysjv60dA3LMoiRWKY3j+HHaoooBMD8u1+x/pTZ5B5+/gqwDcetJBLsbJPHSp6D6lqCSNG8uVARnB9RUF7p0acxON2cGM9cetS3ceTHLGrbn6+5p83mSAycFwex6+ualPqhtX0KltEckHhhwa9i+E3iGWD7PbTWPnhjsjnD/ADLk4KgHr64FeSEB2STGCSA2O1eweDvCNyNKt7y4aWKKLItIY12tPNIeSxBzt49egNZV2mtTfDJp6HsgwVBBBHqO9GKp6NZLp1hDZhg3lr82Om4nJx7elXq887xmKTFPppFMBuKQin4pDQAzGKSnYoxQAykxT6TFADaMUpFFMBtNNPNNNADaaetOpDQAw0hp1JTENIpKdSGmAmKSlooASilpKBCUlOxRTENNJjmnUYoGMNGKdSYoAbSU4ijFAhMVl+I2xpbjpuZR+tauKxvE7YsUXOMyD+VNbkz2OIcZkYn1opcZJorY5j3cdKKAOKK8c9IKSlpKAEpDSkUlMQ2kNKabTGIaSlNIaaAaaaaeaaelMBhpKcabTAKSlopiEopaKBGB4u1mbw9ZrqUQgdVJjaOQ8vnsvvXiXiKeTxBqs99cWn2J5cBkCnGR0J969P8AiOt5FcWl21o0+nxMjMwz+7bfkkj3AwD7muD8V31vNbf6IcyOS8gOQfvcZz7YrsoaWsZ1NVqcd9nSPd+8VgDyB1FQapILll2DgHH4YFPaMmZ/m55JAp626IheQcdK7721OC19B9javawefIABtJTJxk+tUtRnMiJuOccirF/di5JdJW24+4egGMf0rJnkLADP0oiurCTSVkMGWcMTxUs0GYRIjZHQr3WookMmVB+bt71caJokUMQSw+6OtWyIxuZjOxbOcHvTpW+RcN161JNbsJCgxmtjR9CErjz8HPQU3JIdOlKbsjAVdxAUMxp807+YFKFQBjGK66+8OQ2sclwG8pRjaff0rHks5Zzu8s5Hc1POmayw0o6MxS8ksgVRj2qSWFx8jHjvitiDTGc7io/CtCPR1cAsKl1EgjhpM5DAT5VQgDv60wOQ+a7htBjZfuiqV34dj2nGAaFVQp4WSOQdyvy9RnIqwjBIgTyat3emLGSD2qIW22Fgp3e1XzJnNytMliu2ltwuOc8fSkgmYg4Ix1war2pypxwRQoJJwfapcR3Lys3mMEQ4PI9q9m+F/io6mIortlLWa7FDZ3Hccbx79B7DPrXidzIY1iCn5to/H2roPB+qGw1K2kLiPbIA5bptJ5z+dY1Yc0TejPlkfU0JBXdgBs81JiqlhJ50auHV9w3bh3B6Vc61556DG4pD0p1IaAG0hFOxQRTAYaSn4pMUAMxRTsUFaYiPFBp2KQigBtMOakIppoAYaaacaQigYyg0tBoENxSGnUlMBKQ06imAyginYpMUANoxTsUYzQIbikp2KMUwG0U6koAbSYpxFJQAmK57xY2I7dfdj+ldF0Fcv4tcmWJR/DGTTjuZ1PhOWU88UUqiitjA93XpRSL0pa8c9ESkpaKBCHpTTTu1IRTAYaQ0ppKYxDTadSGmA00008immmAw0lONNpiA0lKaKYgxQBR3paBEN1brcW8sTgGORGRgwyOR6V4XqOm3895LbNOJLa0Pl8ncEUdgx5xn+eK92uDmJlHVgRn0ryLWLe+sbOQXNu8fnKyFz91n83LdPYVtRlbYfKmtTzjUrd7K9TghsAkex6VB5xnsJ49pLI2R9K1dfkglnZ4s7OiKTkgZrFt5/s8zLkEk7gD0PqDXpwd1c8+atKxWgVpGPGB3qBky5UAnnir97eRkfu4THu6jNWtEsxcjzCN3Na3srkwp88uVE2g6G1wQzpx1rU1fTtOjx5se6XGAqnGPet3TrLyYcDjj8qYmiRTTtJICdxySec1z8+tz1/qvLT5UjiPs4RjJEiKo7HBOKs2+tw2T7mwceldvJoVq0e37NER2woBrKuPDVqpP+jx49NtV7SL3Of6rVjrEoDxRpuowrBPE6EMGV+mGHQ0scUchYxXKujHJAGD71WudGtYm/wBSF+lWLXThj9y9J26FR9pe0kXlt4lUYQAD0p25FUcDFWIraQW2GHIHWs+53KpArO51NcquVtR1eOzT5RlvSuauNcv7qQhFXHZQP61pzQedJtbLMTwKv22l29qoMpUOf4QORVKy1aOCpGdV6OyOfttPvbv5pVC59amvfDk1tb/aEYNtOSAMYFdNFJaRgAkqPUqRV9I0eEj5XRh+BrGpiHF6C+qRtueVO4hARV5LEt701ELSfI4wfWtfX/D09g01whDwg7l9cVhW1wgmVmPGc+tdsJKavE82cXGVmXLv5FQnliMCut8BaQNV1izt5jGiSSpv8wfeGemK5bzkvtRi2DMe7byMZre8K362/iaK4dTJEm5Tye4IrKpflsaUrc1z6J8E+Za299pcw40+9ktYs9RF95Af+AkD8K6XFYXhawjhjnnhlnnW5dJWlmbcWOwD9MY+ldARXnN6s9JbETcCmFlUj5gSe2f5U25mSGNpJGCovc9PrWA/jLRxIIf7WtY2btMwXP59BQk3sM6LORwOKbE4ccOsg5wwIP4cV5n8QvFrTaUun2N5A63Kl5ZLebcNgP3cjuTjjPQU74UapKmmT2aqWWN2laSR+F9sdcHHB9a09m+W5HNrY9NK1HI8calpJFRR1JNZ974hstNsm1G6uFFjzmRgQUPp/tDPHHOa8n8VfFa51KZ00wzWcDHCOf8AWsPUAfcz69aUKcpbBKSW56dqPjDSNNO15JXf0EZAH1OOKWy8SQ3pXLLFFIcJMvzxn2J6g/WvntL65hm+0xtdxS53b1nJ3H3Bzn8at/8ACU3Jk8yRo1ZxsOyMKf06/jW/sSFVR9ILIA5jfAfrx0YeopJ5IrZDJNIkUY6s5wK8i0b4qtaaf5VyrTPAoMbAZZu20jv9eKyLjxXr/jzUDHBqa6fB0UJkOM/wIM5z9OT39Kj2TvqU5roev3fijSrLmacoucbnxGD9N5GamstXsdSQNbXCMW6IWG4/Tnn8K8r/AOFUQW2ZrqK6luSu7/TX3FvwUfoTXntxMq3zm33QvFKwjMQ2Mu309PwNUqKezJlUcd0fT3zEnpR7GuC+HPxC/tiJ9O1uVI72BNy3DkKJ0HUk9Aw7+vWu7tporvm3ljmB5yjhv5GspRadmaKSauhSKbis6/8AE+l2M724e4vLlOGhsoTMyH0Yj5VP1NZ7+OtLt5Ej1K21LSfMbakl7BtjY/7ykgfjRyu1wujoKKI2WRFkRldGGQynII9jS1IxKSlxxSGmAUlLRTASgUtJQAh60YpcUYpiGmg0tJQMSilpKAGkVyXip83jKP4Y1z+Ndf1ri/EzZ1Gf/gK/pTjuZVdjFVeKKeoorQxPcF6UUDpRXkneFJS0lMAppp1NNADTTadSUxjTSGloNUIaaaadTTTAaaQ0ppDQAlLSUtNCYUd6KBQIR13Ka81+Jt/9jIsli3B1acj1PAx9Oua9Mrj/AIh6RBe6WJnkEU8LFo3YZBJ6qfYgVdNpSVx62sjwW+upN29WAJGGXaDVNNOmmbzV2tHjcHJA/T1rR1mAxskhh8sNkbfTB6/Ss+aS3t8hJJfUAdM168XpoebNWepWuoiBy2Sa6fwXb7rVm/2q5KaVp2+9k13vg2Ax6cBg5LZ5oqu0TowC5qyOjtouDUyoFOc8U9AETjrVafzHQqhC57muPc+htYpar4jisVOZERV4Lt3PoB3Ncnq3iW7MckwiKopAHnkhmz6AcV0Mnhq3uZhLcN5zL0LH7tV9V8O216o+0bX2DCnJyBW0HBPU8/EwrzXuOxy1pqt7fRSTIkbLH94Bv8a0tD1NZpgyZXBAdD2z3pyaXFZRmKIAL3CirOnWAM4KIAenTtVzcXsZUKVWLXMzshAr2m4CsOe1Em/kDAJrfjBW2IPpWLNw7L61yVJWV0enWhocXNetatujAM8z+XHuPC+pNZus3VzZ7o5dQlSdZMGJI8KVxwwbOTn0xXTS6eI52Dorc5UkZ4qK5sLa4I8+BXxwMjOK6oVI6M8Wrh5zVk7GZo0N7c6VJfQahiSMkrFMOJRkAge/P6Vs6JfvcMUkt2hcj5lH3SfUelJbRQJtjAYIvAXgAVpCJY8NGeCK5a8k7qxdOjKFtSLWbUT6bLgAkKfxrySCPdIRnbjPBr2MsHhdD3FeUajaG11S7iHyhZCR+PNa4GVrxOTHw2kSafDNHOkwQmNGGSPWu18E6LJd+IYJli32glR5R3AzzXHaa0krrFEx8xmAK9j7mvd/hPoMl/pMghiht7ZZsG4bLSTY54HYe+a0rzsZ4aCbuem+HITFpcec5JYfgCQP0FWtT1C20nT7i/u5PLt7dDI7ew9PftVqKMRRLGowqjaPpXn/AMa7mX/hF7XTYG2Pf30UJY9AOSM/jg/hXDCPNKx2ydlc868UeK9X8T/6be3H2HTGLC2tVkI3jPJwvLn1JwOwrEjuLYwSRLPaKQhO2a2HPHTvzVLXGluPENyJI3FtbSJBGuNoCL29B0/Ws3WLVbO8Rg7pIAssTRArjIzjnsDxmvQjBLRHK5vccjLDcFotu08qYz1/TkfhW9pHiO80crLbOhUN5hRlyrH6fgDj2rnJLhSR1VcnggZA7dKf9o3RHY2R1NU43JUrG/4s8d33iG1hiuXjVIWLhUGAzn+Ij+Q9zXMWuqTGcsTGc9iuSfxqldrLO+I0fbk9qIrZ3T5QcDjIq4wSVjOU22bP9pESI/Rd21l7VHd5eV3XG3PTpVOVdsZ3SKTgHAB601bklgMkk9Knl7A5dywAY8SruIBwwz0rRj1BYokn8wh1YPGyffyPSmWkkcSHzVHzDnIzioLu6tA4E1uY+cKUNQ9Sk7HoWj+NPE2vQyO2pCxhQAFvI3MwA6bjgdP51w2oX8QKDYvmPlvNRec5PX61WivIEbcr7+Djcp4/Oq005ZsMuB2ojCxUql0WVl3MgmG6PIyD2+vqK7hbKL7Vp9l4ZM1tdXil2KTnbEvc8AcVwMNwpJVxnHDe4re0zWbzRWS4smP2pAYFwoYkcHGO/UUpXCEj0rwprNx4Qv4vD+uW8EENwf8ARruIfu5TnnJ9SeueQetd7PZWl5FNbSwLNERzFIMq4PbBr54lfxNe3VzJqV5N59gv2tre8m2tgcllXpke3auk8LfFLU9L1mGx1eR7m1dgHaYfvIs9wR1HsaynTd7xNYVVtI7zTo28Ia9BpMTSNpGoBjbRucm2kHJQZ7eg+tdYa5H4izs2n6bcW7D91cx3CunXGeo/AmuuVvMjVsdQKwlrqbR00DFIaUUGkUNopTRQAlFLRTAQUUUUwENJilpMUAJRSmkpAJXC682+/uDzgyYrux1+lee6kxe5lJPWRjVQRjV6FYCilUGirM7HuAXFG2lyKXNeUdwwrSYp+RSUwGYppqQ000ARmkNPIpuKYxtIaU0lUA2kNKaQ0xDDSU402gAopaSmIKWkxS0CELAYB79K5rxlbNLZOUJV4sSRsD3HXP4V0jLu/DpWbqumy6jZz2u0fPyj7uVYd8VUdyoux4U9idTsHvHdJIi5Vlz83rkH/GqEfhOC/VJEaRAeOTnNbn9k3PhW9vtN1fS75YZ2LW11CCyA+jY4K+/apNCGxmhkP+oYnPqK9FSa2NMPQp1V7y1Odu/ByiNxCGEsa7h33Y6iuh8KQs+mIR9DU2r6o0EO60RMg5JI6j0rR8OwItkZIlKo53AHtU1Kj5dTohho06vNAs+U2yq5hc+1bDxrsBFVmUGsYzO210ZbqUGaz7ozMeNuK254flPFZc6YJrS5EomY1mzHLsPoK09IswpL468CqrkVp6XcIEIPam27ChFXNF12xHHJxWBdZ3njGK6Ir5sXBrFv4gCQRisZK6NqvwmZdxrJCX6FRmqkcQlXJ5NGoyzpbOIBubuO5FRaXeLLGMHNFJNRPOTXNYtJZxjBOanSNelOyCODzRGATkdaUzZxSQ8W42k1xviHSIHu7uYg71VXxjqAORXcSMAoAGMjmuUu5i/iC4j/AIFiwR/wD/69Rh2+ZtHBXipaMh8JeGb7XpPKsLdAjDDMx24H1r6R8N6c3h/Sbe0MSm5l58mLgZAA6nooGMk+vqcVn/C7w/Fo/hC0RoVEsmZGZk+bmultG3Xl65yzh0iUdcKFBx+bE1rUnzHPGPLsK4vgpYPaZHITYwH/AH1n+lcN8Ur+1Xw5Dcyoy3Wn38Nz5LEZJB5APfI6Vc8S/E2y0+9GkaLBJrmss21LW0IKq3+2/IGK8K8ZeKtf8S6u/wDbDWsf2V2j2W/Krg8gHJLHPGfyqqNJt3ZM6iSsQanr19r2oXOqSCOGS6ZWkSMYGFA24+mBz3NZ13cXWqT5YtMyDBkc4Cj61FHI88m1YwqknOP14pmoXTKgt4QwiT7xUfebvXalY5m9NRZI7JCY2ui7HqFXIH40+CFUACuHQ9MVjsdjdNuOop3nMsbAMdrMM+mOf/rVdjPnNF9TtrSULbR+dLn/AFj/AHVPsO/1NL/aMk4PlynaOGCjAz9PesG7dlc8/e6HpVizmNtE4OPnIJ/wp8qJVR3saRIcENIQx9BzVm109ZnWdZUAXs3HzVz39olSScYJ4zWhDcGTG1j16g9qTTCMk2XZC6s2/CjpkHINVZVt1+RcyAYySMY/+tSm4KuxGODyOxFSXkItFRjzHKu5TnP4VA3qRRoDwDxnkGnGNo8lH3J6HtVaO7IbOOPateJIntxIoHJwwpt2BK5SAB/eKcetbuh3jwRLIkiLJbyiWNieRng8fhWRNAyrLsGQULfiKpadcS73kB4K4/GpceZDUuVna+Mtci8T6nptwf3c3lqt2NowNpz+JNP8YafHdWZv14vrZvnwflkjIDBl9vm/CuctrwaeY7jaJnQlmDjIY4I5/Om3HiW4mgS3eSVoo1VFXAAAAwPrUqLVrdC3JNO/U9U8O6yuveG7DTJX3XUcaxQqOd2eCx9Ni5/OvVQoVAFyVAAz9K+YvD/iWbSL2O7gyroePlxj8q76z8V+ItReXUtHvtyQn57N33l1xnO08AdRwBXNOm7nRCorHr3FFYfhDxRbeKtL+1wpsmjbZNF3RvpW3msjZO+qCiiigYUUmaKYC0lLSUABptBNFACUUUmaAAnapOOgJrzy9O6Yn1JNd9dNttZj0wjfyrz+X5nBq4GNTdAq8UU8CiqMz2gdKKBRXlHcBpvNLSUwDNJmikNMAJpppTTTTGBpKKSmAhpppxpppiGmkpTRQAlFGKKYgoopaBC9sUYFFFAEc8SyqFJK+4ryTxFpQsNZlZMKlyGU4GNpzx/n3r2DHrWFr3hn+17Ke3Qx5ZjLGWB3I/oPY1pTnys3oVeSWux4e8jLI9rNkMTjmu30KJV04ICDsOMjvWFJDHLP9nv7ZTIjbdxGDkcYNbuj28Vs06xFirhWCnouOOK6KsrxPSUbFmZ9iYqssgzRfOQGxVBJmKfjUQWly72LN5KdgC96xbqYAnJq9cSnZkmud1O8WLIJ5raCuZVJpIbcXvUVv+HrZJrQzStgMT39K5WysZ76USMCqV0gsybTyEmeIH+6aqS6GVKprdmvLqVraERiRWLds1ha1qiKhYcHNUZNCsLIeesCSSj+OQkkms3VZGugDtC7R2NLkQVMQ+V3Qy31yL7V5crLkjp3qrJdJFq8pgJETEH8cc1D9miki2so8zOdw61FJb+SM9R60RikzzfaPqdKs+5Qc9qdHOfMHoKx7G9DARk9ehq0jneRUVI2R1+1vHQ23nEig1S0zQ01LxPHaxFnnvpkVsD7icZ/QUyFyRgnvXonwo0q2n126v32mW2iGwehbgn8v51yQ3MW9Lnqf7u2hSNRtRFCKD6DgV4f8WfG2ryQyJpkj2OmXkht/MUlZbrYMM47qnb1b6V3Pjb4jr4a0hL82KyRzt/ouZAfNPOAy4yB3z04xnmvAPEXiCfxJIlxcxwQmPIMUKlUyTknrnmuyhDW7RxVJaWLHhbxRe+Ho54tPjgWS4XazmMFwo7A9QCeT61j3F+HdbePDyFsF+uMnt71DDJ5avsYICMHsfp7UmnxRm9W4dSI4FMuMcEjoPzxXXZLUwu3ZGmbaKw3+e/zMAFRR82B39uf5VVf7JdnYoeJ34VmORn39KpyXbXs8zs3LZIz3NEttKJlUAljhRj9P50W7g2nsV2snE7QyoRIjbSuam/0e1XDAOx7DoKua6y/bGmjOPMUHg9sf/qrm52ZpGGe/etI+8jGfuOxrx6vbM+FjX0O5FI/lVa/to5AZbddhxlkHQj1FZ7R7AHyRjnirdlcGVG3Z46GnaxPNfRmQ4+bnpVyyu9jBc4xUFzEHmPltkE+lSw6bIwDDj1J6D61btYySd9C0lyRMdy5DAj/AOvUrCeeJYgxKqehPSmLAigZO73xirtrbr12kZ75rNtGqTZUFnJCoZyAG6DPWr7SqNNMUCg3LSKfvdFHGPSoruyKDzdzFf73pUaWzQyKw6H1pPUaTRdKXK25ykiHHfvkc1HAqxBuAuUIA/kasGd3AjXj1A9agvYntUjklTHmHI9wDzmoRTXULXOGkkZgF9O5qdbiGdgskUIyR0XGfxqlFIYtNc7ssWxUWcoGB5ABNFrk3NlbSEnMSkN6VZt5prK4ivLKQwSwtuBBIOO/4VVtG820SbIzu2n1Bq/I8UzgKNjYJPOSTjispPoax8ju9E1CTS9Xt/E0SmKyvXitLtMABsqB5gA9H79xXrbLn/61eKQ3Mt34Js7Wcwq6XRijVT8wOQcEdeeMEV7NDIZRkgqFAGG6/lXPU11OunsSfWig0hrM0Ciig0wCkoJopgIaSjNJQAuaTrR0pCaAKuqSbNOuGx0Q1w78yfSux119uly+5A/WuNGS5qoMwqbkiiinDiirIPYx0ooFFeWdwlFFJTAKQ0ppKAGmkNKaQ0wENJS0lUMQ000402gQlJS0lABRRRQIKKKKYBS0lLQIWl+tJS9qQHHeOPDFrNE+qowhYECbA4bPAb2PauMs79I9RihXO1lKHvj0J/GvY3jSaNo5UV0YYZWGQR6EVWtdF0yzilitrC2gWYFX8tACw+tbKd1ZnZSxXJHlaueXXh3FgOtUwNq1f1W2ksr2e3f70bFD+Hf8sVnk1rDY7rpq6K165WFsdcVykKG6vHaTkqeB6CuwmjDxkeorlbmGSzu5DH1PSt4M4sTfRnR2kLlAqR4FTy28iDIGPxrjbDX9ckvmsp5ktgcCPKdTnjmu+n8JXZ0+e5F+XkRsIhXhuKbjbcmnVhLQ5/UI5GTG9CRyAGFY8sBKku6KO+WrrJfAeofaxbmZATHvLFOh9KwbrwZqTSzxtJGiw7cPz82c9PypqwqjjuYcrW6NxIT9KQTQOpBf8xVseFptgkuJ8KkmHA/u5xn+VcprtjKutzWlpLKYUb+9wvA4pRipO1ziqTS2RoYKznyX3DPGK6S5t/JdD3Kgn61m6Hpq25RZOWTBJNat7L5kpxUVpaG1KNotsWAjdmvb/AWgWmn6BDfRxyNc38SyTEnIwDwo9BXh1rG8sqRoMsxCqPUnpXtnjHUY/B/g5ycOlhZpmPdjzG4UA+oz/OuOnFuWhNR2R5r8U9estU+weGhbwNLahyLwclOSEVfQMAM/UeleUzCNYGVsnghgeGX2I7VauNZvdZvpNTvpWlmuGLMxH6e3GOB0qrI51CXylXOSF3Y6c/8A6q9SC5VY4ZO+pRgtwuXaQMmOh6jJ/wDrVsSwJHYQqrbM5Qdy2ASPr1FZ8kAhZw+1UjHr17V0WmKrxG+uz+7tRlN3Qttxn8ME/lVSZMI30MB4lsHAm+acD/VjgD3Pv7VHJfXQxKmwEdPakuZS8vm4yXO4k96naKFbckvu3ZG4DpgdvzqvUj0Kcl886bnX5gvbpVAhJn3hmVvrWiYo4ySjcbsAH6VJNbF4xmxCt13Kp596pOxDi2ZxtHYAxyjHfI5qRYcKY1yi92xV0SXdoBhxEMcKVAqleapcsxEixsp5PyYp7iskSrZQKBhsseMY61LdMAvljAVap2Fx9ouFCrjHPX0qe+kKysMHEg3L+NLqGlroIGG5Twc9OK0PtO4FEA3AfdxjNZ1tEtvaRPM6xmRiEBPWrgCGXaSvJA3K3elIqIW8sm9lIOORjsacHC5j6g8rn+VSxwRh2MbbiMnOehqpBMLreki7HBz16jsRUDL2nwGVywOQpG4+mf61Nqdh5coVHkHHAeM7fwbuO1VLIGJ/JLblL7j2z/kU7Ubt57ySF3KiF/K2g8AfjWbvzA9jLeYAvFgpk4K+hoiLoeec9fer15DFHOLcgsoUZY9j7VXNlJbz+U2WDYKkfxA9DWyasZNFzTwCwXPBOfoPWniU3UhhtgfNPT/aPYD61LbWpWzvZUBzEgQMOiknFVNJQi7WG5Y8OAGBwSPb3FZuzuy9rI9B+F2mS6vqcElxFLJa2solCD+KQeue1e2R5YneGDD5hnrzXlngLxXpGgC7S9vY4gu55XcHGRx0HPauz0H4i+GPE12LTTdSDXGPljlQxs/+7nrXHK71tod1OySV9TpDRQaKg1EopaSmA00hNKaSmAlFBpKQBSUdKQmgDL8Rvt07H95wK5KPGTXTeKHxbQpnqxNczGcnNaR2OefxE+KKUUUxHsFFIKWvNO0KSiigApDRSGmAlIaWkNMYhpKKM0xCUhpaQ0AJTaU0lABRRRQIKKKKYBS0lKKAFFKKQUtIQtKKbSimgOL+IOlsDHqcS5U4jlx2P8J/p+AriM5r2i5tYb62ltp13RSqUYe1eQ6np0ml389q5yYnK5x1HY1vSl0O/C1LrlfQgHzKayLu133SFh35rYTFNngDHcB0rZOxvOPMijdaJDfRKwXbMn3WFNtr/VdORoTPO8bSK75bLcdgT0rXi4QHPSm3AWRcgYb1pqXcPZQe6LC+PRPPdTSySD93tijmHPXJ5H0rO1LxFLJJMsdxblPLEgA5yeePrzWRqKsHyFXIHbvWRJNNGchRmtLXMKlGC6kurzC6SdHmZ0YDBHAB71jQmMTceuc9yfelvZZnB3MAvpVS2BMgx0FPlSRxzcY6RN6KXaCfWmly75FV45M/LU0ELTSKiBmZiAoXqT6CuafYXMdZ8P7BLjXI7y5GLayxM3BO9s/IgA5JJ7exp3xu1ue80w273BBlBAtxKpZijcuVXOE6gcnOM84ro7XwtP4V8IXuqNO0V0kcjMhOV2qOR9Sflzn+dcDrcD22nRNqVtPDqt3tuRIZAYxbYwsa8ZGASMfzyK0oRV7mFV30OChuI5rW0RV5UZfH8PatC3intZIpIUVQrEsW7g9aZGbTRrSS4dEky+2KM85PXJ+lUYNR+2O81zclZGPygKTn8ugFdWr2ObRb7lq5SOUFW2MO49eaTV7pzpwUEBZAz4Hb5iv9P1p0FupHmJNu9d1QalIWgIwCYyNy/wCyT/jTjuEtEyq8kKWgmYb5HHyqOmcDrVeO5Z4oeOjHj3P/AOqqonCjB+Zf5VLb36xO0irl1Hy57Hsa1sYcxo29rFFHtn5kc7sddtaEUCStjznYjgLvPFc894ybjksRyx9TVaO9vm/eoSo7YGM0uVspVEjpbtF+aPG4f883PP4VgXlvsPyE+W38P92rdvrCXUYS4B83uR/MZpJsyFgfvDr7+9C0FNqSuirpKNDepyT2H51o3hFzD5YHKE7T/SsiG68m8jAHCNzmpIr4q2cd+tN3buQnpYWWcRpD5gyUDbfY0+2lkmiLCMAA8kHAX8T/ACFQOVkdvl+UNuUf0qCa8mBGDhRwFA4FNIm9jXhzb5dXLK3XHFXLHy7mYKqZfHAz94VjWt4yqu7BVu9WbeVknWSMlCrZBHY+1RKJcZGsts4mOwHK/NVXU976q0qrs88q2VHU/wD66l/tZPMjfaA+QCyn72etWJ5UZAz4IikA346Z+6351krp6luzRBqsOLiUqxDIeh/ipxuRMlvuky0anAx06HH51W1GcpI3zMSgAOep9fzzTbW1lugJIo3Kgc8YwKdtNSL6nR20TmDV42wsEoSXOcdSD/j+RrDF1HYXrrIm8BiBkAo4zz9P6VPNet5YaNxnIG336YP15/OqjLBcqvmGXyh/EoBZfZh3+tRCNr36jk9rEgmea/aVCSHGDzuz7H1r0X/hF5tc8Frq9lY2dlcWkpe1e3h8uRgoywyODz688V57YzQWlyGRnkiXlCVwWPbIrsLD4hanpVkmnIFjgIySEy2G9AeOvOaJXuki6drPmPY/BGvt4l8M2eoSjEzLsl92HBNbmK4j4SkL4faIAqrO0qjnkbiCR7V3HSuSW7O+L0TCkNKabSGIaaTTjTDQAUlFBNACGjHFJRnFAHPeK2x5Kj0Jrn4/WtrxQ265Qei1jRD0rWOxzy3ZMOaKAKKBHr6nilpF4FLXnHaFFFIaAA02lpDTASkNLTaYwpKWkoASkpaSmIQ0lLSUAFBoooAKKKKBBS0lKKQBS0lLQIWlFNpwpgPTrXmHiqdbzVryZQMq+049gK9VijxCzHuOK8g1XdB4g1K2cfeCyge3Iq4dzowvxmYGxzT0kB4NV5D5chA6UxZNp610HoXNJVAGO1QynZx60kU4KkE015A3WmhlK8t1kUnHNYdxa9fWuhnZQpGetYlzMAxU/nVps56kUYtzbjoRUKQrEpNTX0x7HjNZ11eApsB5rRJs8+bSZJDLumIB68V658HPDNtdTXGr3Q3y2pCwRn+En+P8O3515VoVp5reY44HT3r0Dwd4jk0XX4kjcCMoBID0wc/4VzVpa2REU2rnqeq2Tan4c1PSpdnmpHNCEOBuyWYYPuCteBeKNSnub1kvp3lgslFvDuGCTtAxjuQAB9Qa9c8cfErQtBt57iG7E+omIoYYxjAwcGQ9sdh1P614Bdau9/Mt5eM8kSvkf7RPLN9cmtaSb1M5NIx/EYmV4w5+XnAz24Az+X6VUtbkxQKkIIeR9vr36VZ1K3LXDwmQuWAZSf4lIyD+tUbdXiyCjB467Y7HDJ+9c1ZbpLCXy5JyzDggc81Vk1CJnEiRsQOCD0YelZU4eV9+Tn+VakFlcC3V58AHpvODj6U3Gwc7eiKU9q87GSzVpVPJUfeH4d/wqO3t7h32i3mznkFCKvMrRH9wvzdcipNMeTUrkwSSMQi5OWJBx61XNoJQu7FXcLNd08fzk8JkH86hubuW4IEjKqknBUYx7VZ1LSm06dpFBktZDnryh/z3pn9nyXKrLBtZTwfSldClCSdjOW2YOGDFuetahmYKAO6gH3p0OntAclsH+6Dmi5KxsFI+Y8BQMk/hQ3cFBpFEptuGJHXoaVYjKSEGcd/Sta30Oe5AMgKN/dPWrEPhq4jOYmOD6jOaXMi1Qk9bGHJaSqFZsLj360z7P5g3yD5R97HXHrXTp4bmc/vTx6DirT+G2hQMArduRR7RF/VZPU5m1iitTjcZIWOcY5FTiKJJCYZcqeqsMH8qtXGkPExKf984qhNbNxw2V7dxTvczcHHdCzKnmbwcHvjoatWt4EhljPzLKhjZT+YP4ECs/wAmQtlt30I607aUwBmk0mRcuNeq8KqIl8xDgSHrt9DSLepCjiQySMVIVUbAB7fhVJ3z8o59adGMkAjp3pciFc2dOtRLbJGF3Mxy2B93HNYs7vBfTjBGZGBUHjr0rofD9wtvM7+YdyrjYFzkHg8/SsfWohFqBeHDIWI/I8fpWcJe+0xyXupljTZfMMmP+Wa7hn69K3buIXclxcRgGNIY0DN3PTj8Qa5KJpIZOP4ufrWtZ6hJMyQhc7pF4UZPGf8AGlODvzIqnNbM9/8Ah1eW0mmLBbZEdumxSQfmAPb8QT+NdljIrzzQNTs9D0rR7aKC9uryMMZYreHeNrHoWyBnOMDrXY6L4g03WhIlnM3nxf622lUpLFn+8p5/HpXDbqelGStY0zSUUhpFDTTTTjTDQIKT3ooNACZoopD0pgcn4lctqDLn7oA/Ss2PpVvXZN+pTf72KqJ2rZbHM9ybpRSc0UAevilpBS15x2hSUZpCaAEoNLTTQAlJTqSmMSkpaSmAlIRSmg0CG0lONJQAmKKWigQlFLRigQlLRijFABS0YpwXNIBAKrWetaVe6tLpNvqEE1/Au+aCNtzRj/axwPpXG+Nfi7ofhy3urTTrlb/V1BRI4hmOJ/V26ceg57VxPwG14W3ivUILqYeZqMe/c55kkDEn8TkmuqOHbg5s55V1zqCPoMgBQO2MYrzT4gaX9k1G31RB8jA28p9ATlT+Y/WvS5fuA+tYniHTotU0+a2lXcsqlTWUFqddGfLJM8euVyenIqnJwOKmLyWt5Npt4cXEBxk/8tF7N/j70kiZHFdKR66tJXRTN00RwelNfUgBjdTp4cgg1nTQVSSMZprYdcaiSCd1ZVxe75ODx3p1zbOc4rOmgcZ9q0SSOGrKYzUJy+Apqra2TzyAvwuasLESfWtOyt8AHFEqnKjm5XJ6l+xiWNQqjAFZQml1DW9RigneLCLEHXsR/wDXrWmuUsrd5D1xwKyPC8DSQTXB5kuJWb8K5qSveTLqdIl7VvCNvY+CJb6/Z5r+SZIokR8RRkkksxzlmOO/Arn9Xtms7lLdcSQQL5QfHG7GNxH1zj8K77VFhn8P+XdFgEZZlA9V4IPsQa5OeeKaa/LD7se1Fx0+UZP1zW1KTtqYSpo53V1bdbyAESRhkP04I/mackmNOeQxlpWbBOO3PH8qfrN4iPbMFA3jeR6cAf0rOj1cCbyzGBCx6KOR711pXRzOykNh8q3cXLyLleRu5BP0qylw91cF/vGQ5B65qN9IincMrqyjnaf89K3tI0ZSpP3kH3nAx+AocluOnTlJ2Rn/AGKW5AjgUNIy7mwPujOBT7Lw5eWhJSMfN1J7e1dH4PAlk1KX+LzxGAOgAB/xrrLWzVid3TPI9azdRrQ9Cjg4ySkchpWjGSQechfHbFbI8CaU4aVrYwzMTkxuUH4gcV11pp8YUnaoB9RVh7eEcKAMcVk6h2rCxtqeey/D6BgQk0uP94in23gNLJS8KJnOCx5b8zzXamMLJgdKnTanB6Gj2rBYSHY4xPDzQnLICT3qzHpfBUryK6G4Kgjpjp9KhKrip5i1RSMkWEadFGfWmSWoAxitJ+Gz2qrPcRJncwFCbFOCSMK701XJ+Xmsq50lDztwfUV0FzfW45DggfpVCW8gc48xefetU2cNSMWcvfWMq5KMdvpWLcxyKOrD3Fd1cRoyEjB+lcpquIWZo2wQelbQlc8+vSS1MqPgcEmpBHuPzfKKlmuF8ksB82OfrVV5WWMMxyWGcCrORm9aM8Ns0cW1Q4yx7nHPX0rP1WNzbLcACNt2CoHB+n+FS6beJLD5T9SjKCT0PY01dTdbaWzliDxsQSO6sOhFYpNSuW7NCaev9ostsuI3YZRj/C1bvhbTV0m1uNSvYz5iS/ZgcjMf94gHjPQD61h2yPF/pFsu94wcDuGxwfw6/hWprWt3d1pem3a4WR3lllYL0fI5x+FTU5pe6tmOFlq+hs6feXlp4v0m5hkmAnu49sZbJMbHA+v1xXuupaAmqtHNuNtqVuM2l7EPmjP91j/Ep6FTx6c185+HLi+v9bh1CW482VSGaeUsRH2BODnHPQV7npPizyG/s7WpFtPMAEV7FIZIJTjGAW5U+xrConHY6qLTTudHoWpPq2mR3E0aRXCs0U8aHIWRTg4Pp3H1q6RWT4ahWCC82KUR7lmVT2GBWsawOlDDTTTjTCaADvSGjoaQ0AFBOKM0yQ/KT6CmI4fUm330p9WNNSm3J33Ln/aNPTgVsjmH0UmaKBnr6nilpo6UtecdoE0UlGaYAaSlzSUDEooooASkpaQ0xCUUtIaAENFLSGgBKWgUtAhKKKcBmgQ0CnYpsssVsm+eRIl9XOM1hal4wt7UEWyb8fxvx+Qqoxb2E5Jbm+dqKXdlRR1ZjgCuY8V+LobHS7uLTys1yYnCt/CvHX3rl9T8XSXsnmXLlYwflXOQffFcrql7K26bzROhPLIcgex9K6adDVNnPUraWR5fM21gOntU1hqk+l3kN5ayGOeBw6N6EU/WbCS1maTBMEjEo3p3way2btXraNHlao+uvAnjiz8baBDdxOq3MYCXEIPMb/4eldIYhJGRXx14R8W6h4O1ePULGT5fuyxE/LKvof8AGvqbwn4y0/xPpUOoWTko/Dr3RvQ+9ebWocjutj1MPX9ordTifid4aeQLqFqNtzHnaR3PofY9K4PTNaW8jAb5XHDKeoPpX0H4g0uPU9PkTGdy183+MdHuvDurNfRqRBM+2TA+5J/g3X65pQ97Q9KlXcNehsyPuHBqpKAfaqFnqqXCDnn0q0Z8jmqtY7udSV0Ruoz7VUuIgRnirbupWqNy5GcHimYzsQRwKWHAq4XS3X1NUVcr0pJHJGTzUOHM9TmsZ+uXzGNstxiu68DaEqaNDcXHyjyvMOeygZNcfpPh6fxTrcFjED5Wd8zY4VAef8K9d8R3WmeFdMtjdyQxRJ8u0nnHXp+A4qp6JRRzP4nJnn3je/YYttogDyxoYhncij5sMe5PGQOlcjJMX80CTdv4Yj0z0rU8Va/H4t3arZ2r26QzCMo/35DjO9vQnp+FYO9lWUqQCy45HetacbI55zuynqKtfmR0GRCAB2zk/wCfypsFjC04UsNiqMsOx6sfy4rQsF3WbRbQ7Sl5MZyOBgZ9skmq13ayW2nZJzJNJtDdMjGSfp2rZPoYuP2jJmvHm1EOmUVjlVHYV2lzbWiQJ5U1xDIUBk8o/KxwOxrj4rQC7Rm5yQqr717BpXh22hAkmUu5Azu5qas1Gx0YKjKo2kcRp882moyWxk2E5ZgOc++K2bDxd5DAFZsDqzLkD611l6mm2sRaSONcAnj2/wDrVhT3WgzycSwh92ByOfSsudS6Hc6M6WikbNh4qguFCMwDEdR3rQW+WVQyuCuOtcpFZWbktbznrxg5FalnbyRnBbI9u9RKMeh1Uqs+ptCU5qXzePrVZAcYxTmJAFZnVuNnfB3Zqjc6mluvODj1NOvHcjHesO8iedzkgDGKuMbnPUqNbEWoeJJSCEVVz71gvd3l033sc+5JrVNtbRsHkAOOpc8Cq2o+I9P04qkZWU85KLwOK6Irsjzasm9ZysQxWN84/wBVLj1ZsZom0a9ADAAfR+f5VBH43iJAOU9mGDWxa63BeoCjChuS3REY0p7MwJJbq2BBbcO4PFZeoI8sbNjk4Irtp4IrhTlVOfas250EupaMjHp6UlNIyq0XY4iOGaVsBDjPPFPaJ2kIYgKOoJ6VpXtt9iR1Yndis9HRo/mbavc+tbJ3V0efKNtGJCpSU4IA/hI/rWhptt9svI0kZUXO+Rz/AAqOSapRhTJtQZ/WtC3lWBW3Z24+bHUj0qZ3toOJCl35Ny8yxuscjHr9eD9a6DUNl5pUcwKhiT5YI4JGN355zWAt493cvO8a7Ccbew9sVtSalBqGn2Gn21pEZGDoHmkwI+eSST/9aspp3TKjsyLToYnAkMgt4tw80oMcVrJql8TJpTXsItyeGfkPzxknvg9f1rn7geUscEY3EMVcK4dWYdwRwRXoHwu8OWviOOaOa3eSR2KXNxKvyQQYHyR+sjdM/wAKipmre8y6d27I9J8DyXdrbXOj6iVa7sijbw+4SRsMqc+3IrpTzXP6RdQXnirVWsUX7Ha20NpvX7u9SSVHrgEV0B61xvc747DDTDTzTTQhjaTNBppoAWobltsEjeik1Lmq+ottspj/ALJpoT2OHc/vSfepVqInMhqQH0rY5hz8DNFIT60UAewjkUtIp4oOa887gpM0tJQAUlLSUxhSUUGgApDRRQISiig0ABpKWgCgQUYpQK43xZ8U9F8OK8Fq6alfDjy4m+SM/wC0/T8Bk1cISk7RInOMVeTOyxgFiQFAySeAK53UPGljHuj0+6tZHX70rOCo/wB0Dlj+leGeKPiRrniRmS5vmjtz0toPkjA9+7fjXHy3JDbgdrdcrxXdTwXWTOKeN191HuWqeJyGeRjJI5zmR+SfYelYT6ybiR2Y4TBZgfQV5tZ+J7yAiOaR5ov9o5IroI9SgubIGF8vKfmHQhR/9etlR5TL23MW73Unu5A5G0HoOwHpVMXckTlo3K54YdmHoajJyduaFQS85x61dkRcnazg1aGWGMYMgyYc9/VT/SuDvYHtbmW2cgvG2CR3966q5l+wh5mY7E5zXKXWpTX2fOIchiysR8yj0z6VrBGVRogdyfwGK6fwB49u/BWpiRS0llIw8+HPX3HvXKOcjNRh+aqUU1Zkxk4u6PuDQNZtdb023vLSVZredAysDnrXL+PPCcN7BOzRh4Zl2Sp7dmHuDzXinwX+Jb+FdYj0nUJj/Zd44UFj/qJD0I9j3r3vxl8QNA8PqLO6l+03TjiGI5I+vpXnVKLjKyPWo11JXPmrVNKvPDWpvZ3AbA+aOToJE7EVat9RLKATmvXNW8O2vjzQpU8o2rx/vLW4b5ghPVSR0Brya/8ABviHQ3C3VgXB+68J3q30I61alzLXc66dTl2JjcAjg1XdwaqvBe23M1rcxj1aMgUJcK38Qosb8/MTgimTttQ0qsvXNdH4K8PRa1qZur4f8SuxxLck9H/ux/Vj+maTdlcmWiudX4atYfCvgyKWQrb3V6hup5icGOLsc9uP6+teE+LfFH/CQ+I5rlBILRAY4g5JZh/eOe56/SvSfiH4gm8RzS20T7bMHfKRwr46Af7KgfpXi+8XFy7A7VZi2f8AZ/8A1UsJBzk6svl/XmeNiqt3ZHXaI+NMlBcOuctsbBOOh+nUVWubtpQVVTDGOQODk+tVNI1Pzd1s6iMscxuMZJ9DVm7zHF5m0OueRjBrq5bMIyvFWJ4rm1WcPJuEaoMqp5c46fTNVNQ1AXDb5CBjnaDwPQD6DFUTdRbHLKxGMdcEGq6zwZPUkdN1NQ6idR2samjoZ9Ws425y4PNe1Z2J6ACvH/BKNfeKLNDzglyB7Cva3tF8vYR2rkxL95I9nKo3hKXmeW+M5L/UL8RW8hEQ4Lg4qnq3he30600+OGdIvOjeWW5KlicY+UYBPfpXqcuj2zp93tg1hXfhG3bKeY/l5yFPIB+laUsQtELEYCUm5dWee6LBcw6uttY36y5b5WGdkg9RkA/mBXpGk3bzRYkXbJGdkiZzg/4Vl2/h2HTJWktlMchGNyjnHtWpodhNDdTSM5eKRPm39d+eP0zRVmpaiwdCpRdnsdHbxh1plzFsXOKsRJ5eOx70t8MRZ71y3PWeiOdvJOoqlFavdMVBwOpPpVm5G6bAzgVct7djp93HHhZJI2VWPYkYrVM42rs45NFu/EwvhZb1WGMsnHL+gH161xV9ZWtvOigTl1bbJ5m39Mc/ga9Z07S1063RIrq5EioEBDkYHtj61FPo8E7M7kFyclsDcT9a3jWSOCrgZT1ucZBpFpLoEf2kfOSdiuBuA7Y71madYz2l2Au8ofau+/se1hbcFDMepI61ImnxEgsgOOlT7foSsFZpmZancMAnPuK1rS2ikG2ZeDUy20a8BB+VKwCdBXNUk3sdfs7LU4/xXYRySOIUCKqmuCmUJCjBiWLEFfQetekeIHUGU9dylR9a88NuwmKMMBSc5rsw7fLZni4yKUtDS07aiLIE/etwPalumjeRoo8DBwRmkhIRVYHBYYTPb3qnLG0UvQhs8itTHZGtoUCGaSOTG0jkN0xz+vSqrRWz3McdzNIkKtk7FDHGfQ9TVnRbuHz1hneSMsCFkQ4IPYfSq72ty1687gsityxOPz71m78zDojbufs9hobxQhmxdgRySRmOUKVz0zxXp3wptNWvfCzRW8kNtbSzsXuGBZyOmFUcZ47nHtXAReG77WtBn8RahMLewg3y+Y/W5k4VUQfXgnpXuHw70s6T4M0yJ02SSxCeRf8Aabn+VYVnaJ1UI3kbGm6da6TZpaWceyJOcnlmJ6sT3JNWGNONNJrkOwYaTNKaa1MBppKU9KTNAhKo6y+3T5fpV2szxC23T29zimtyZbHHhsu31qZTVRDhjg1KXIrY50TO4x1oqhPdBc8jiinYLnuS9KWmr0p2a847gNNzSmkpgFFJRQAGiikNABSUtJQAUUtBKojO7BEUZZmOAB6mgAx68Ad/SuM8Q/Fnw1okLC1uBql0CVEVv90EerHjH0zXFfEj4oPqZl0nRpTHp4+WWccNcew9E/n9K8puLgsTzXoUcHfWZwV8XZ2gdp4r+KmveJd8BmWwszx9ntmI3D/abqf5VxM9xuwM8elVjMTkVCznNd8KcYqyR585uTu2SySZPWonbjrUbSd6YzVoQT2kP2m6jhBA3sBk9hT73UPMvnmtyY0U7YwD0UcD8+v40WUgtre6uSDkR+Whx/E3H8s1nA9qB3OisdfWTCXPDf3x0rahk3dMEN3FcExI71oaZrMlmwRsvGTjHpUOHYqM+5c8W3YeeO2jfKou5sHuegNc6r7TirmqSSSX8ryKV3HIz3HaqEvBBFUlYiTuyUv+tRMeeKaHqRoCLRbnzF2tIYwnOeBnPpiqERNIc8Vr6VrpWQJeuzZPEzElh9T3rGHNMY1LVylJxeh7d4S8aXuiFVDtNbsuNueMH0rbn8TzTNm2ysbEl4nAKn0x6H6V4d4f8SvpLiKcNLansOqfT/CvS9Kv7fUIEntJ0kQ9PX6VyVKST1PRo1uZWO1sNZiuCEeFlPcdRVPW/D9trjMrWiQJ0SaNAGDep9fpVOzM8ciuEyAe1dbYSRXcf7rMU39w9G9qwUVF6HWpNnjOlaJqOqa4miQR4ujIUfdwIwPvMfQAc16HrD22k6XFoWlEi1j5klPDXDnq5+vb0FdHLa2WnzzXfkLFeXsSrcvnny16L+PU+wFed+ItUM9zL5XVzj6CuapVdSp7KO3UKlR8upxvjrV0tdPaztzhpTsZh6dxXnythSBxxitPxJfre6m6o+6OElAexPc/59Ky8CvXo01CCR41SfNK5Zgn8sBujDjPtWxFK+XiZwUwCC3Qg96wQcda1bcm6sCowXgwD/uZ605LqVTl0Lklqiru8suMfWs+axiQDywVJHr0/CtETlLSMBs5GASKRGtPLJDM0zYGTnOc/lSubNI2vhTbk+LY2k/hhcj36V7dcwBcMPSvGfhlKIvFKIeMxyKPyz/Svai4dBXm4tv2h9HlCXsH6me1QyIJOKuyRA8iq7xlTWaPScSk2nCRgSeO9XIrdIQFQAAc0BsHFSxgHpVNsz5EmBBzgVBeMTGRmriR5fAqjqJ2kj0qVuOexhSE7s+9aNjICMVmyMN4Parls+0gg9a1bOOG5ca2UnIFN+wq/A4qwnIqZRxU3OhQRmmwRPU1E0Cx8AVqS9OaozdaAcEiqU9BTktfNIXHWlHB5q9ZIPMFZVJtI55nKeItIONyrz0Irzy6tts7sVLDeRivXdWIkaQNxtORXACz8/VQrKdmSTXRhqrtqePiqab0MK5tXEUQ2/MckAelOhhFygR1zICBnvitbU0aUqyxn5X8sY6nIqm6S/aVt7hnWRCEAkkChR6Z6CunnbOOcOV2KJijjJ4YFTjkYIxV/wCxyT3KrOGhXjeZPlIB9c9OKv63o/8AYtvZ3k+p2M08wykdpKJZRj7pbjBHQV3/AMNvANrqcz6p4jEep3TL5xhLl44XLDAkx8rORk7f4QORzRKokrsUYNvlRPaaZceP/wCzbSCH7H4V03YRlWVbxlGAF9V65PfJ5yePVIgQBube2MZA2qB6AdhT0wiqirsVAFAAwAPQU41wylzHfCHKNNNpxNNqSxpppNK1Nz60wEIzSEU7NNzQITFYvid9tkvua2s1z3i59sMS57E1USKmxyanmiRyBjNMU0jnjmt7GBiXUrJqpUE4aPOKKh1MldWhI/iQiitOUi59LL0paZGadXknoi0hpRSUwCkpcUYoASkNLQaAEooooABWX4u8PXXibw1eaZZSiK4mChGJwOGBwfb1rUHWpWkWGMMwBJIC/Wrg7STRM1dWPmD4i+EL3wTrAs7iXz4JUDxThdoY/wAQx2wf0rj2fPevpz4meFU8W+Hby2Vc30H76Bj1LD+hGR+NfL7ZVirKVZTgg9QfSvboz543e54+Ipezl5DWbmmOaGNMJ4xWpzjS3JphNDGmFqYi3cEpp8EfI8xjIT644H9apbsDrVm3vvKRreZBLbv1U9VPqp7Gku7B7eITxt51s3AlA6H0PoaBlYtkVJZR+bdIO2ear5rV0GMmRpduQOM0mCWps3NpBdW4hkXgchh1Fc5qOlz2By43RdnHT8a6gt0OKeT5qFCoZTwQRwahOxo43OAbrV26HlaXYqT99pJP5CtTVPDwY+ZaEBiceX2P0rG1TerwwSK8bwR7GVxgg5JNXe5FrFcGmsKQHApVbimSRt1Aq5pes3Wj3Alt3wpOXQ9Gqqfm5qM8UNX3Gm1qj2Xwj4wstVQKk/lTjrC5+b8PUV6NoUsdzcRoQGLnbXyojvE4kjYo6nIKnBBrvPCPxcv9DnhXUoftkKfxpxIB/I1yVaDSvE7qOLW0z2XxRqsMlxd265JkbbtHdQMKRXlXjvVV0O08iNh9tuVIT1Re7f4Vbvvifo7JLfRtJPcHiK3KkEemT0Ary7VdUutav5r68ffNKecdFHYD2Fc2CwsovmmGIrpq0SmBT15FNAqzaxb2z2HWvTOEgJqWBpRIBESGb5eO+adcQeWdyjj+VaPh+z82czt92Pp9amTshrc10sBFbRI2PlHzH+dJJbw26Eop3Hv2q6HzkY6VGLeM7skjuoB4zXPzM6oz7kPhq6Gm+I9PuScKswVvYNwf517yhHl4r52uXc6kLeMEdMHrjvmvdtAvhqGkWlzu3GSJST6nof1Fc2KjqpHu5NWXvU/maTNgY7etVp5VC8mnzPgYrMuJOCDWEUe02K9zgmmpqBR8AgVnTz7ThTT9NtzdXSq2cfeq7GTkdRpZMoeU4wnU1R1FdxJ9avwsltbmEdM7mPqap6heJJAF8sAg8EHtWa3CWxzF+GiBYVWtNUCuFfoa0Lx0dWUjOeKyLmwPlNjhhyDWySe558m1K6OstLhZFGDV1Su3Ncfod87IA3UHB9jXTRS7kBzUtWO2lPmVx8r8n0qpKRnNPmfvVOWXPGaQ5vQfwauROFj56istJSDVhZs8Z5rCrqcdSRBfr5jFj6c1yD3AtrmVUGZCMD2rsrj5o2PtXJi4sJLzhhJLniOP52J/CtMO9ziqJX1Em0yGaLTbOS4it57iR5XkkztjXGATjnGaZ4W8AXvia/u4l1FVs7ZXK3nlnZIFPOM9uauaZBqV5fzzSaTpN7JKESFbtv8AVqSQuFI55r0C38Aa5fC30vXdcgtbCKDy/sukxlC6qR8rOw75zwK6VLl3OKa9pK6RT+EfhnQp7G8vJdOt7yeGfyknnjDg/KCcKflyD3xzXpqIsKrHGqxxL0jRQqj6AcCq+k6PY6FYR2GnW629tH91ASee5J7n3q0awnNyZvCKihTg03tRmkqCxpNNzilammmAFqb1oNITxQIDTTS5pDzzQACuW8YScov+zXU1xvjB/wDSsDsAKuG5lV2OfXpTZOlKppkh4NbmJg6wdt/at65FFM19tslsx7OR+lFbR2Ie59KRSZHWpd4rCttS+UZq2l+D3FeJc9Sxp7qXNUkulb+KpVmB71VxWLNFRLKCKcJBQIcaSjcKQkAZJpgFJTBPETtEiZ9M0M9AEq8mquqy+W0C++as2n7yYLnOOTWXrkmLtQO1bUlqIXW7hrWe2uk6Ec+leAfGPwvHouvLqtlHiw1LL4HRJf4h+PX86+hbuFb/AEgL1IHFed+KtNOveGr/AEeRA0yDzYCf4XXp/n3ruoz5ZHNiafPC3VHz2xqMn3p7BlJVlKsDggjoajY9q9A8Ya3rUJaphyCKgkGDQAE1NaX81mzbCGjcYeNuVcehFVQ3rRQBovZQXqGbTySwGXtmOWX/AHT/ABD9eta+kQmCzUFcFvmNc3bqzyoseQ5PBFd5C0N3bxxykrdKoQOT8rgcAH0+v51MtDSCuVMBhijdjGO1PliltZTHIu116j1qJwWPy96gssW8TXN1Gg5JYY4rP1m0ttRdxjIZiwYDBBq/ZsYY55m/5ZptUepPH9aoDkkHOB6mmgZyl/pc9g2WG+I9HH9apE+ldrMFdCpAIPUHpWHqGijJltcD1T/CqUjNx7GOvJx60SxPGcsMe9Pgjbz9rqRjqDWjtVlwRkVVybGPmmkA1oXFiMbox+FUXRkOGUimhDCMCkyD3Fen/C/4b2msWD69rkZktSStrbk4EuOrt6jPAHet7UdB0ZWaJdKsQnTHkL/hXNLExUuVHo0stqTgqjdkzxRELEADmtOGERoFA5713h8J6Jv3DT0Q+iOwH5Zp7eF9HVeLMfi7f40niIiWX1O6ODmCGM7h2rR0SaFrIJHwynDfWukn8J6VcIV+zsv+7Iw/rUNv4NsrWXfA9yhI7yDH45FJ1YtB9RqplJTkGm/5xVy60q4gbKgMPrVN43iIDqVJ6Zqbp7GU6coO0kQzWwLGaNtk4wyE9Gx/Cfwr0j4c3puvDxiIIa2maMg9geR/M1wl9iMR2/H7pfmPqx5P9K6j4b30SXlzZY2tNGHHoxXv9cGsq2sDuyypy1156HayyeprPunA5HNXLmAsSBkVRmVY9qMcs1c0T6SUmVrWya8myQQg6mtdYG09hLEoYgYx7UzTioUgEcGtHh1INNu4orqZDarcSysHhVEHQhjn8sVWuLpihHbtWy9lE+SRWdc2SMw25ApxsRNM53UdSS0PIMsmP9Wv9T2qsmsm4i5t5BIeiqcg/jXTT6JbLGCEAPc+tVo7GGBsqgFaJo5XTlfVlfQdNeGEyXAALktitgLtXjpVcy7V4NIt0ACMipepvBqCsSPIACM1SlkwainuAz4BwaiLlutKxnOrfYsx8809D8+aiibC1PEoJzXPM527j7shbWRiQAEJyeg4rgdJ0rUBq9taWl3Zh7hv3M6Sfu2PoTg4PsRXqug2MWpailvNEJYdpaRD0KjtXRx+BfDMF+t1baTDBMGEgEZIUEd9vQc1WHlZO5x4mHNJWM/wX8PptK1E6xrN3DdXOwCKOPOEPqSep9q7YxhpVl7gEfnSb8ndjk96dvBqpO7uwirKyFNNozTSakoCabmgmmmgAJphNKTTc0wAnimk0tJQIKQ0GkzQAtcN4sl3XrfWu5yCK878SSbr5/8AeNXD4jKrsZ6tkUx+lCnApkjcVuZGB4lOy2R/7riimeKT/wAS8rnkuMUVtF6GMtz3BZFKjavNP85RgAEmqIZuin6mrEbMFzt4ryOU9dMtpJIRnOKnjuWHGTWc9yYuDyTTkd8Zduvalygay3xUcmp0vgeuRWKJgvJNJJqKW6F3b8BRyvoGh0P2tdh+bnFczdalcG4fdMwXJAA6YrCl8WvNqSW8anazbQK1JwGdsrV8jW5CknsEc7lyVY4/vVeg1O4iXBkLL6VnFsKFxgUwMzHCU7XA7zw05uYJbhlxk7RWd4gTF0HrY0qI2miwKRhim4/U1m65Ezwhx1Fb01YlPW4uizq8LRMa5zX7V9O1AXKj5Se1XLK4MEwIOM1p38KalbGNsBscGtEDR8z/ABN0hdL8SyT26gW16POTAwA38Q/P+dccxr2T4p6HK+iyAoTJav5qHHOOh/SvGmOBXo0pc0bni4inyTY0NhqZOO4oY0OSY60MCueDS5prHmgGmBqaJEXuw23IUZrpAwxgVk6BFstWYgZZq0y20g44NQzWK0LEV3GVWG5RpY14BX7ye4P9KLq2a2Cyq4lgc4Vx/Ijsf8KrgLzg81JaztHJhAH3/KynkN9RUFD7gmPT448DdK5lPPYcD+tZ5B696072IXLloGBaFdjREbSoHcevc+1ZrLgZzQDG44pCMcUcUMFoEYWuSCC4jCAbsEk+1QW90sg2nhqh1aRZdQk29Fwv5VVBK+1aJaGbeprk+taXhrw1N4q1aKwQEQj57iXtGnf8T0FZehWt5reoQ6daRGSaToeyjux9hXvXhnw7a+GdMWzthukbDTSkcyN/h6CuXE1/Zqy3O/A4N15Xfwr+rGmlrHFaxWNpGsVvBGERR0VQMAVz+pwQxkkoWNdQw8qFsnB6muc1DdLkngV5lPc+omko2MQW0DnLQqT+NTosSLhYkB9cUyQsCQi5PpUkFlcyfNLIsa+gGTXQcqQx4w3JqJoI2XBGa0XtIo1G0M7erGo2tS4ORtpXK5TFv4iItmwlR0bFZUadV3fnXS3FriJwxyM5rlru3kjnOwsK0iYVIkV3YEksBnJ5xxmn6NImmata3LSvCqPnfs3gexHHB6VC15PbnbINy+oqT7RBcLg8H3rV6qzOb2ML8y0Z6xHNFewpPC4eNxlWHcVUurNZWDHqOlcz4R1U2f8AoU0n7pzlCT90/wCBrrmOa5GnF2PZhNVI3Zhw2eoWVxuR/NjPVG7/AEPY1pwa5Yn5TIyOOCrqQQa0o0WRBnqOlZup6ZBu3vH8jnkjsaE03qaQp20RaXU7Ig/6Qoz61VeRGk3K6svbBrFl0yRCTDN8vYNyCKzbi31NGYRxxsvqCa0UPMc4NdDqbq/t1iw0yA/Wsl9Sthx5y5rBOm6g3ylUQ/7RzioTpk2P31yf+A8Vap+Zy1FLsbkl9C+SJk/Os9tRe4n8i0/fSd9nIX6mqcWixTthizjuWOa6KxtYLGELEirgdQKTsjjak2VBazdZGBbvirTR4Ap3mZJo3ZrNsdkhF44qxGccVAvJq5Y20l5cx28QyznH096wnqJux1fhC3MUEt2R80h8tB7Dqa6aM7cknLN1NUbWBLWGOGP7iLge/vVkNWiVlY5W7u5bWSjfVcPT91KwEoeneZmod1G6iwE2RSEiot1G+gLjyaaaN1JmkAhNJmgmkyKAFJpM0maTNIBS2Aa811x916x9zXo07bIXb0U15lqLb7xvatKe5jV6EK9OaZKeKeAQKq3dxHAAXdVz6nFbmbMbxAPN+zpj70qiiqH9rLqGuW1qI/kEow2euKK0s0QnFnu0SFxwOtSyP5YCqeBURZuinFRuORk9K86x6NySONppQz9qlkfGRUCTBKR5MiiwXGSzOQRnis2+mcqQHAHvV24YBSRWHfXKqG+Xe2OgrWETObItCtBP4gR2bds+auqurkNIQq4Irm/BtvPNfT3LrtVVIArqTAu4M9Kq/eCkvdKyyE8OtT2yrJLHEv3nYCm3OxWwDmrvhu1+0azb+iNvP4c1nY0O3vMQ26Rr2wo/AVUmjWe0YH0qfUW5UH61FAQUYetdC2IWxy9zbmBufun9KltrzkRyH6Goby72am8Mn3R0FLNaBlLwHP8As1SKDXdLh1qzkicDzCpAPr7V8t+JdHl0DWbrT5VIMbfLnuvavp6K8ZCY3yCPWvKPjpp0U0dlrESqJlbyJSP4lPIP4H+ddOHlZ2OLG0+aPMuh4+e9KpJBFNbJpFPNdp5RE/WhTkiiThqTHvQI6+xhENrEvH3asMBjnNc/p2rtERHMcr0BPauhilSZAyEEVm0bRdxvBAI4qeyKJK8x/wCWKmTjqSOn61BIVzxUylYrFuTmZ8f8BXn+eKRRUErJIHRirDnPfPrVlRBf/K7iC4x98/ckPv6H+ZNVmUSAmmbeKBCSQtDIUkUqw6iobhlhjdz0Ck81oR3SPGsN0peNR8rj7yfT1Ht0rJ8Ro9tZnYwkjkAw68jb3/I8ULcHscqWLMWP8RyaVUaV1RFZnYhVUDkk9BRjAr0X4V+EvtU/9vXafuoiRbKw+83Qv+HQU6k1TjzMeHoSrVFCJ2HgLwfH4X0wNKqtf3ADTP12+iD2H6muwHy4NQqmADmnNJheteJOTnLmZ9hSpxpRUI7IdI5k46+tZWoKScY471qW8Rbk1W1KAqN5HFEdy3sYOwK+cYqUSHv0pk08a8DtWTPqN3cbksoN+OC54FbpHO3Y2mnjXkkVTudUhT+MVgy6d4hmILzWiL3B3E/pSjRb2VTuvYVIHOIj/U1agu5m6j6IuyarHNwuSKqTSQueoJrE1bQdU5ii1EvGw+YBNhP4iq9vb6xajZgybR/GQTj61qqa3TMHWlezibdxaJMnSqUmn/KOOR/Km291qe7EtuoA7Z61cN+8eBNZzr77cj86NUUuWWoy20cXHlqHlALqNin7/PT8a9MvEFhqTWDK67AAGYfeOOa5zwLbf274gghjiZFtnSaXeMZXPGPxFdl8SopbGSC8iTdGGHmY6jnrWM9TSE1GWhBGOMilmwyFWGQeoNRWM6yxgg8EVZZNwrn6npJ3Rzl7BJDzExK5zjvWZNeOEYMvJPYV01zZs2SKy5tPDHOPyreMtAdWSMWa8Zlyc89appHLNJ8xwnpW4dP7AUz7Hs5xTc+xy1akpdCrDGEwAOKs5JGKXywKMVm2cmxCykdKcGpz9KhmljtozLK4RB1Jqb3IbsTxKzthQST0xXcaLobaQoacD7TIoJwcgKRnArjNEnW5nDKOBg16fAPtml29wOXhHlP9Ox/nUN2krmU5X2GJ0FSimBcU6tTIcDTg2ajzRnFAyUNSlqhzzml3Uhkm7JpN3NJmkzQBJuo3VHmjOcUASZpuaQnOaZuqbASE0BuaYGxS5p2Ah1CTZZyn/ZrzO8bN5J7HFeiaxIFsJK8xnuAbqXP96tKaMKr1sWd3Fcj4wm/fRL6V0rXKActiuP8AEs4mu2HooreC1MKj0M3w3Jt1qAk8hiB9cGiqNpN9mvklHVHDUV0NX3MISSWp9NrIWGQKQR735704DaAykYNK7qOc815J7I1oAh5NRN8vTBp7S5NRswIzwKpCZXuGUod1Yt3JGoO1dvvWldTqBtyDWLfMXIVe5xWsUZTZ03hq38nTTKRgytnPqKu3FyFUqAc0trH9n0+CLuqDP1qN49/1rF6u5qtFYq5Ltg9K6fwVAr308oz+7jx+JNc825SMAZ967HwTCVsZ5iMeZIB9cD/69UtRMv6g/wC/x6VHbHJI7Ul42+Zj70ls3OK1QLY5zxTatFdC4UcMOTVC1v2UBSea63UrVLyFo3APFcVeWctnIVIOM8GmBenkSYZYZJ7iuO8e6G+q6HcxD5iFLL7EdK3Uu2j4PIqYzxTxleDkciri7O5E0pJpny04ZRhhgjgimL94Vv8AjjTBo/ie+tlQrEz+bGO2G5/nmufz8wr007q54MlZ2EkHJpgqSTk0xRximIWrun6jJZtgkmM9vSqdJSGnY6+3mS5RXQ5zVrUj5UqwBcCBAnTueT2rl9EmeK8VixEUYMj4I6AZ78fhW7b3sOoK0m4bmyzDvk1m0aqV0AY54FMYkVIQRmpILaa9njtbaF5riZgkcaDLOx6AUhjLGzutTvIbKygee5nYJHGgyWJrpPEHgyz8L3K6fqUk9zeiNTOiSARAkZ2gYO7Gep717R8Lfhrb+DrT7beKk2sTJiWTqIR/cT+p7/SuU+O+hS2+o2mtwpmK4XyJW/uuPun8Rn8q5HX5pcsdjtpYeyvJanjtp8PINW1VVtLiSOzDBpo5BlkX0DDqfrXr1jaQ2tvFb28SxQRKERFHAArC8MrFFahI8Zzkn1NdIjgLgc1z1qspuz6Hs4LDQpRbW7H/AFpAvek3cZNPDbhWJ3Do3I6dqZeMXiO78KXeEqpdSs2R0FOK1E3ZGBPABKwHOakSNIgBjGOgqxIqoxY4yaz7m7RTlmAHrW25ztlp5VxiqkgUEkHr1qlJq1ohwbuEH03jP5VVk122XhPNmP8AsIcfnVKLM3Uii9cYlb5VOBTGtQx3Y7EGsuy1q7vrqWKO0CpHjGW5/Grr3l590RRKfcmqaYlUi9UEtiC4ZcAipL51SxMZ+8+AB/WqVrd3t5fyWrmOHaoYFRkkfjV24svLUsxZ2PVm609ilO60Ot+D9p5mrXs/9xFB/WvQvF+lJqekzQsOHQrn0965L4NWjCDVblvumRI1H0GT/MV6RNAJ7d4yKiT10OVuzPA9A1OWwmk0+8OJYm8tifUdG+hFdfFcBlDA/WuQ+IdudH8Qx3GNvmHy3Hr3B/nVvSdSLRKQ2RUThfU7qFf7LOmkYSIdvWqLRlfv9aWO6VhkH8KZPcevFSjr5kyCXCVSuJBmn3N0M1Qefc1Uc1WolsP3BulKcAZNRBwvLHFPhbzWzjispdzjbuSW9m1wwLfKvrWN44mjt/7OskA+eRpD74GB/OustVGM4rzT4kXjDXYnVs/ZwB/U08NedW3YxxL5adzsPCpETxFjwx2k+lep+D5DJPPbv/qpVxjtn1rybw0xmto36ByMV6f4Nm3XCknnpWWKXutkLVXNF49kjxggtGxVgDnBppriPjTa3miavZa9ZPJFFdJ5ErxsVKyp0zj1X+VctpfxP1i1ws0y3K+k65/UYNdFCLq01OL3OWWJUZOMkevGkrm9C8faVrJWKVvsdy3G1z8rH2b/ABrpduRntQ01ozeE1NXixO9LmkIpKkscDQTTc8UZoAdSg00GjNIBxamnmgtTSaAHZxSg5FMzS5wKAM7X5Ntifc146dYEN/OJF3pvOMdq9Z8Ty7LL8/5V4bId08zermuiir3OWq/eOifxbpaJtnt2I/3a5G+v7e+1GV7dWWJhwGqC+IJIBqpZ8z89K6VGxyzlfQjm/dzE5AyKKh1oeXKuD1FFapaHPJ2Z9O28+cYywqZ5lyBj5jXOw6m0PKnOOxq1BrkbuPMTB9c15Tg0e0qsTVZsVBOQ/Q4pouROAVIwfQ1FMwVTkg00imyncuYwcc1m2bfa9Wt4P7z5NGo36qrKrZPoKreD45rrxEsxBCRgnmtuW0WzHmvJI9AlfDkZ4FRmU54GKbPlX9vWozKegFctjpJXkHGM5rvvDcXk6LCT1YF/zrz1ZT0bAr0u3XyNLiXGNsSj9KuCJkZ0/LH602FsPSyck1GOGBrUotyruXIrK1C0Ey/MM1rI26Oq065FAjjb3S9pJUcVly2s1uDIp4HrXYXkeOornNe3/ZSsZxhgSPWmTJHifxYilk1O2u3QglNhPYjtXCHAIr2fxdpq67pLwkDzozujPf6V4xNG0MrxP95GKn6g16NGV42PHxMLTv3FfmkpzdKbWpzhRjpSgZpQuSPWkBdUfZdHlfnfdOIgc/wDlvb0qnbXMltIHQ81b1ZtpgtVYFYIgp46MeW/pVLGMY5pDZ0VhqAvmSMK3nOdoVRncewHrX0X8KPhmPDduNW1SMNqsy/Kp5+zKf4R/tHufwrmvgd8JG0lIvE2u2/+nyLutLaQf8eyn+Mj++f0HvXuCqEQDpXnYitd8kT08NRsueW49F2DFZXinQbbxLol1pdzwsy/K3dHHRh9DWn5mBzUTSZNcqR1nzbbRXWhanPp14nlzwOY3B6fUex6108MoaMY611nxO8FnWrf+2NPj/4mFqvzoOs8Y7fUdvyrzrS9UEiKM/MOorRq+p3UKmlmdEkeQCxpzDApLX98oYk4qaTatZNHZcqs+V5HNU7idVzk1Ld3KoDziua1XVkt1ZmkAUDJJPatYxuc9SokP1HUo41YvIFA7k1gz3k14CIomRD/ABvxn6Cjw0I/Fk810xPlwPtVG9OzfjW9d6dFbrhUArXSLsYK9SPMtjktH0GNtSuW6ttU8/jW9HpCxtvDc9xmo7Hba6uM9Jl2fiOa2bi3Yc05zbYU6UUihpFqn9o3aKMFo1YEd8HH9atXUKkYO7cOQTVawlEWvQIekiMp/Q1tajbL98VDeptFe6c5axbdcgbHPlvn8xWvfBXUhetULNf+J1IW6Rwj9T/9ar1w64L/AN0E03uEI6Hpnwtszb+FElK4NzPJL+Gdo/lXZxDC81keF7X7F4d0y3xgrbISPcjP9a2UIxUN3ZxSerPNfi/4OGuWC3NthLqE7l9Hx/Ca8k0HUngcRSAgDhgeoNfTWsWK31lJGR1FfOPi/SZtH8Ryloikc4EinsT0b9efxqk76BGXK7o6GGUMoKng0ryPg5YmsfS7vgKTWrnI9ag7oz5lchZFfrnP1pDCq9Fp78c1GzECi5LsROgzVi1UDGBVYZd8VoWy4A4rOo9CLGhB90k15N4zH2i9upDzlzXqdxJ5Fsxz8xGBXmniO3zNLxwearBrlk5HNi1eNjqfASm6sbdFOf3a/mf/ANVeqeFrVkvUA7n+VebfDSFoNPtT5ZVWXAJ7nJr1mxgeGNH2heODRWjzJomn8KLHj/w4PFXha801R/pBHn257eanIH4jI/Gvl8nDYOVYcEHsa+vRKfJWUDJChvxFfN3xS8NL4e8X3ccCbbW6xdQewbkj8GzXNlNWzlRfr/mefjIWtM5qzuGS4j9Sw5/GvXNP1yeBFeGctGwyA3zKa8f01TJqECYzlxXdoTCfNgbYScOp+6fw7H3rvxKvYMG9Gz0Sz162ugBNiBzxnOVP49q0SvGQQQehHevNLTUY5JDExEcnXYxGT/jXR6Rra2h2ytmA8MP7vuK5OZrc7k7nTdKTNKQCAykMpGQR3FIcVYwozRSGkAZyaWkFHNAAaDQaQnigDnPGUuyyfHaNjXiobIY+pJr13x9P5djMf+meK8hB2x110NjjqfEZ9wvmOB61DaLsuHHXFTnmfNRWg3Syv7109Dma1KOrRyTTDapYAdqK6mz0u3uYFeRcse9FCm0iXTu7nc296k3AIz6UTzSRMWA471QvYTHIJ4OGPJHrVy0uWuYcSqOlZWNbk8GpypgqxA+tXl1IXPEr7D396x5LPCny5OOuKjkYwxKG5LHFJxRaqNGvdGBAVAHqSOprV8FRKftN0BjJ2iuKu7i4tEZlBceldr4FmzoPmH7zuc+1RVVom1GXNM3rhwcjmqxn+XFSvKH54pjRxsODg+lcyR13HWv+kXMSDnc4GPxr1K8Ijt9o6dK848O2om1uzTt5gJ/DmvQ9Sf5FqkiepmtyaaBzTgpJpSMVRY9GxxSSc9aYH9KXO4YoApXqbkrltTQtuGeldjJFkEGuX123Mbbh+NNMT2OE1W2OXUfKGrxrxPpcmm6lIWBKSksD717vfoJEJxzXnvjPT0uYTkDjke1ddGdmefiafMjzgjKjFJjjNPdDESvpxSAdq7DzRBVvTYg9yhI+RPnb6DmqhGDg1f014v3sMjbDMmwOQCFpMa3Kc0hmkeVursXP417j8EPhE0rQeKPEFtwMPZWsi/lK4/kPxrP+C/wkXWbxtc12DfZ2sgFtD1S4Yfxn1UcY9a+kYYRFGOwrhxFf7ETvw2H+3MVEEYFNeSkkfNQSSVwpHeOd+OtRb6YzmoS9aJDLbS8Yryz4g+BpLO4k1/Royyk77m2Qcj1dR/MfjXo7SEDNQSTZ71SdhrRnl2i6jFdWqsjAgip7qYAZzW7q3g6FpnvtNZbW4bJaMD93IfcDofcVy934V8aalE4trO0s1HBkuJ8nHrtAzS5NTs+sLlOe8Qa5Dajaz/MeAo5J/CuSn0+91583GYLXOfLz8z/X/Cu2n8G3Ph+1hOpyR3Vy+9nuUHDgnoPQDpiq6wxxIWjCkduOtbRajscNRyn8WxW8J2kWl3ohRNiyrsPuRyK39VtXwT0FYEreRKksfDIwYdu9dgZF1axhkh5EnXHas6j9656OBs4OHY4e+jaLbMASY2Dj8K6Bpknt1cY5GaZqeneWjDb8pGDmsvSJHks/LJ5Qlfyo3VypR5XYjzs1uycf32H5iuhvpxswSK525zDfWjkZ2zL+vH9a6C8izGTye9DCGzKemQLNqU4bjKKfw5rWsdJjv9ZtrIkGKWRd/wDug5b9BXn/AIt1a/0SSyurCTY7M0bBhkMMZ5r0T4LQXGv2UniDUZledJnhiRRtVQAM8evNVyPl5jmli4qTpLc9fUrj5cewHQD0qWM81AisCDxipVI7VlY5yxjehFcP458IxeItPe23eVOjebBJ2DgdD7HpXcRnNU7+EEEjmpmna63EfNXkT2Fy9vcRtFPCxR0bqrDtWzZ3O9ACa6/4keGUuIW1y0iImiwLrA++nQP9RwD7fSvPraQo1KM1NcyOilKxtSAkZHNQuGxinwSblGTU7RBhxTudG5TjBBrQicLGPWqZXa1SK2TilJcxNhLyYsBz2rmNYsjcuoQEuxCgD3rorrO7HpUGnw+drmnxkDBnXOa1hotDGpG53/hTw1b6VawvcFVZEARCfu8da6mBxcTFIxuCAdO1ULSzDDESlgfvTP8A0FaNuEjBigDKn8T92qJMztZGrakeQqnsSK81+OGird6Fa6sijzdPl8iQesb9D+ePzr0i1KBSOoPWszxXo0XiDRdR0cn97cwExt/tryv6gV5MZeyxKl5nPWjzQaPmjQYDNfltu4IpY+1dZbyBV2N+vesbw7bNHFcb1Kyh9jA/wkf/AF61VwWKkEEcdK9uq+ZnNh48sSzdW0bxjeoYDnnqPfNCXk0MD+YpnjVeWH3h6fWk8xhFgkEiqFy7GExqCTIwTA56n0rJRudF7HpnhnUlu7OKAurAoDGQeh7rWwVwa4bT5TahJoPkSMjcAMbT/e/xrvI5FubeOdejrn6HvWMXq0akRHakqXbmmlTVANxQeaXpRQAhHFNIp2cUhpAcB8SZsWUwHsteXsMR16F8TJv3DLnhpcV51KcR13UF7pxTerMy5cpkik00nynPqajvWG1vWnaaf3X410PY5+p19gB9mTHAxRTdPbESiioKN6a7+z3n2aYDy3+4/oabOz2YKk4Vj8pqobuDVrfachxyD6GrMrrc6asbnkHGaLE3Ksd9MlwoySDVm+uk2puYKcg1mmN7KVWcl0B61nX1815qMcQU7Qc01G5PNY7OdEms1bg7h1rT8GX8awS2eeVbIHrWFPObfTkU8NjpWCmuNpuoQtCfmDZY5rJw5lY1hU5JXPXt5WlDd6ybTVWkRXkiYqwyHXpWhFOkybo2De1crVj0FK50vghfO10Mf+WcbN+mP612WpnOMDpiuV+HkZa+u5SMFYgv5muqvTuc00UtyC3UMuDUcoABp8PDDFNuxhvY0yyqpOTT1Y9ajBp3RakCXO4Vj+IbYfZfN98VpB9vesfXrrzYxGDxVITOPuk+VuK47xHa+ZAxx0rubhM5rmNeiEayL2IzW0Hqc9SN0eL3qeXdSL6NVf3q9rKeXqMo7E5qbwx4avvF2u2ujaev72dvmcj5YkH3nPsBXo3srs8flblZFK2sLy9EjWtrcXAiG6QxRlgg98dK3vAPhGTxj4gisjuW0hxLdSDjagP3fqelfUfhzwVpHhnQbfSNMtwIdpEshHzzv3dj6n9KyNL8DxaLq0zWkKRw3MolnYDBAH+f1rjlirppI7oYFppyfqdp4ftbbTbKGwhhSBI4xsReAFxwPyrRlkxlRWJ9sLzmdflZTwPb0rS+0rJGrr1b9K4rHoWGyPioHfNE53nb2qD/AFSBBnAGOuaaQCu+OhqIvzSM2elQyyBR1pjJJZQBVRGku7gW8A+Y8sx6IPWq9xeYBAGT2Are0ix+x24Dj99J80h9D2H4UmMkGmJsWNRhm4Dk5yff0pskN1DHJwryIvH+2PQ+9SaheLCUt14duSf7o/xqtPez3V2nkDGzj2Hr+dQ9QVzzrxhOl9M6RRbFjDY4xvbvXG+WirtP4HOP8/lXq3irRFuoJbldiTx5c7ejjqR9cfnXk5Od6AqQrHgc459sCtobCkyCdQ2DzxwRg/n2qfTdeGhOUlBe2kOfl5KH1qB3CjOOeDxj+maS8jhmslZtwYOCAcjj8a0aurMVOrKm+aJNrXjTTyuyKTzHfhUA5JpNJ0+aG3BZQHkyxyelczPozRq7FkeVs/MO2OnXp2ru9EuYNQsI5iQG2AMPQjrSlFJaHbQqutJ8xj30BDKW6xyKx+ma27hGkhD7Sc9MVl+IpYrOzuJwc4jbj+VOg8WWEunwkSqpCDcGODn6VFmbc0Ytps5rxtbNepZRr99Xc49TgDFej/s/zoNC1OwdAJLe6D8jkB1/xU151cX/ANuvzdbSsEWQpI+8TXZ/BvVmh8XT20zDbfwNxjjenzD9M1rJPksePNJ1nNHssTgMfm9qmEZPeoFT53OOM5FSrIVIrnNieNipwetPmVWTORn0poUTDPSmraskgdmLAdjTEZEkSzs9tJGJI5QUdD/EpGCPyrxPX9An8OatNYzcoDuhk/56Rk8H+h9wa96jtsarvI+UcisLxb4VtvEabGKxXUYbyZj2PXB/2T+nWuaT9nq9mXCVmeOW0hXArUhO4daoXNpLZXElvPGY5YmKup6girFtL0rR6nZFj5kwc4p0SZINOl5FEJ7UIogulwc1J4WgN14nt8DKwBpW/AYH6mm35Cxk5rU+HNt5n9oXrDkssKn9T/StE9DGpoenwWckqLvYRw+i1bCQqNseDVayKXFupllfIH3RVkxM2PKTaOmag52PgQZI6A0XZjikEkgBMeDn2NSrFsXjkjn60y+iV0EmN0bAow9K8jFa1SD5/wDH2mTeFPGN2Im/c3f+kxejK3UfgciqVnfw3DDzCVf07GvSfin4Xk17RY72xV3u9LUlohyZIjy2PpjOPrXjcThgK9ihL2lNPqc7XK7HUK4QH5QQf5VQnCTX1vGq5GS7Bh0xVaC/ePCv8yjv3FS20xe9kkU7lRAoIPc+1aqNh3Oo0u5OcEZQ/Ky/Wu38Ny+Zpzx5z5UnH0Nec6TP5V0qScB+DXd+GGK3F5B2ADA+vNclRctQ2gzbNIaVjzQRxVFEbCmnOKVzxTN1MQcg0FsA0hbNNlbEbH0BoEeTfEefd5K/3pCa4mcjZXVeP5t15bR+gJrkrk4GBXfR+FHDLqZNyvmHbVuCIQRqvQ1TnlCzKM4+YVoSDe21evat2ZI19Mud0YBINFYum3TW8rxSZ9qKloNjrEjjtlkdBhVWo31DybOEHguSx+lN1WcW8SWoOSxyT7U3T9Im1q4EkmUtk4HvR5sy8kW9Ne51Ob93FmP1PSthdPs9PJcqrzH+IjgU8zW2nQCK3UZHAVay7q4eUFpDtHpUbmmxX1K5e8l8uMkju3YVmrprXtytrbqWkY4zWrY2d5q8wt9Pt2k7FgMKv1Nei+F/BsOhR+dcFZrturAcD6VNSqqa8y6VGVR+Qug6TLpVhHFMPMRVAK1dexgny9u3lyf3en6VqbQBk1WlgjlPT8a4PaNu7PTUElZHTfDm3ligvml670UH6A1v3JyzfWs7wRAYNImZnLF5jjPYACtCfv71qnoC3IozzSXILpSpweaVyD1oKKRXI5phfA20sjbSRVZn70WAJpdqnmsS8PmOav3UhYdaz371SEzPmXrXK+KIyozjhlPPvXYSqM1Pa+Dk122FxeSGG03cbR80n09B71UZWd2ZzjdWPmnUdPu7/WfslnbTXNw/CxRIWY/gK+gPhT4BPgXRGuL+MLrd+A044Jgj/hjz69z7/Suw0jRNK0VXk06xitoU++4GXlbsC3U05ZTPPuY8scmrqV3JcqMaOFUJcz3NqEOLNdnDDkVWluLhhhpNw7g1owgeQoPpWbqKlGDKOO9YI6iBlwdwGKfZ3LRzbWHytxUUdyG+V6laNTgr25BpgXTkr5h6VXkbIqETOo2sTtzn6Us86Ko2HP0osKxFLL5Yx3qjPPgEk9KWaUsSSeKp7JLydLeL70hwP8aY0jR0G1N3cNeSLmKE4XP8T/8A1q6hE3cZ5qlbQR2kUNvEP3cYwPc+tX4htLP6VLYMx9YhZrwMO/H0FNjmNvtVDgHhj7f41bn/AH7MT+FUootszGT7q8/WoZS2LVzbI0DRHaIWU7pD0OR1FeD6pEYdRubdtwKMQCAWHXrzxXtT3K3qmJ2KxxchQOWHp+deU+OLQ2+uSSLFjcNw+Ukn+gFa0zOa0MDzFKlCw3+mST9MCrFsiGJ0mXIZSo4C/wA+aq5O8Egrn1b+gpyI284LRqD1C4/U1tYzGfZxKig4yQBkVmXEF9p0jzWUuwN95Tyre/1rZt3ihEwkZflOQ3WpJY4riMlWBBovYabWqOXL3l+5bVGb7PH8xWMfLn3HU1oXumW11aB7dY2dBwVxn6VYtgLS5yeQelP1uCFIxLBmKaRi2+MY3HHO71p3Bq611OaiufmEXQL79a2PDuqf2Lr2n6kDxb3CO3uucN+hNc/KjJLkqFPcDsanEoZdrdCMGtGrmKdj6rnOyRSh3IeM/wAqei5AJrnvBOrtr3gzTr3dmYReVLz/ABp8p/PGfxrehlxgHoeRXG1Z2OlF+EjGPSiZzjimRMMU5xlc0ALDIGwxHI4+lUr5S8pIGBUsLbXPpU00DMNyjINROCnGzA8++IOgRz2R1a2gczQbVuNv8SYwH/Dj8PpXni/IQwOVPcV7s6ZlMTKWyDlcfeXuDXm/jDwNe6bcz6jpkZubOQl2hUZaMfQdV9xyK56bcfckb0520ZzayArzTkYA81SSRXG6M5A5IPUf/W96HnwOK3sdSYzVptyYU13Hw9szH4cikxgyu8h/E4H6CvOr2TcvXmvXPA0ATwvppC5zFnnp1NOWkTCq7mvp8zxsyqcHORxmtJWlbJE3H+7ioOLZvOwBG3yyYHIHr+BqdwVBG4DuP8/561kmc5ZiaQHnkYpbiaKNSWkAjPL5Pb1qOC4d02bAeMAnqK8f+NFqINUsZLe8nWSaFjLAJCEGDgNjPccfhWE8Oqk1rYib5dTr9b+Ivh3w3dDzr4XM6n5Vthvb2z2FeKareWmp6zeXljafY7aeUyJBnITPb8+cdqyyqlypXYfSp4AQ3Wu+jQjTWhg5OW5dZcITjGBVLTLqW1kaVTlXOSp6EVfnObNsdcYrMx5eBWsdUJnT2l/FdsoQlJAchTXoPhaZ5dRG4Y8yBtwx3GK8bjkYOrKcEdCK9M+G2rPdXQgmUvIsbBXA7e9Y4inopI0py1sd2Vw2aa3IxUj1GTWJuROOKjxipXwRUDHFMkKhu5NltK2eimnb6qalJtsZfcYpCex5B44cvrEa/wB1K5i7bC1u+LpDJr0vPCALXO3rfKfevRp7I4JGJeuTJ171tWDZaMsecDrXO3Dkz47ZxWlqErQ2mVJBOBxXQzCMrO47Xb0Wt2ViwWYZ+lFZIWJ13yszP3yaKpJGU5uUro9LS0iA+2ao+N33EB5rYs2vL+NUs7SVYcYCoh5r0XT/AAfpFrsZrVZpF/jk+Y1vR20VuAI41UD+6K8yeLXRHpQwT6s8xtPCGrXYyLdYFPdzz+VbFj8N7bdv1O4a4/6ZrwtdtN8uPmNRlxjNYPETex0RwsFvqVbSxttNt1htIFiQegqQEE53U55CFNUJZipwvU+lZ6vVm+2xakYdqhG+U7UB+opscVxNxgKvcmr6IkCbV/E+tAjr/CsXkaAmTkl3OfxqzIARmo9FP/EgtvcMf1NTbSRiulbIlFbBLUkhwKs+UEBJrPupwmeaBlaY7icetVZXCjGahutRjhUksBWJd6rLLkJ8q/3j1qkgNC6u44hl3AHuazH1DzdwgjLkDPPAqva2s2qXQhgDSyHkknhR6k9q6Oz8KeTzOxf1C8CnotxXOX0k3/iHVotPiHlqzfvHVc7EHU5r0adPOaO0tl2RRgKq9gB3NSaVpqWds/2aJUMny/KMcd6t/YxChAOS33jUSd9hIx9QdUjWCLPlp3/vHuaowDMy56ZrQ1CPYcVQThs0ikb8MuYwM0y9i3x/Wq9tLkDPar7gPAG7U0I554zGadHcFQeat3sIxkVT8rtimBpWkK3cTMOMcGsiWN4mKDgg1p2Uxtzx908EVn+Jb6G0iIiYG5cZAH8I9TTWoGLqWqxWpaMtll4OPX0rX8G28k0D6nMMeblIR6KOp/E/yrhUge/vYrdCS80gjBPXk8n+Zr1m3hjtYI4YhtjjUIo9AKclZAncsRKC+TU8n7u3bHeooj0qS54iUfjWTAobtpwOpqK9A27B97GafIwVwRVdpdzNuPU0FGTYymO9BwCQ2MH0PFcl8S7F7e+imndWaQdyeMcYwK6m+DWtyJ16ZwawPiBBLd6dHfszGNyEznAHH+Iq6e5Mtjz1pMMFQEeo4Qf406DJlPTgckKTn8TUUZ2HeBx0Jxj9TUr9AwG7jOQCwP4niugwRXlTz7x13sdyA9R1HH+FR6fIYpXjcsUJxzzSatHLHHLJbttkKkqRjr17djiqGl6kt7CGUgSKfnUfzFFtCHJKVjoruyVlV4xz14HasV5jdMQWJVeFqzqOqbbdLdM7j95gTnb6fjVWBcDIIoSNdzM1GLo4HK8GqRyPatm5AJZSOorJljMb7Tz6H1q4symtT1z4EaxvttU0d2/1bLdRD0DfK36hfzr1OJQyeUfvp0+lfOHw51p9E8a6ZKG2xTyC1mHYo/H6HB/CvoqSJ7W63E5GcZFc9ZWlc1pu6LUe5Dg1bGGXFRpEDKik5VxkEVDdazpmjxu2o31rbIOjSyBf061mi2TLCQ4HqeKsxjO5WP3egrgtW+L+jWkIGmwXGpSKTgqNice55/SuD1v4peJtYLpbzx6ZEwPy2w+c/wDAjz+VaKmzNzSPXvE/i3RvDkSzX93HE6jCxKcyP7Betc14Y+KFnrN9NBdwGxgZv3EpbOPUP6Z65HFeKeU8rtLKWklJyXclifxNaOkPJEx2dRzinOhGUbMj2jueveK/h5p+pzG+sZPs11LlgYuUkPrgcZ+nWvLdY0q/0Sbyr6HYGJCSKcpJ9D/SvR/DOrTzWifZbh029YweM/Q1ra+UvNJuZ9Qt45YxA7MxT7wCng+/vXJGE6btujrhVaR4YHE86RA8sQuPrXv+haeLLTooRnbGioPYAYrx74aQRX2rvYTx7p5SGjc/3ByRXqvifXP7K0a5FrJtdU8tXB53k44/U/hTqu2gTnoa13cWlnCz3k0UEWOWlYAYrAufHGi6Xoss8d3BfmFgsCxSAM/+yc9MDua8Znlnur6ae6mkmYfxyuWwfx6fpTzLvRWXk9j3P9fyJoVO25zOq3seiSfE68vUItNPjgJ6b2LMPU4A5HuM4rzzVNRudSvbi4u5DNMzEFj6DsPar0I2wELkDqR2B9+gH1wD71hmRi8gb724/nRCOrYm29zPmjSRyPemoHgIODJH39R/jUsgy5p8ZXoa7VsQW49twscaYYPls+wrPnUbz7Vp6fE32hpYcMygArn73qPrVC92m4cpnbnjNZwfvWG1oQIOa6jwJfCy1+2d2KxlwrEHjB4NcwvymtHSMteRp/eOKqrG8WEdGevah410W21MaetyJpGcRhozkZNaZbFeDaFDbXXj+O3s0e3i8/LIzZw65zj64r3JpeOtcs4ctrGlKo53uK781Xkekd8mo2bipuaCmQGqerP/AKIQO5FTFqz9WkxAvPfNJbkSeh47r8m/W7tuvzYrCv2O0mtK+l82+uXz1kb+dY+oSYU16sFojhk9DDRt94B231pau37hRkferPsoi94jdg2as603zRKD6k1vu0cn2WQT2vlWcUwz83WioGmYxCIk7RziiqRB9kgCPoaf5lVkYOSc0vnA4Uct6CvnLH0osh39OKrOJGPyAsfSrSWzSH94xA9BU7bYE4wAKYFBbWUqWlbavoKQRruwqYHr3qfzjMSDxSEbCNpyaYhy/L3pkjYPWhyTjjmmMpbA6k8U0B3umxGHSLKMjkRAn6nmrqRBE3vwKfDAqIisQEiUAn0AFYGv+IVQ+VFz2AFdNjJO+iJNW1aOFWAYDFcneatLcNiLIH9408Wt3qL7nBx+grStdGiTAK+c/pjgVWxZh2+nXF6+4A47u/QVoPotta27MxV5cffk6D6CtySCO1j8yYr8vboBUFhZHU3W9uQfIz+5jP8AH/tH29BRcRV0mKTT7IvI37y5f5RtC4jHt7n+VdHCA1qGbqRzWHfy/aNV2LjbHhB+FbEz+RZqo6mpe4F0SC2tASeAKxZdUkkmwDhat6pKVgSLsFFYoFCQI0/lul2HAbsfWs6SIxuVIqSOYoQauui3ce5R8woaApwSEGti0PmwFaxZg0RwBzWxoasylmFIGMvLcrAc9u9ZvBY47Vq69epDAY9wHqTXE3epPOCkbFY+5/vf/WqlqJMk1rX5IlMVmwBzgy9cfSsZmdrd3di7vyWJyTUlwoeMADvUk0YFuF9RVpWAg8KR+Z4jtcj7m5hn6f8A169KY4OK898JwlfE8YxwImP8q9C6sKU9wRZiXim393HGREGG4Dn2qSPjtXK3ccj3UxdzlmOTmshpami8yuflYH6Gq7sSpAqgtntxhmyO+alaaSMYb5v507FhMnnwPGw6iue15JLnw5MpY4tWzjJGAe9dDFcLIcj8RWfdQ77fUrYAnzYjx+tVHQlnkQKu77Fzg8kDj65apS+RggMe2AWP+FDqI7xgCMgnOPmOfqeKRypkyfm74Pzf/WroOYkuWjlt0AfGccMw/kK8782awvGaA7CjsuOxGelek+QrWxYEAqM4LDGPoK4240dpNbmkVWe3DiUvjghgGx+efyq6bWqZjXi3Zol82SSXzJlKM2CVPatK3xwaj2LfLtUYmTofX2pbViG24II4IPakzeAlyBvzVOeESIQf/wBVXp0y2c1XfKqT270gkjDmE0ThVZklUgq6nBGOhHvXYL8V/F8mwNqKbkULnyVy3ufeuYeI3MrSZwBwh/rTVGT8ww69RT0e5lqtjpr3x/4r1TCza1dIoGNsJEY/SsR4nkfzZpHlkJzudixP4mkiAIFWtoYdORTXkUlfc1dKnV4GhkGct3HAbHH5j9RT5Lcgnjjr/wDrqppUEl1dCNOPlO76f571qb9w+cFWHytgd/b6/wCNRLcqxn7OcDr1Gas2kot5w4Gcc/Ud6fJbjYGXoag2ujH0PIzSuTY7bQ3CyebDL5bYyT2IrW8Y6vNaeFrlA+17nbDgHrnqR+ANcj4fv/LYo/IHb1FReMtSaae10+J2kSNd4Qcks3AH1x/OsW9TambPwn0qS81PULuFlSS3txGrEZwXbn/x1T+da/xAlAlXT02ERHe5UdTjAz79fzqXwhZv4S0VxJ/x8S/vp8f3iMBPw/nmsXWpHlWa6mOXclmPvXJZzrc3RDqSvscOTvnk2k7i2OP/AK3NTptjIwFAIxnIA/Pp+eKaIQG5HJOfx/z9KnjR0LPtOCMFgefx/wDrit27mKRYgUocgkN5bMuQQcfT09wSPUVg3EUkM7hwRuJYHsc10WAYQw27eCoAwCe+Ox/Ag+1NuLKG5i2Oei/KRyRSg7MdjknOSc1HJJ5Q3H6CrN7aSWsu184J4bsapA+bdLH1VPmP17V1p6Em5pe6KBFI+YnJPqaoa2v2e88wABJB8w9G9avWrcqM4IputruhQlc44NYxfLUv3Kexj5yetbPhyIPerI5AWPk5rn1DwuAgLoe3cV1ugCNYYjGwYu2T7H0NbVdmShPCXhqeLx5fag0Zjt7eR2Xngluf5GvSzLk9ali0pL3SrK8jfy5ZYtrHHBZSR0+mKzbmC8sjmRCU/vDkVw+2jUe+pvGhKEeZLRlwvnvUbPmqUd3uBqTzc0NE3Jt+azNakxFz/dY/pV4MDWP4ik2W0xz0jNEdyZ7HkdzbuJJGAyCxNY2oxSbSAjEmuobBHOKqzRBuoBr0ozOWULo5KwjeOUBhird1bQXIwx/eY4qxdoI7ngY4rJv5WS5DKcEDFbRd2cslyqxJa6dEJB5rBsdRRVWWSaGPk438570Vpa5ldI+srRJ7psKCqdzWokCwD5Bz3Y9TTo2WJdoUADpimtKPU186z6RDi5RScVUcNM+Wzj0qVieuePakB9KaGRBRnFPxt4ApHZepIBqu9w+TjimiWWNhbOTx3p9gsT6haxlgS8yLj8RWc8ryD7xrX8M2ypLNqLjJgGyLP/PRh1/AZ/OrirsVzqPEWslXaytPmYnBI7msm10qOICa7YvK/IXqTWlpmml5BLIPnk6E9hUuqagIpsWyorAbAwA3Y+tdBK00RGLXaq+ewt07Rr95v8KtJsSImJNkY/OqVhYy3cnnTsSM9z1qTxFfx6dYFEGXPAA6k9hSAzXzrepC15+zRHdKR/F6LWvJPs82Tjy4EJGOBVTSLX+ztP3SczPlnPqx60ao/kaJIcfNKaYGZoq+fctK3PNbV+24qBWb4fTZAX9TV24fe4oANXfEuPQD+VZ6sqqSevarert+/wA9iBWRNIemeKaQD5ZiwwKn068ZJArGqa/MainmW3UsThu1U0I6Z1jm5I5qR9Vg0q1diOewqhptw09rHIRljwayddkLXWJM7NuAKm1xsoahqU+qTM8h2xA8L61UXk+wonfA+UYHYUkWSuasQu0lgKfeyJGyRk4wOaimuVthvJ5FcV4q+IFloTOHJnvGG5IF9+hY9hTjFvRETmoK8j0Pwiyy+I2b+7bO34ZA/rXcRfM9eNfs/wCo3/iG88Ra1fyb2AhtowBhUHzMVX9K9niGKiorOzHSnzx5kWUwBWBfxf6QxHrmt9c4rGvhmRjWRoiquAM1n3s2TgVamfYprMnbJz3qii3pwyx78VHeytZ3KyoobjkHuKm0sqPmNSahEJADiqRLPGdfh8nW5RjIVsqMZxn9Kh++oz82Dn1x/StjxnGi6gX2qOiEj9DWNEu+LG4sR69K3Wxzvc0bQkRMC3HcbgB+lV0iH2GSMYKo5ALDqMnFXbTZ5GNxyB0yBmo4o1LzjcTjcMBs+9Iu2hy8UojuS20gBiMe1al9aB2+1RKFG0bgB+tZ98NtxnoDz9K1dOu0dFU8/wAJU9xVGcexnSAEbu1ULktO/wBnQ4B++fQelaGq7rEmEDLn7i+oNU4rfycktljyT6mi5THG3VVAXpVK6tjt8xB8y/r7VqIdwwaSeIFflH1qObUloybeUMMjOPTuKuxkY5qhNG0MpljGf7y+vv8AWtHSohqMyrHllP3sdq0uSjoNItHgs/OC/PKcjdxgdsUt0WifzWjyjDbIPb/63X/9dTKsgwvQJ90E5xUsh84YkYcDGMcEVm2a2IVTP7sdGGQfUdj9KQwxuPmBBU8nvUQPksIBwBzG3bnqv9R+NWl+dgRzkYJz9/P9SKwm2tREVqixTR73KBuN+OntWl4Y0aU65catqCkm3k22yYyGYDhvoB09z7VQxjKP9P8AA1uaLq0saeS2MgZGfYVjKb6AtDe1G4aSU25424Zvqa5/xA2LXZnBJq5HMSWkZixbkk9zXPaxf+feeWMFVHP1ogrAylFGrjByDnAxThgMAT93+I5/ocimopC5GfUH1p+0Mykcg8kcH+dUIsLETHlBwzDJBzk88ZHB/EA02QpC4LEmNujA01nZGEY2jBzu6n6Hv+B9etSsI5433Dk88dM0kMoaiIHict8yhCfU/hXPjTprW3S4KNsl+b5vvL7GtW7iW6uYbIqDH/rHLKdpA/hz6k1omBWG13BHAwBW6bQrXMG3Ygirt+nnWLdCQKS50xrcs8OSg6r3FTIQ8GMAjFROVmmCRgabbie4/eD5F5NbcSG2nFxbRAj+OJf4z6/WmWlukOcqQGPIFXIU2P8AKSO9audxJHrHhqVL/wAIWs0bbthYqc9txBqQ8jBGc1F4FJ/4R+JJF2h5ZAQBgYJ61mav4q0vRJWivLgCVSQUUZavFpxlOcoRV3c9TDVoxg+d2RJfaNHP88BET9x2NY8qS28nlyqVb+dauleKNJ1sf6HeIzdNh4P5VcvLSK7iKSAA9m9K6VOcHy1EOpQhVXPTZz6PzWJ4nkxYXHPVcVsTxSWcxifqOh9awfEp3WMg/vMBXRDc8uaa0ZwbqRUEorRktyO9U54mHSu1MyaMG/H+kZ9q5/UX3TnHauj1H5ZAD1rm7+MrKx966qe5w1iuzs4AJzjgUUi9M0Vsc59kh26H9aRhtBI4NKWVTjNRtICcV84fTDy20AmkM3BzioywYd6ryuF4BppCuOnfJ+Vvzqp9oK5BP/16a7PMSsSsze1Oj0e5mdXkIjXvzzVIkdCJLhtsffr7V1+iWirYW0AJO+Zmc+p4H8hWLFHBAgRBjHfua6Hw86OURT/q5MkexH/1quO41ob08gtrV5OhYbV9qxbS2a8uSSMjqav6rIZHEI6IMfjS2A+zRkd2rYhGiFSCHgYAHWuLuLj+1/EITrDa/OR2Ldq6XX777FpZcn5mGB9a5DwrGfLubhvvyzNk/jTsJHSzvmNVqp4kcmzijXpU7nke1V9UPnIB6UkUGlgR2KhfxpzSbpcdqitGMUWOxFQvL85waYFrWGG5COpQGsUtvfArS1lwFtjnrEDWJLdC3bf1bsKpCJ5bpbYHJGay3na5lJY8dqrzTNNIWc5JqW2G5vaqJvc63RWK26j9Ko+JB8wbFW9ObaoHoKq+IuYi3eoW5Zzk0uEoE4jttw61Uml4rmfGniyPQdLaNGBu5QQg/u+9aRjfRGUpqKuyt4v8dWekxSxJIJr05Cxqfun1PoK8bubma7uJJ55GlmkO53Y5JNJNLJcTPLIzM7nJJ6k0xRgV3QgoKyPHq1nUd2fS37ONh9n8CT3WObu/kb6hQFH9a9ajWuC+CNqbX4Y6NngzCSc/8Cc130eM4rzarvJnsUFanH0Jz8uPpWTer87HFa5+6KzLofMe9ZI2RhXsmzis6Rs1fv8A73NUGANUNlmzYhR6VoSfPHkc1m2vYZ4rUDDygD0piPMPGduwuyRkeYNpx65yK5iKQRthh0PTFd/4xtDNHIy53dV+orzy4mAkDg/fAOPeuiGqMJ7nQ2AjlUgg4/vcU1B5c1wCoxkDGB1wap6RdAsFBBzkGtEyxJuRxsLnAPHJwcUmjRao5XWItshwuM81Y0aJRGpIB9c0niJVik4cZI6ZzzmqVvqP2GLc7BVA5JquhjtI2ZbE6s8xTy/MtgqpnO4k8kfTGPxrGaMqWDDDKcEHqDXT6Gs4tZBOojuZWMjMvOCe35VX1yxa5Pnx8zKMMAPvAf1qbmzjpcwFOKlUBuKrHKnFWIiCelQzMoXibJOmKuaVp80a/braWONy2Chz847j2NPuLcXLKFGWJxirqxPDGkUfytGOuKfMJLUtreLcwiWIspP3lcbWU+4NSREMFZ8E/XpVK8083MouonWK5AH7wjPA7EdxT7O4EkrxyqUnX+EjAf3X1FDKLVxDvJUA5Xlf/rU22mDSFjwc7WA757j6/wCNSGYFcnrnFZ81z/pn7tldgu91B5xkDp6H+f1qJK6sDNOcgtyOD0PqP8j9BVu2Cpg5JPXj0qh5qTxjGGUfMCeuf/r/ANKuWZD+WS3D/dY9j7/571xTVgQup3z2J8oZJcZQ/wB4etY65J3kFmzkk1d17csMcgOfJkA3Hsp9fbOKiBwhUgAtwcjoa0hrG5LFUjAAOR6euf8AOP8AA0wLzuBIHXg9B3P09TjjuO9Rs+4AAHJ4IIznPbHf+uMdQKdGHGX3kHgqd35HPX6N1GMGqsAXdx5LncheIkRl8fcx36njPpx6VMt+trGzTYwq5OBnOKYUDR+S6jaQQQR1Hf8APrWGkirdR2rOXt4JSIz8wIbqqk+nX8f10hFMLmvp8LbGnnjUS3B3lQSQP7vB6cVOSB1XDU1nZ13AfMOwpfmmYMeo6+1MofbTyRTblHtnHSm3em+SonjXEbtgp/dP+Bq1GgVSQAVPUUX1z9n0qaQksUxtyc5z0FZSd3ZDeiuyhNEEcALggYxj9aLdG3cEcGpbm5jvore6jCrvXDY56dc+9IsZBVwcgdfpTTdtST0/4fln8Pjed2yeQfyNeTfFy0Gn+O7slSI7qOO4X8Vw36g1698OoseGgcgg3Ehz69K8++Ploq6vo90MfvLR4z/wF8/+zVz5XVcMa0ut/wDMxxkb0jho7S1nVHsbh4ZV64bBBre0b4g6lpDi11Ifa4VON/8AGP8AGuKhdxIu3O7tiun03w3LesktxhVfnbnk19Xi5YepTvXSPPwjrwnaiz0U39p4i0kXtm+7Z+Y9jXL6381uAe5rf0SwGl2M0aptTBJxXO62wCxAnGcmvl6dudqOx7uJT91y36mE8IIqjPb4zxWnn8qY2DwRkV2J2OVo4jXyIJUYngj8qwtViDRLJHyD6V3OuaN9riJjxuHQGsCy0aYo8NzEV9K6qc0lc46tNt2OUCSRjLoyj1Iorp7jw/KinYxI9KK3VRHM6TR9MHsM04be4/EU04AOfzpkfmTcAFI/7x6mvBPoRsjfNtTJJ7CmrZsWBlbk/wAIq2BFAMKgz69zSKcHcc5NAiSGMQphQBUcszbsA0NIwByRn3qHJ4yMGgB5JC5rU8L3Rj1i3Q/dlbYR+HFZJHGan0mbydVtHyABKuSewzVRdmBuXOplr1gp+8xrShS4dkBxg9K5a5kaG/bPBVz/ADrtrFxKIZAOCK3QmYvi6cy3ENoDkRKGb6ms3w5xZdv9Y38zU+tzLHqV075LbuPpiqPheUtYgtxlyR+Jq2StzoHbGKrSuHBFSTHERb0qis2/pUopknm7VxmqskhDZBomchaq+YGOM5NUIu63JthtG7+SOK52VzISScmtrxC5SG0U9fJArn4W8wNjtVIhsY5wauWf3h7mqDn5qu6f88gHpQxI6iyzgelU/Ekqrb5OM1PHcJb2+9ui1x3jPxTBptq1xfyLHGo+WP8AiY9sj+lJK7KlJRV2Y2t61BpFm91cSBFHIJ6/lXieqa5catqc13PyHOFRjnavYVN4m8TXPiS8MsxKQqf3cI6KPU+9Y9d9Knyq73PHr1/aOy2LLwCUb4Tn1X0qAsFUn0Bp0UjRMGU4xU88K3a+ZEMMeGUep71qznPsH4e2v2DwNoFtjBSxiJHuVz/Wuni5NUNMtxbabaW+MeVBGn5KBV2Hlq8eW59FFWSRPkeVk9qoTjKmrmQAR61VnGFJz1qUNHPXqgn3rOcVq3qgBvesuTg1SGxYH2tir6TZGDWTvw2RVxWJUGqEU9bhE0TZHavI9ctmtbyWPB2Y8xR/P8q9luMSRkd6868Z6eRH9qjXLREsR6r3Fa03ZmNRdTltOvvs9wMnGa6e7t2uFKLKULRhw6gHawOQfz/TNcHM4jbcpyOoNd14fuvtmnQTMfvIVz6EVrNdSaUr6HOahdC6LLLE0M643ow5H09R71XsE+1TrL84igOQpxtkPr+FM8UN5F59pEgEoGzB5yoyTj17mrmj20flxiF1CAZXPehLQjeR1WmyR3MDKzOrkcnsPpTJT9mAXbu4wSTyR60mmIYmJ4AyCwzVq5eMMEYZ7Egd6y2Z1LYwtZ01f+Pi3UAAfOB396yI279q62PbsYDIBOADz+FYOr6Z5DefCRgn5l7DnAP6gYoZnJdSbRrYTStKZIl8v++cZ+lXbmIrMw4Ct3Han2MP2a3WHZkt94YHOatOY/JMYGTx8prmlO0hIymkVS0fUpg8A8VHMtvcRKXjRJFOY5CPmU+1W5rUtIfn5AqN4FxubaPbH61spJiZSsNT8iRrW+BYHAW427VcnoPY0/Ro0uHnvW2MZmwjIOqLxjP61Bqs2YPsvyeZMwRQyhsDucUsRn0bDIJbi0ZiWX+KL3HqP1ptaaCNCaAQO0kDMyDlhj8x9asWbgk9GU8jH+fr+VQ2N3DOgljZZI5eCwPWmNFNYZZOUGSQOcD1+nrXLNX0Yy1qh32MxyQpjJDY5DDn8RxVCC486FMKAMYK9eeMY/T9PU1pwSCSNkYbg6k568+tYun7ZQEICkDay56Y7fqT9Cf7tTT0TTE9ySRt7uykbfvZP6n6dM/g3rVkOzybyuAPmwe59fr7jrjNQyOsVwEV9uSBkjHP+c/mw9Kg1C7FjEsUQLyO21BjPPv7VqlfQQzUbp7iTyIDtkfrkEAL357GiO2ijhFswIi27cEk5H1ptlYNbI5kk3yyNukbJwW9s9Kuld4XHHvW+2iGR21y1nILa4kxG2FhndslvZvcdjVrGzLLye9QzIJoTEy8Nwf8+tV7S6NnItndSZVsLFMzDLn+6fcfrUtDRrwkuvPIPX61meIZ1itYLUSZMjF2HsOgqwJWt2YCQFWBOWOAK5XUtSOo3jSgnYPlj/3f85/OinTvK5jiKnLC3cuabqAtpvs8jARStkE/wt6/jXRQqqDDNzj07Vwlwd61v+HdbBga2n+aSIZUt/Ev+PanXhpdGOHra8rPYvhnfRmzk04AKCzSR+571kfHLRJdR0/RJYQN8dxLExPYMoP/ALLVDw3O2nvayxs26Pnnr1zXa+L72x1TTdPeQ/J528gDkMFPFeOm6OIjUid6pqquRnk+i+EEguFVcyMB80jDqfau303w6sD7gM5HVqcuqWNsT5Nvk9vaql3rV3efukOxD2Wta1edV3Z3UqVKitCzrN3DHE1rbfMwHzkdAK4bXyS8S+2a6uWL7Jp0rufmfjNchrJzcgf3VAFaYVnJiJucrmaSaYXIp5pjiu45xpk9ahYq/UU9uaYVpolkDxqeaKkZQOaKq5Fj2aKIs3mzH5eoT/Gpi28+ijvVZJgQRn8aPNwDzx6Vw2O4nUhj+lOJwKrecEwcDPpUhfd3xnt6UWGK2WI4pWBThunWmhwi7ieB3pjSZBLc5osIHl4O2oSWPY4pynPJOKa7noBTsBqhhqFusuf30QCyD19GrqvDE/mW5RuqDiuAtr97K4EiYbsynow9K7jw8UdWmhP7txkA9R7H3rWDB7GD4mk2zzyeisaNCj8nS4G7MM1X8XHZ5wPVhgfnWnBCYdKgGNuFFavYlbl+4ANi574zWBYXGWKDn3NbseH01vXBrlLWXyr0rnjNJAzQvWPcmmaVEbm7RAMjNN1R8KMGr3hSMl5JiOg4+tPoHUqeNJlW8jjUj5EArE0r94ZBVrxhJ/xNG56qKp6I5HmkDtTuQ3qLPEVlNS6fJ5d2oyFXuWOABT1iPlveXcggtV6u3VvZR3rzHxh8T7aOSS10RVlZePNY5Uf/ABR/SrjFy0RnUqRhqzsvGnxJsPD8bJA/mysDsUfeb3A7D3NeFa94gvvEV611eSk8/LGD8qD/AB96p3d3Pf3D3FxK0kshyzN1NQgAdK7KdJQ9TzK2IlUfkJgA5NL0oxnmjHbFamAuAas6aGbUbVF/imQHHpuFVsZrX0O3AureQ9TKmD/wIUpbDirs+1du1sdhxUkPRvrTBlgM9adDwSPevHZ9EPfGKryAbTU0gJGKhbgYoQ0Y1+uATisKf7x5ro9SX5CSPrXMyMXcntTBkZz61ZSVimKrN1qSI4600SSCUjOax9btBcQtwCCDxWqzDBxVSY7lKkZzVxdhNHiOrWz2MstvggI52H1X/wCtW14d1PyvDzxpFJNcIzeXGnUjPJz6D+tbfxA8PR2/hG61UgCWG5Qhh1xjBH6is/wpCLbwpDLICrXBeUNjjHQCultONzmimptGHeW05uPMuHWSQgFQFACD0/HvVjRC9tKtq/8AqHP7pied393/AApb4M1wVIPHQmr9pabrYxPjJB2kjOw9mHuDzQ9gitTe04jGxxnHRvWrMyBjvZGHpz39ao6JdNdxMkq4mi+WUYx82M5HsRz+NXJy64RyQvYY/SsXudS2KjyKJMcsOuF5KmuT8Taq15ctAkm63hbAwfvN3NXvEesCJns7SQbm/wBYy/w/7OfWuXZcdq6KdPqzzMXiL+5E6Twv4gG5bK6fJziJz/I11KZmLAou7kDPr/n+VeWHg5HGOQfSut0DX2vI/sVzJifpHJn73sff+dc+Jw9vfiGGxN/ckbsqmIGUqcHgHHGaYbc+UWJyuAcGpHZ40ELsWBPfmq+sXWIEW381nlPl5jxlSe/PHTmuaJ3Mx7NZbm6luGLeWmYkVlxgg8sD3q84ZEBboetWIIPItI4UXIT5d5PJI9ajmJ3BdvytxgdjWtySr9jeCQ3lk6rI5BdHztcAeg6H3rUtNSt9SgYFGjniH7yJvvJ+VVY3WF8NnBpz2EckwmjlEMyAlSDgN7N7eorOaTGQw3LW04SEh4w3TOCnuPUVT+0rFNdvuAbzWOR3G4kfkSR9DUVvcGRxcD5XVjuX0OeRVS++a4kdQqqx3AD1xzSUSGyO7v2ncOSQi8j/AD61Z0uUanK1xMV85V2oBkYXv+dYk7GWQIDgAgn3qe3u3tblJlXOOCPUV0clloSpHTJJ5Z2nOelSJOc7TwD3NQ28sUwDpuYEZ5FWBCk3ylgpHSixYecHyp57cCoZ445oykqgj17g9iPf3qR0CHapGQOcVQ1DUY7KAswBcjAXPX/9VFuwpSsrszNR1OeKM2LsS4GGlIH7xfX/ABrNVieOlVnLPI0pOWJyT61PE27muiMbKx5k5ubuyRsnOabbuI7iN8ZVWBPuKSV9vQ0tsPlOe9EtrEre57HocazCI4yGUGrPjdruG102O0Uld0juR1PAAo8LQlIrVMciJe/tW74kuoNO0aK5uQNvnFM4zjI/+tXz9WVq6R7UNrnJaJbm9YC4LAnpmuntdFyNscRz6AVxmm619s1dkhGIiDjjHNdq/ii4gtY0G1CFwWHU1OJU01yHXCSa1MjxXDJYlLeZNm4ZUetcVqURaXceQRitnxfqE2oCznLktHOAfoRism8OVBzW+GTSRzT3MxoqjZSO1WSRTW5Fd1zNopsD6U3HrVtkDdqiaGquS0VmGBwKKmaPFFFxWPSIZjkAVI9zzyAMfrWdBcbTleo4qR7jeBwM+1S4m3MXklDY71LnfgdvSs6OYHABwc1cSXBGTxUuI1ItY+Uc5pCRtPHPrUYY8kdPal384PeosUODjhWHH1pksoAwg3MTgAU25ljRAu0s7cADrmpLW1MIzJnzOvXpSASO32MC/Ln9K6LwxffZtQSBnAjn+U57N2P9KxT0yDTA7IwYEgg5BHY00Br+Mrdn1WC2XrLIox+NbVzCFs1UdhWc92mpeItMmkxuazMuO2/p/Q1o3M4GV7VtuCIbJ/8ARJkNcerYvnHua6A3ot3cdm4NctcyeXdSOOhYkU0yZly7ujO6xZ+boPeuw0u3GnaYpfgkbmrl/Denm8uftMoxGpyM96l8aeMLfTdNuDGzPFCv710GQvbH1o30Qr2V2c9rd4bvUpMHcN3FY99440/wo2ZSLicc/ZkPLexPauD1vx5eX2+OxU2cJ6vn94349vwrk5GLEsxJJOSSc5rqhQb1kefUxVn7h0Hi34ia34sdlnkW2tiNq28PCgema5MADj+lSuM1HiumMVHRHHKTk7sbikK4HIpxpD+lWSN4HAoyaU96Q5GKBE9rbNO4HYda3tPjC3Nuq8fvUx/30Kq6QE8gnA3d60tNQvqFqgGS08YA+rColsaQR9fxMCg+lSIBycVBAOMelWFbAzivIZ9AJK2BUBfNPnfAxVXJNCAivUDIa5m4UJIRXVyDKEEVzl9FiU5pgzPZaQcU9setIq7qZIoGaa0GRmrEcW0jNSiLzCEHU07jscv8S4QPh7JbgAvcNuA9cnA/kK5m8LWOmQWQjGIIlQFT7c11fxVkjitLCyPyq1xDH64Gf/rVyWtSCOV1H3WJ4raGyMZbtmBKd05LHJJ/StjTArKQW+YkbfesUnM24j8K3tPVcAZxgZB9K0kRT3LTL/Z11DeoGww8mbJ42no31B/Q1T8Ta+LG2W3hdTdHkMpztHr9TT9b1a1ttMkhmQSSSjasW71/iP0rhHkeUkyuzMO7HJNVSp82rMcVieRckdxdxYlicknJJ7mmF8ijORx0qNjiuo8oJDxkVGHMeGBIPYjtQxJpCRiiwjq/D+v/AGzZZ3bYkxhX9T71pQnz73z5Im/0YFYyz/KzHO44+nH/AOqvPzKVOAcHtXU+HdQWdBayNtlGSCTnfk5P41xVaNveiejh8Rf3ZHRJIHUkEYH8qhLFpMMOKVWRQQABjmnieNmRR9M1ynYVbhsvxkk9hUN9erDbqi58yToewHf/AD9as3AS1kZx0weprmp7kXN00gyFz8uew7UJXE2WnYpMJeiy4Vv97sf6flTLzasZbpTgA8LITwwIz6VSuJGlVAT8w4b6iqS1IZQO6MknqeaVWyabISXwOacvygV0kGhp181pJtY/u2/Q10EOSA+OvIPY1yqkEAGtXTNS8seRKeP4Sf5UpR6lRkal7N5A84/6sDLN/drj9Rv5NQumcsfLXhB6CruvawbkNawsfJz8/uR2+lY6nt+tVTjbVnHiavM+VD1BHNOT5WPPB6UifNiiXIII7VZgh7/OM9qtafGZZ4o/77hf1qqh/WtnwtALjXLNOqh9xH0qJuybKirtI9e0JFHlqrnIHT0rpNb04arohtsfNGyyKPcf/rrG0iGP7QGUcYya6J0Zraby87jG20D1xxXzGJn+8uj3Keh57LoJ025WcIQVOeO4qXUW3W8DqeDmoLjxAbiMBz1qvHdebYRx5z5bNj6V1Pmt725u2uhS1L5oUz/z0Wqd0eBVy/bIiX1b+lUrtuQCeRWtE557lUjPFNI9KfgdaYc11ogZg801gaeTTC4PemJjG5HSinHp1FFBJ1HmDOQcUqykHtUWOPu5/GjacYBrYRbjmC5yeanjuCAcH8KzDIysPl49KnW4VFwcA0nEaZprcFSCpIqwl4GUu+BjoaxhONvByPelmut0SxKeW4FQ4FqRq2soZjdSclvuZ7D1q7Hc7we4rLEqr8gHyqMAVLHc7VwMe1ZuJakXvMG4jPB70FsnFU0lHzMeKUzhjjNTyjuaEF01rLHPgNJD9zPOKuDX3ZB56o+emPlNYysBkZ+tOADAsf8A9VPVCuaclxBPnBdSex5rKuY0Z+DnFOD7iAB09KUrjPQ07iYpuZxB9n89ki/uJxn6nrXMfEGby/CN7GOFbYoA6feFdH8u7oSa5f4jf8irdnHCsh/Wqpv30Z1fgZ44SC2RTXOaMikOc1654ohzTCvPSn4xTSKAGkdqYwqTtUbDnNACU0/jS80CmBYs7prd8jOD1Fdl4GhGp+LtFgTDbruNj9Adx/lXCgmu5+C4km+JOjxqMhTJIfYCNuaio7RbNKOs0vM+r4cjrU+RioE5HuKZKxwcE5ryD3xJmBbrTdyIOuTURyDzRtzTGSGUHisjVIfm3AVrrFkVXvIN8ZyBTA5UqdxFXLS3L844FRTRGKUitTTYwFye9SSUpFwemKu6bb+ZIGPQc5p13FCv3jj3qhd6mNPt3WI5cjFNA2ea/GbVvP1eyhRsBJWc4PoMD+dYAvhqUe5iQ6Dkep9ai+IzMdVsyxJYo7H8xWFBcPGd6nBrtjD3UcUp+8zciTbKd2DxVu5voNPtw5bczcLHn7//ANasaLVUjgkllyXXnArIe7e8maRycngD+6PSrjT5nqY1a/s1puW5Z5LqVpJHLMfWqt0rcMPvD9RU6DABFRTk4wa6PJHnNtu7Io5gyj/OKVuRmq5ypyB9akDAgc0wAdDmo2cKDTmYDNQMxZs9qQxYwzHcetWA7IVZGIKnII7GoVI6UobAqWFzq9J1kX0JhuGH2hTz23r6/WtNiSAVGMVwSSsrB0O1l5DV0ljrn2q0O8BZYh8wHf3riq0rao76Ffm92W5Y1y4KBIQ3LjccHoKyAQpzS3ErTys7delIBwDULRG5dhfcvTtVGdgs8jYwG/nVuIgKDUF4gktTjhuoPvULcb2M5nw/FKrZ4qusnnHIGCOCPQ1KOOtdKMywD6Vo6ZY/a33Pwg5+tVbGya4YE8Jnk1uLGEA8tVVVGBihspI5vWNOksblnKgxSMWUjoCe1U16Z6V2V5aR3tu0MnzAjIPoexrj5YXt5mhk6ocH3qoSurHHXpcrutgXjqKfncMmjKsAO9OwAMUzEbHz06iuv8CWJ+1yXzjCopVQe5NcvaWxnmWNT944J9K9L8OwiC3jjjUBd2AD6Vy4ido2OrD07y5md54fgwu7byFya3ojsZXYcDr9KzNNDQ26sBgt29a0A3mYAr5qvK82z1FseOajB9l1C6gHSOeRR9AxxVizGIPxq743tfsvim+UDCylZl/4Eo/qDVO2GIFr0HLmimWht3AzqkoIwp5rMu8+b+FbMp/0ZgKxJ+ZSe1a0DOe5HyKOtISRSEkV1EA2TUTxhh0qXOKbuxTuJkG0r0J/Gipi3Yiii4jq5IBjPQ1GQQMFc1ZbcQB0pfLVjhjitxFPjj09DTHiR2BGR64q3LCOMdKq+Sy5Izn0NMQ0KV4HSoQxNxHnopzzU5JyP4T7UzA8wEjPuKALKTbskVJ5mOQeB0qqyEEmFiw79iKdHcOFwyZPfNTYdy6kuclWycfdJpyy8At0qnvU8D5TSmQlMFTgdxS5R3NFZA2Du96mEu4A8hTWWku1xyCDVhLrjle9S4DUi+sqrkg/SmjczZZhzVM3C+39anSVYxuY8ds1HKO5PLJsGxOXbiue+IjraeCdQVmBeQIuT6lhwK3LRlZjOR3wo9PesL4losng+9JHI2Nx/vCnBe8ianwM8SXHSn4qNDkjFSHrXrHigBzk0jZpQMikY0wGHjtUbc/WpG6UzvQAwelKe9J3oxTABxXpf7Pdv5nxGWQjPlWM7fTO0f1rzUAmvWf2cbcjxndzMODp8iqfU70zWVb4GbYZfvYn0d93gVC7EE8U8tk4o/iryj3iFQXbninsuypFFNdvWmBGXIqCaXjk1MRnpUE0ZZfpzTAzbtI5Gz3pqXqQR46kU+4iVSSzAfjWVdSrvIi5HTNOwmSXV+WJZj9BWZLmYlnNSiIliXOTTJeEOKaRmzyP4hy7tdgX+7E3/oVYsQL4CjJPFbnxBgJ1K1mx94umR+BqpYQrAN/VvX0rti7QRxNXkyWzsYxbtHKoLN1z6elZN9p7afMMZMLfdb09q3RIwfcKtvYx31t5UuPmGQR1HpSjNxZNSiqkdNzmouVzVe4f1q00TWzyQyfejYqapTkEkH8K6V3PNemgzNQt8jY5waeGIGeuKjbMh56UxgTuJ9KD+dNB2ttP4U4j0pANp27imE9aQHPekA/dg1t6Hp5kV5WUgONq+/rWVZWr3twsSDk9T6CutRfsoSKMYxwPbFc1edlZHVhqd3zMyrq3e1lMb/8A66iByQO9bOoQLPGASd46GscgoSrrhhXNc7CUsVTaOp4GaLsbYAB2pqASSAc/LzU15/x7Eip6j6HOyMYbhnAOxuG+vrV+0tzcnPO31qvFD58uwnAPetC0zZTi2Y/u5eUOOh7iulmaL6DYVjjO0DtjrVrcxT5Dgj9aiTOOCDipkGR83BqGaIlhdhgucA8Gs7XrJZkNyigFBz6kVeTBPXgnFSShSFhJ+Z+vGeKhOzuKUeZWZx8YyakA3HFTXlp9jvHiH3Ryv0qbTLJry7jjHTOWPoBWzkrXPPUXflNPT9NMdgZiMSyDKH0A/wDr13+gKs62+VwSobHpmubjjXzViHCZxj2ruPCNstzcbgOE5rzK9TRyZ6dKCirI66OIRwKMfcFS26F3BAp0UZc4FX7aBYUOBzXgSep1HnfxTsfJ1CwuwP8AXRNE31U5H6NXNxDEKD2rvfihB5uh2s23JiugM+zKR/hXBAjaB6Cu+jK9NAglOIWz6VjuCWyK1rr/AI93PTArHWQ124fqZ1NxrDJ9KUY4p/DduaYQK6CBki4OaYBkVKeAR2ppFMBjJgcUU4nPFFAHWjcCVzu+lOVMfeGRVZXK4IOKmDsTk10XEPPGRn86bww/rQzBj6GowehoAaYlduDjjrUTQFWJ3ZHtU7ADmgOpyDQIpHKnuT6jrTg4ZMsNy+o61ZaFHUZ6561UkUxN93gnGRTEKUZgWQhh+tIrkrsbcP60v1zSrJgjcocejUxDVba2A3T1qXziRnuO4qAiMv8AKSuexNQyeap/2fUUWA0YpE3ZOPqafczZ2qp5PGKzVfoxNSJJ5lxGGOMnIqXELmyZDBtQHO0YrI8YE3HhbUU25JhJAHrmrBmYsTnOahvybixuIM4EkTLge4pRWqY5O8WjxCPpmpKailRg8dsU7FekeOLmoz1p2aQn0FAxrGoyae361GTQIB+VGM9KUc80DigCaytmuZxGOB1LH+EdzXrPwCu0l8fTxxqBEmmSLGMcn50yT7mvMbB99tPbQjbNIOvdx3Uf55r0D9nh/wDivpgcZOnzY/76Ssq3wM3w38SJ9KBQe1IVG7ihGGcGlPDe1eWe6OwFHWq8hz0qYjIqEjGc4oAYMio55hsI6US3CRjGaozyl144FUkBn3gMj8nIqviNOOKuyplc1RdMNnFUSyCXLMT0BqCcgRH1q1MeM1RnJKmmiGed+P4giW03ZZtv5g/4ViW7BVAzXUePIPO0WVh96Jlkz9D/APXrj7SVZIw688dPQ10x+E5ZaSL6OScGtKy25CkYNZasMrWlbZCgjrSZcNzO8SWvk3KTgf6xcN7sP/rVzU7gHJrsvEQSTS2Od0wYMid2I6gfhmuIkJkO4kV0UndHn4qHLO/caAz8/wANPBAoAxwKCB1rQ5hrqGHeohIV+VuvrUuevNRSDdQApI70Ku4gDvUasc7TW5olgxP2qRMBfugjr71EpWVyoQcnY0dIsmsIDIfllkHJx0HpV9c9Sevc0yJw/BweKRjsYA81wSbbuz1IxUVZDzwcnkZyDUN3ZiaIyrwyjIPr7VI1zjOVzUE9wbySKFF/dL80mT+QpDKECGLrw2eanuQWtmHb0q9eWe+IXEQ5T7w9RVMjzIitQ3qFjPgjKZOOtSyr9pi8o/Kw+ZW9COhpxGX2jgU4AR4NdF+pmSWVw0oG7iRDh196ugAseazp8Q7byPd8mBIgH3l9fwrQhdJU3KwKkZzSZaJ1eOE7mIx0qaxXefPmBWR/4Cfu+gqgiLeTABgYo3KsNp5YentWmsew9/esKjtoUjN8QWmYhcjscHHoataBafZ7IzlRuk559O1WbgK9lJ5igoeBUlzMI4EVBhSAfpWbm3HlIVNKXMOsixlZ2HzHIAFepfDqzjGm3N0wDN5gTb6cZry2y3EqcEE8g+orp9G1W80uXzLaUru4Ydm+orCvSdSm4o3g9T1qKSI8bVFS4BPauCi8W3fH7lCe9aFp4tukkVprRXiJ5wfmx7V488HUWxsncs/EODf4WuD/AHJYn/8AHwP615lx0969G8c6gkmhTRK25Z1TafXLAivOCQCT71vhk1DUaI704tZPUCsRWNa+oMVtZMGsdWzXo0NmZVNyRWwOaXIpvFOC81uQITxTO9OZeuDTDlaAF+tFBPHNFAXOlwRwcGnMzKM9KiLAcHk+tOUkjHUHvXQIBcDcAf1qYqHXcBVZhzj8qTe6cAnFAXLRx1bimLGJGJz7ZFMFwONwzSq4DkgfL7dqAHJGy8Zpkkm0YIpVfJ+U9aHRWUZbBzTAGKFMAAfWoXQZC+tPZNpIBzToiWX5hyOlO4ipMrROuV3g+nalDKWxkg1daMsfnGeOOaiktwfu/kadxWK5jTBBQHPcGo1QLKrK3T1p8iOozg/jTcZ56EUCFWTbuHSiOQBvUUhZgRkAj3pwkj3fMuCe9AHkmq2xtdSu4GGNkrYHtniqea7Xx7oyoU1SA8NiOUe/Y/0riutdkZXR5tSLjKwnU0HuaDwRzSGqIGHk5NNxmlz3ox3piEo6UvbpSUwJYJTFIHUlWU5B9DXqPwOKyfESK7hA2TWc6SKP4XwD+uK8qH869D+Apb/hZFoATj7NcE/98VjX+Bm2Hf7yJ9PDgU4cmmhugpjTCNsV5Z7xLK4jTJrHuL0sxw3FW7x2kjIXvVFLfHLYJpoCMln5JpcDHNK3HFIASKoBknKEVRmXAzmr7KTVSdMmmiWUJW4IqnNgRnPWrNwdpJqk53A5oM2c74lg+0aTdRDq8bAflXmVmWRFmQHOOV7E16zqA8xSleVQ5iuJoeoWRlx6YNdFN6WOaotbl23ullY7W2sOqntWjb34tVO9TIx+6g5J+lYU5CjcQVZehFaGhLuuTLJ80qnAH90e1Uwg9ToLCAmN7m4UCeQYYdQoHYVyGv6Z/Z90XiH7l+R/sn0+ld3IirANhO7HNZl1ai9iMUgByMEGlCdncqvS5426nBEnFJzirOoWL2FyYn5UH5W9RVY8fSuxO+p48k07MDgDpTG5xTs5FXdM0t759zZWFerY/Shu2rCMXJ2Q3StMN7Juf5Y16n19q2ITLbSfZLmQsuT5b4wG9vrV6OFYIRsAXbwBxgVFcQLdRhHIx2b0Nck58zPSp0lBEkSeUQQR9KfIylcEc9faqlrcGB/s0/zN/C/94f41JPKQh44FY2NCKeQpGQhBkY4RScbjVmzt0itxn77HcxA6t61Ss8ufPY/KfuAjBHqfxrUgAZcHPPrSloNFi3MYXY3HrnvVG6tBb3DBP9WeR7e1aKxqUK4HSqWr3ot4oIzjdI2Dn6f/AKqxSbdkN6Ixm++fXrTkYPhc1WYsXNSxKWAbIB9a6tjIuJGcFRj/ABqiknkym0t5F8p2xkNzH6r9aeJpbndFCwUD5Wl/u/T1q2Uia28hRgD+Lvn1+tFyi7bRCFFRBwgCjnNXicY4ycYrM0263qYpeJYjg5/iHY1p7/LfexGMda5KmrLRFdtu2QDkfeNRSNJdTxwA4RQNx/pUaOZZpJM5Ayc+1aXhC1jv7l3lwSw4z3NTYDY08RNjKqV6Y9BWvDDYA4cSKfRTWXJp01nIxtssFPMZ6/hVq2nhvFCSHypB0Joki0bUAsol+WWX8QKm+2264CFmPuMVmyWVzZKplRgr/cfqrfQ0kexzg/KfauaRomXPGDuunacobKzOz/QKOB+tck7dOOprqNab7XoqZOJLOQMPdG+U/riuWk4ZBxgtislsWivq77LJ+vJH86xVmxW1q4zaEdiwrG8kYOK6qPwmNTckWaniQHHNV/Lb1xSDIJz1rUkuhuOtBxmqoc5608SetAErDOaKQOMUUAa0MjNguCC3AqZJlywRxkHkVamhYN8qcjk4rGmtWhSV4iULtkk9a6dyXoaDvv8AY96DJkAEZ4qokkkSgSjnqSO9SK4ZcqePakFydWVhikEnzlc8d6YoAFIVGNynnoQaAuSBir5UinF/mye9VWPPvTy5CjoTTC5ZxubnPtTyHRunFVVdicnJx2qdWbqcmgZOHJ4GenQ02MHGM5PvSo46npTSWUk4zQMcyBhg1A1ocnrj2qZSrISr4OehoMpUjP50xFJ4mUNnn6VHtJXPNXmG48jqajdARincVjI1myOo6PdW6AFym5f94civLZFyNwGAeor2KSDyyGU15p4h019M1SZGQiKVjJGexB7fga3oy6HJiY7SMIikfgVJIu01Gc9K6DkGYoHIo6UvbNAgxSHpSmk4IpgAxmvRPgIQPiTACetncAZ7nArzuu4+C7PF8S9GcZwxljP4xtWVb4Ga0P4kfU+p0HPNQXBy/HpUxfAqBx84NeUj3yPPGDTGIAqZ48jPpULrxTArsvoKAOKkA9aRiF4qgImBxxULJnORVsLuGQKSRViQs/QUCZzl98jN6VmvJu4FW9VuPtVwRGDjNQlEhTc5GaoyZm3CbI2kfoBXkd/mz1e9VjjEzH8+R/OvXdQbzlwOFB/OvJ/FkAj8STM3R1RgPwx/StqRz1iBC07CaUHA+6pHStW3zDKlwueOGx/dNZsLZGOtatgpdCpOR6VctiYbnSqT5Q3d6pSbyHAwMdKtW+JLCPzCcquM1SZwjE7s/jWaOhlPUbSLUYGUryOQR1BrkJ4ngkaKQYK12buiNwT9KyNTNtcyKoUNtbJIPPuK3hKxx4ikp6rcztN01rt9zZWIdW9fYV00EYt1MUKqq9hjpUMCxmEeUAFUcAdqnd/k3YPHWpnJyKo0lBET/JwW4Jpvyg/L9alGyVMP0NNSNQvynBHrWbRoyvPbecvpjvVISPcSrZzMRt5Lg4347Veu7hooSFGWbhR6n0qi1lvQENtnB3CQ8kGhCLpUA4GdtWYn24HPH8qoWly1whilTZOhwy/1HtV1AQQTkkVMloCNKJgr4zlSK5PxZeMboIBgRjI+tdOCqRliTgAkn0FcJrNz9pEs55Ltnp+X6VNGPvXIrSsi9azLcxCTjBpwLXUhiQ7Yhwx6E/SsLSb0K5tnJCOevpXRRRLGBs6Dit5KzM4S5i5bqiqF/CrIVVHJBqmDtAIFOjVmYA/hWbNkW57YhFu4sGSLqB/EncVYvZFa1VkIKuAQfUUWgXBXnPvWdI6pI8Ck7VYlB7dx+dc7V2USXDmOwlYZ3MNo/Gtjw5usJIBzhQM/WqVnCJREkgyquGIrpksRgOmCp6GoGkdxJpYv9MTU7YBsD94i9R71g3OnRSHeuFY9+xroPAl+I2ktHJw4yPrWrqnhyKcs1uAjnkAdG/8Ar1wPEezqOEje19Tk9M1K4sWa3ciSB/vRSfMjf4fUc1fudIjuIDd2G4qp+eI8tH/iPeqt1plxbv8APGQR0PrU+n6hJptwkhUlfuup/iXvVz196AJGbdO32G6RgQTHjB+oNc3NzcxjvnNeg+NrS2j0db+2wBJIikfWvPCd18g9FJrOEuaPMUiHWG22yj1estDWnrRxHEP9r+lZaHFdVL4TKe48e9OG1jQvHvS8ZHGK1JGsg3U3y81NtBpu3mgCMqw+lFPOenaigDvpoAjnHV+/tVK704SgBR8uc49avzTHKqFy5PyrjtSKCxOTkj8qpSa2NGjFu7OQFgACAuWPYVnyW8kKHyxh+vNdLPAZItucAnLEenpVf7OPNaTbkkYx6CtVMzcTnUvWACzIQem4DrUyt7ZzWhJYBl2jnac59KyXt5RO75K88e9WmmQ7om3A4ySKMgVCjOiEyDABpyyIQT60wuPyW5RsVMlxtADKM461CrJgYwfanjnPfA6UgJRchjgfrT1k64PJ7VWCpyeRxQpAPBoHcuMm9QV4ZTnihsv15NVhOyZBFOMu4DGQfrQFyc5yD2ppde3FIrnaM9falDBgOnPY0DE6NgjrWP4xtIbjQppJEBeLBRscg5rccIyYyR9adNoh1bw/rWQWEFi8i4/vjkfyNUpWZMleLR4lNGVJ7j1quetW5W3YPqAaruM5xXcjy2Q+1BpcdcUnemSBPHNISMDpSnrSEelADo13uABkmvTPhDYeT430jePmDSOT9I2rzOJtjhgcEGvT/hFfLP440kkjcTKMe/ltWVb4GbYf+IvU+iDkmg4yMikBweaVsGvLPfBnXBFQKQcikYMW46UqQlzigCszsTgCnJAxILflVtbUA1X1G4W2j4IzVJiI7i5S1QZasO/vpbolFJCd8d6iurrcxaV+Kz5LpmBEfA9apIhsWaRYMjGXqplpTuf8qeFOSepo2N2BqjIhuEyvPSvLfiGFtdUtJm4EiMufcHP9a9XMDP1rzT4yWfkWFjLjnz8Kf+AnNaUviMa+kGznbWZWAIORWxp05yyj0riNPvjCwDE7Twa7DSZCZFGQQw61tNWMKM+Y6yCRfsi7uA4rMmwhJzgDnOamFyI4pIJmACfMM9lPT9Qaw76/aUmNPu9M+tZxR1SkJd3pBKIeO5qknIprE05Du+la2Mi3Z3hgfa3K962yf3IKgEMOo9K5w8YI7VfsrwqBC5/dnoc9KUkNF4DC5bqaiZzGMuPxqTdgfhVOYtdSNFG/ypy/HUelZ2Bsbbt9rmadwpROIvf1P9PwqR13SZU4x1oQbTtBwBQ8gHA69KBDLiBx/pMLKJE4II++PSp7e8adAyjbj7wI5HsaSDcUK54bnn1FQzo9uxu4RuA/1qf3h7e9JoZJ4gvDbWvko3zygDj071yWoErbL2OelXtRvzfXZk5KgBV9hWbqLfIgPIrSmrHJVlzMzlBByDg9RXVaTfLdQKrH96gw3v71yvuBVuwuTbXKTLxt4I9RWso3M6cuVnYRtg461aQqccfjVCCYTqssZ+U+lXoRtG6uWS1sdy1RP5phzjHPFZ9yCCjgZwcke1TySedJkdAKjyS2DWIzY0WVZL1YyQflFdXa5tZdjKDG1cVZf6JfxSYx0BPtXoggWa3STHJFZSNIGjosfk3qyRHgcgV28MqXkW1iFbqDXAadM1tcIT0zXTvdCFyCQu3GeeteVjaTckzaJpT24uFZHAWVeue9YtzbqrmOeEEf3gMGtGHX7SXCySrvUd+4qve6pDcYSMhjnG70Fc9Lni9UUc74suY49JtbBZMt5u8r/sgHB/WuIiOb5s9VGK0by4kubmWSZizbiPoATwKy7U7ryZvevQjG0bE3I9YbIjB9TWeqg1d1nG+IZ55qkoNb0/hMp7jxkd6kyCORzTAuRTwnvViClzmkpccCmAhx1/SilZfaigD0YWx3Ox+90AzVYxGNGYZJBwfStYRYklXeWYtnA6Jx0qGSMJGqhfvH05NQpnQ4mfIjrGOvAy3tUTghkCEEnrWi8TeUxOcZ5qu0AIBwB/F9KtSJcSo0Q3bRwo7etV5oEL7tqjjp3q9sYQk478mq08EjCPHALfp61opENGXJZg2u1lIJ5JNZMlk9vOMHbxnnoa6z5XY8ZRePqaq3tqJEX5RuzWqmZygculzl2DIV2jJNXIpwww3Gehqe503yw8rqNzNjiqd0jxYRVO4kAAVd7kbE/mY7ZpxdWGT271nPdm2l8uZCB0JHOKspMrKWjYMKdguTsCy7lOR+tM3kAEinJIJCMjHbilkTH3DmkAgnULggrzwafHNjIJHHQ1F8uPmFJtwcqRn9aQy4G3/jXb+ErBV0aYtg/bCyn/dxtx/OuAWUkEDGK9E8LyhvDtng8gFT9dxrOrojajqz5l1CD7Jdz2x6wyvGfwJFUnJB4rc8ZW09r4t1ZLiB4Wa5dwrDHyk5B/KsNv516cHeKPGkrNoZnrxSEg0u3HemMBgVRAuPSm0Amgt7UALkZrrvhNcMnxH8PgEjddbTz2KNXI8V0/wxBHxF8Oso5+3IPzBFRU+BmlH+JH1R9Z43U10PFORsdakLL3NeQfQkSQk1MNsS89aY84UdelZd3qKg43U0BemvUUHkcVy2t6iWmKqcmrUt6G6ZzVJoEebzWG4+9UkSzOW3muXyQee1W4dKP8VXl3jBWPj2pGln7IBiqIsQtZRxfdUZ96aYV64AqUfaXP3c+wFOvbSaC1E7rtGeaBFFwqfMccV5B8a9RF0LKJWysUh4HqQa9C1zV/JjMcZyxFeV+OoDdQQEnJ83JPrxW1GOt2cuId4tHEwKSoOK6zQbh1iRWGHXgfSs+zsEQLkA1qWy4lBAxgdq6ZO5y0YtO5c1SeacrIWyyjAHtWek+8Y6Edqt3LHB71nMpLbl4NQtDpe5OBSgYzxUcUm4YPB71KB+VMBwB656UMxVc+tOACjPaq0sjSnao49aTGXY9RkcLbjBcnAb0q4FEEYRSzHuxPJrD8vysYJz3NatreKyiNz83r61AiRiRggYoA+bPU9qc7DOKjUkTDjIoYFuNhk1m6/fG3jFvC3zv94jsPSjU9QW0iZUOZWHA9PeucaRmO5jlvc04xuZVKltESQoyNz0NQ6kclQO3WrEO5hz3qpqWRIAOw5rWK1OV7FPvg1IODUY5/rU0Sbjx1qyDV0bUFt3aGTOx+nsa2GvNybF79az9M0bJE04wCPlXuatG3MUwHUHpmsJ2bOyldLUv2/CgnPtU1tGJblF6c5NQDKwdPp7Vb01C8ikdWNckjdGk9mJt3z7SrcGu+8Nn7Xo45DMhwa4xIt1xKPQ/wBK6vwfdDTnljmGYJSOPSsqm10aw3LkiBScqRW7bWya5p8bo+25gHluM/eXsaf/AGfY3ql4piPr2qK3s/7Ku0ube9gdQcMu7kr6V59aanHTdGpjyafNFO0TqwIbFaGn6ddCCRgoXZlst7CupKwXoEmFLdM96WS1xbSIMEsrAD8K4niXLSwWPEv7ShlZyrBm2mRsdMnmq2lklnYnrzWbpwKJKxGCIypz69K0NOyGfB4xXr1IpIyjJtjNWUPMnqAarIuKsX/MyjnIFQL1xRDYJbki5AxTlHekUc1IB3xTEIBSlCelP2+9L07fjRcdiLBAx1oqXZxxRRcD/9k=" style="width:100%; max-width:340px; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.4);" alt="Jon &amp; Monique" />
+    <div style="font-size:0.75rem; color:var(--muted); margin-top:6px;">Jon 🎂 &amp; Monique 🌸</div>
+  </div>
+
+  <div class="sec-label">At a Glance</div>
+  <div class="overview-grid">
+    <div class="day-card" onclick="showTabById('thu')">
+      <div class="day-card-date">Thu · Jul 2</div>
+      <div class="day-card-title">Arrival Day 🛬</div>
+      <div class="day-card-bullets">Sesame breakfast · Little Havana food tour · Wynwood · Design District · Coral Gables dinner · golf sim</div>
+    </div>
+    <div class="day-card" onclick="showTabById('fri')">
+      <div class="day-card-date">Fri · Jul 3</div>
+      <div class="day-card-title">Beach + Keys Road Trip 🏖️🐊</div>
+      <div class="day-card-bullets">Lagoon & pickleball · Everglades gators · Key Largo · Seen &amp; Be Seen dinner</div>
+    </div>
+    <div class="day-card" onclick="showTabById('sat')">
+      <div class="day-card-date">Sat · Jul 4 🎆</div>
+      <div class="day-card-title">The Main Event</div>
+      <div class="day-card-bullets">Lagoon yoga 8:30AM · Jaya brunch 12–2PM · Nikki Beach · Dennis's · Fireworks · E11even 11PM</div>
+    </div>
+    <div class="day-card" onclick="showTabById('sun')">
+      <div class="day-card-date">Sun · Jul 5</div>
+      <div class="day-card-title">Send-Off 👋</div>
+      <div class="day-card-bullets">Easy breakfast · Last beach walk · MIA by 3PM · AA2035 5:15PM</div>
+    </div>
+  </div>
+
+  <div class="book-asap">
+    <div class="book-asap-title">⚡ Book These ASAP</div>
+    <div class="book-item" style="opacity:0.5;text-decoration:line-through"><span class="book-num">✓</span><span><strong>Jaya at The Setai</strong> — Saturday July 4th brunch. Booked 12–2PM.</span></div>
+    <div class="book-item"><span class="book-num">2</span><span><strong>Dinner reservation</strong> — Casa Neos or whichever Seen &amp; Be Seen spot wins the vote. Friday or Thursday.</span></div>
+    <div class="book-item"><span class="book-num">3</span><span><strong>Biltmore VIP Party</strong> — If going this route, call 305-913-3244 or email july4th@biltmorehotel.com. $180/pp, limited spots.</span></div>
+    <div class="book-item"><span class="book-num">4</span><span><strong>Fireworks Cruise</strong> — If choosing the boat instead of Biltmore. Book before July 4th weekend prices spike.</span></div>
+    <div class="book-item"><span class="book-num">5</span><span><strong>E11even</strong> — Buy tickets in advance for July 4th Saturday. Walk-up is possible but pricing will be higher.</span></div>
+  </div>
+
+  <div class="sec-label">Navigate the Tabs</div>
+  <div class="card is-flex" style="border-left-color: rgba(199,125,255,0.5)">
+    <div class="card-icon">🎉</div>
+    <div class="card-body">
+      <div class="card-title" style="color:var(--purple)">Seen &amp; Be Seen</div>
+      <div class="card-desc">Party restaurants with DJ, scene, and energy — Gekko, Swan, Kiki, Casa Neos, Carbone and more. Vote on which nights to go.</div>
+    </div>
+  </div>
+  <div class="card is-flex" style="border-left-color: rgba(255,107,107,0.5)">
+    <div class="card-icon">🍽️</div>
+    <div class="card-body">
+      <div class="card-title" style="color:var(--coral)">Restaurants</div>
+      <div class="card-desc">South American focus — great food, great vibe, not a club. Cotoa (Michelin Ecuadorian), CVI.CHE 105, La Mar, COYA.</div>
+    </div>
+  </div>
+  <div class="card is-flex" style="border-left-color: rgba(78,205,196,0.5)">
+    <div class="card-icon">🏄</div>
+    <div class="card-body">
+      <div class="card-title" style="color:var(--teal)">Activities</div>
+      <div class="card-desc">Shooting range, Key Largo day trip, wild gators at Anhinga Trail, and more. Some locked in, some optional.</div>
+    </div>
+  </div>
+  <div class="card is-flex" style="border-left-color: rgba(255,209,102,0.5)">
+    <div class="card-icon">🏠</div>
+    <div class="card-body">
+      <div class="card-title" style="color:var(--gold)">Amenities</div>
+      <div class="card-desc">Phil's place at Shoreline Solé Mia — 7-acre crystal lagoon, pickleball, golf simulator, beach volleyball, pool cabanas, and more.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ THURSDAY ═══ -->
+<div class="panel" id="panel-thu">
+  <div class="day-hd">
+    <h2>Thursday, July 2</h2>
+    <p>Arrival Day — Welcome to Miami 🌊</p>
+  </div>
+  <div class="sec-label">🔒 Locked In</div>
+
+  <div class="card is-locked" id="c-arrival">
+    <div class="card-icon">✈️</div>
+    <div class="card-body">
+      <div class="card-title">AA2799 Lands at MIA <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">SFO red-eye lands in Miami. Bags, car, let's go.</div>
+      <div class="card-time">8:39 AM</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-sesame">
+    <div class="card-icon">🍳</div>
+    <div class="card-body">
+      <div class="card-title">Sesame Breakfast <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Right next to Phil's. First proper meal after the red-eye.</div>
+      <div class="card-time">~9:30 AM</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-foodtour">
+    <div class="card-icon">🥪</div>
+    <div class="card-body">
+      <div class="card-title">Little Havana Food Tour <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Sanguich de Miami + El Rey de las Fritas. Best Cuban sandwich and frita back to back on Calle Ocho.</div>
+      <div class="card-time">Lunch</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-wynwood">
+    <div class="card-icon">🎨</div>
+    <div class="card-body">
+      <div class="card-title">Wynwood — Bar Hopping <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Street art, galleries, cocktail bars. Neighborhood picks up energy as evening approaches.</div>
+      <div class="card-time">Afternoon → Evening</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-designdistrict">
+    <div class="card-icon">🛍️</div>
+    <div class="card-body">
+      <div class="card-title">Design District — Shopping <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Browse the shops, grab a drink, take in the architecture. Flows naturally from Wynwood.</div>
+      <div class="card-time">Afternoon → Evening</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Dinner — Casual · No Reservations Needed</span></div>
+
+  <div class="card is-flex" id="c-coralgables">
+    <div class="card-icon">🍷</div>
+    <div class="card-body">
+      <div class="card-title">Coral Gables — Casual Dinner <span class="badge badge-flex">flex</span></div>
+      <div class="card-desc">Short detour on the way back from Wynwood/Design District. Coral Gables has a walkable restaurant row on Miracle Mile — good food, chill energy, nothing fancy. Ortanique (Caribbean fusion), Caffe Abbracci (Italian), Finka Table & Tap (Cuban fusion). Pick one, eat well, head home early.</div>
+      <div class="card-meta">📍 Miracle Mile, Coral Gables · ~20 min from Wynwood</div>
+    </div>
+  </div>
+
+  <div class="card is-flex">
+    <div class="card-icon">⛳</div>
+    <div class="card-body">
+      <div class="card-title">Golf Simulator + Chill <span class="badge badge-flex">flex</span></div>
+      <div class="card-desc">Back at Phil's — open until 11 PM. Long travel day, long night out. Wind down, hit a few holes, get rest before Friday's road trip south.</div>
+      <div class="card-time">Evening · Until 11 PM</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRIDAY ═══ -->
+<div class="panel" id="panel-fri">
+  <div class="day-hd">
+    <h2>Friday, July 3</h2>
+    <p>Beach Morning · Everglades · Key Largo 🏖️🐊🐠</p>
+  </div>
+  <div class="sec-label">🔒 Morning — Locked In</div>
+
+  <div class="card is-locked" id="c-lagoon">
+    <div class="card-icon">🌊</div>
+    <div class="card-body">
+      <div class="card-title">Lagoon + Private Beach <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Morning at Phil's Shoreline Solé Mia lagoon. Swim, relax, get the Miami sun going.</div>
+      <div class="card-time">Morning</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🏓</div>
+    <div class="card-body">
+      <div class="card-title">Pickleball + Beach Volleyball <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Phil's courts on-property. Pre-July 4th competitive warm-up.</div>
+      <div class="card-time">Morning</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Afternoon — Road Trip South 🐊</span></div>
+  <div class="sec-label">🔒 Everglades + Key Largo — Locked In</div>
+
+  <div class="card is-locked" id="c-anhinga">
+    <div class="card-icon">🐊</div>
+    <div class="card-body">
+      <div class="card-title">Anhinga Trail — Wild Gators <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Everglades National Park. Free boardwalk walk — gators are literally on the path, in the water, right next to you. Dozens of them. No tour, no upcharge. Just $35/vehicle park entry. 40 miles north of Key Largo, perfect stop on the drive down.</div>
+      <div class="card-time">~12:00 PM · 45 min walk</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-gatorgrill">
+    <div class="card-icon">🍽️</div>
+    <div class="card-body">
+      <div class="card-title">Everglades Gator Grill — Eat Them <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Homestead, FL — right on the route. Gator tacos, gator kabobs, grilled gator, the works. See 'em at Anhinga, eat 'em here. Full circle.</div>
+      <div class="card-time">~1:30 PM · Lunch</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🐠</div>
+    <div class="card-body">
+      <div class="card-title">Key Largo <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">40 min south of Homestead. Snorkel, boat charter, tiki boat — see the Key Largo tab for all the options and vote on what you want to do.</div>
+      <div class="card-time">~3:00 PM – 7:00 PM</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Friday Dinner — Seen &amp; Be Seen</span></div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🎉</div>
+    <div class="card-body">
+      <div class="card-title">Dinner — Seen &amp; Be Seen Restaurant <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Party restaurant night — DJ, scene, great room. See the Seen &amp; Be Seen tab for the full list and voting. Casa Neos is the current frontrunner.</div>
+      <div class="card-time">Evening</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SATURDAY ═══ -->
+<div class="panel" id="panel-sat">
+  <div class="day-hd">
+    <h2>Saturday, July 4 🎆</h2>
+    <p>Independence Day — Jon's Birthday Weekend Peak</p>
+  </div>
+  <div class="sec-label">🔒 Locked In</div>
+
+  <div class="card is-locked" id="c-lagoon-yoga">
+    <div class="card-icon">🧘</div>
+    <div class="card-body">
+      <div class="card-title">Lagoon Yoga <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Laguna Solé — morning yoga session right at the crystal lagoon. Low-key way to start what will be a big day. Residents only.</div>
+      <div class="card-time">8:30 AM</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-jaya">
+    <div class="card-icon">🦞</div>
+    <div class="card-body">
+      <div class="card-title">Jaya at The Setai — Seafood Brunch <span class="badge badge-locked">locked</span> <span class="badge" style="background:var(--teal);color:#000">✓ Booked</span></div>
+      <div class="card-desc">2001 Collins Ave, Miami Beach. All-you-can-eat raw bar, mezze, bottomless Rosé/Champagne, Spritz Bar. One of the most elegant settings in Miami. Reservation confirmed.</div>
+      <div class="card-time">12:00 PM – 2:00 PM</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-nikkibeach">
+    <div class="card-icon">🏄</div>
+    <div class="card-body">
+      <div class="card-title">Nikki Beach <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">1 Ocean Drive, South Beach. Iconic waterfront beach club. July 4th here will be a full scene — daybed, drinks, music, sun.</div>
+      <div class="card-time">Afternoon · Post-Brunch</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🌊</div>
+    <div class="card-body">
+      <div class="card-title">Dennis's Waterfront Apartment <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Pre-game at Dennis's place before the evening. Waterfront views, drinks, wind down from brunch and Nikki Beach.</div>
+      <div class="card-time">Afternoon → Early Evening</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Evening — Choose One</span></div>
+  <div class="sec-label">🗳️ July 4th Evening Event</div>
+
+  <div class="card is-optional" id="c-biltmore">
+    <div class="card-icon">🎆</div>
+    <div class="card-body">
+      <div class="card-title">Biltmore Hotel VIP Party</div>
+      <div class="card-desc">$180/person · 1200 Anastasia Ave, Coral Gables · Open bar 5–9:45 PM · BBQ dinner buffet · 10-min custom drone show + fireworks at 9 PM (Coral Gables centennial — extra special this year). Private balcony, away from the 30k public crowd. Book: 305-913-3244 or july4th@biltmorehotel.com</div>
+      <div class="card-time">5 PM – 9:45 PM</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('biltmore','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('biltmore','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('biltmore','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-biltmore"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-cruise">
+    <div class="card-icon">🚢</div>
+    <div class="card-body">
+      <div class="card-title">Fireworks Cruise — Biscayne Bay</div>
+      <div class="card-desc">Departs Bayside Marketplace, 401 Biscayne Blvd. Watch Bayfront fireworks from the water with the Miami skyline behind them. Options from intimate 2-hr cruise to mega yacht — unlimited drinks included.</div>
+      <div class="card-time">8 PM – 10 PM</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('cruise','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('cruise','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('cruise','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-cruise"></div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Saturday Dinner — South American</span></div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🇵🇪</div>
+    <div class="card-body">
+      <div class="card-title">Dinner — South American Restaurant <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Good food, great vibe, but not a party restaurant — this is the night to actually taste something. Cotoa (North Miami, Michelin-recognized, 5 min from Phil's) is the top pick. See the Restaurants tab for the full shortlist and voting.</div>
+      <div class="card-time">Evening · Before E11even</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Late Night · Locked</span></div>
+
+  <div class="card is-locked" id="c-e11even">
+    <div class="card-icon">🎪</div>
+    <div class="card-body">
+      <div class="card-title">E11even Miami <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">29 NE 11th St, Downtown Miami. 24-hour club. July 4th Saturday at E11even will be something else. Dress code strictly enforced — no athletic wear, no plain white tees. Buy tickets in advance.</div>
+      <div class="card-time">11 PM onwards 🌙</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SUNDAY ═══ -->
+<div class="panel" id="panel-sun">
+  <div class="day-hd">
+    <h2>Sunday, July 5</h2>
+    <p>Send-Off Day 👋</p>
+  </div>
+  <div class="sec-label">🔒 Locked In</div>
+
+  <div class="card is-locked">
+    <div class="card-icon">✈️</div>
+    <div class="card-body">
+      <div class="card-title">AA2035 Departs MIA <span class="badge badge-locked">locked</span></div>
+      <div class="card-desc">Miami → SFO, arrives 8:20 PM. Airport by 3 PM — allow time for bags.</div>
+      <div class="card-time">5:15 PM</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Morning — Flex</div>
+
+  <div class="card is-flex">
+    <div class="card-icon">☕</div>
+    <div class="card-body">
+      <div class="card-title">Farewell Breakfast <span class="badge badge-flex">flex</span></div>
+      <div class="card-desc">Somewhere good and close. Eggs, coffee, trip debrief.</div>
+      <div class="card-time">Late Morning</div>
+    </div>
+  </div>
+
+  <div class="card is-flex">
+    <div class="card-icon">🌊</div>
+    <div class="card-body">
+      <div class="card-title">Last Beach Walk or Lagoon <span class="badge badge-flex">flex</span></div>
+      <div class="card-desc">One final dose of Miami sun before MIA. No agenda.</div>
+      <div class="card-time">Morning → Noon</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OPTIONS ═══ -->
+<div class="panel" id="panel-options">
+  <div class="day-hd">
+    <h2>🎯 Options</h2>
+    <p>Not locked to a day — pick your night, vote it in</p>
+  </div>
+
+  <div class="sec-intro">
+    <strong>These two go together naturally</strong> — Nexus is in Davie, Hard Rock Hollywood is 5 minutes away. Do them back to back any evening that has room. Friday night after Key Largo is the most natural fit but not locked.
+  </div>
+
+  <div class="card is-optional" id="c-nexus">
+    <div class="card-icon">🎯</div>
+    <div class="card-body">
+      <div class="card-title">Nexus Shooting Range</div>
+      <div class="card-desc">2600 Davie Rd, Davie FL. South Florida's top-rated indoor range — advanced video lane targeting, multiple caliber options. Legitimately one of the nicest ranges in the country. Head straight to Hard Rock after, it's 5 minutes away. Closes 10 PM — plan accordingly.</div>
+      <div class="card-meta">📍 2600 Davie Rd, Davie FL · Closes 10 PM · Book a lane in advance</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('nexus','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('nexus','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('nexus','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-nexus"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-hardrock">
+    <div class="card-icon">🎰</div>
+    <div class="card-body">
+      <div class="card-title">Hard Rock Hollywood Casino</div>
+      <div class="card-desc">Seminole Hard Rock Hotel &amp; Casino, Hollywood FL. Poker, slots, bars, live music — open all night. 5 min from Nexus. Pre-July 4th Friday or post-July 4th Saturday, the energy in this place will be something.</div>
+      <div class="card-meta">📍 1 Seminole Way, Hollywood FL · Open 24 hrs</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('hardrock','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('hardrock','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('hardrock','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-hardrock"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SEEN & BE SEEN ═══ -->
+<div class="panel" id="panel-scene">
+  <div class="day-hd">
+    <h2>🎉 Seen &amp; Be Seen</h2>
+    <p>Party restaurants — come for the scene as much as the food</p>
+  </div>
+
+  <div class="sec-intro">
+    <strong>These are restaurants where the DJ, crowd, and room are just as important as the menu.</strong> Plan on two dinners: one Thursday, one Friday. Vote on your favorites — whichever spots get the most love will anchor the evenings.
+  </div>
+
+  <div class="card is-top" id="c-casaneos">
+    <div class="card-icon">🏛️</div>
+    <div class="card-body">
+      <div class="card-title">Casa Neos <span class="badge badge-top">Top Pick</span></div>
+      <div class="card-desc">Greek Mediterranean. Gorgeous room, festive energy, great crowd. A step up from Kiki in elegance while still having the whole place buzzing. Currently the frontrunner for one of the dinner nights.</div>
+      <div class="card-meta">Cuisine: Greek Mediterranean · Vibe: Elegant + Festive</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('casaneos','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('casaneos','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('casaneos','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-casaneos"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kiki">
+    <div class="card-icon">🇬🇷</div>
+    <div class="card-body">
+      <div class="card-title">Kiki on the River</div>
+      <div class="card-desc">Greek, plate-smashing, dancing, right on the Miami River. Gets rowdy in the best way — one of the most fun nights out in the city.</div>
+      <div class="card-meta">Cuisine: Greek · Vibe: Loud &amp; Festive · DJ + Dancing</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kiki','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kiki','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kiki','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kiki"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-gekko">
+    <div class="card-icon">🦎</div>
+    <div class="card-body">
+      <div class="card-title">Gekko</div>
+      <div class="card-desc">Bad Bunny + David Grutman's Latin steakhouse in Brickell. DJ, loud, scene. Essentially a club that also serves excellent steak.</div>
+      <div class="card-meta">Cuisine: Latin Steakhouse · Vibe: Club-Restaurant · DJ</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('gekko','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('gekko','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('gekko','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-gekko"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-swan">
+    <div class="card-icon">🦢</div>
+    <div class="card-body">
+      <div class="card-title">Swan</div>
+      <div class="card-desc">Grutman's Design District flagship. DJ, beautiful room, celebrity crowd. More vibe than food — but still a great time and easy from Wynwood.</div>
+      <div class="card-meta">Cuisine: American · Vibe: Scene + Celebrity · DJ</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('swan','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('swan','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('swan','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-swan"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-sexyfish">
+    <div class="card-icon">🐟</div>
+    <div class="card-body">
+      <div class="card-title">Sexy Fish</div>
+      <div class="card-desc">British import, seafood-forward with an extraordinary room. DJ and scene vibes — known as much for the atmosphere as the food.</div>
+      <div class="card-meta">Cuisine: Seafood · Vibe: Designed Space + DJ</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('sexyfish','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('sexyfish','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('sexyfish','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-sexyfish"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-claudie">
+    <div class="card-icon">🎭</div>
+    <div class="card-body">
+      <div class="card-title">Claudie</div>
+      <div class="card-desc">French Riviera-inspired, Brickell. Cabaret performers, live entertainment, theatrical energy. One of the newer buzzy openings.</div>
+      <div class="card-meta">Cuisine: French Mediterranean · Vibe: Cabaret + Scene</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('claudie','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('claudie','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('claudie','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-claudie"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-carbone">
+    <div class="card-icon">🍝</div>
+    <div class="card-body">
+      <div class="card-title">Carbone</div>
+      <div class="card-desc">Italian, South of Fifth. Hardest reservation in Miami. Classic red-sauce in a room that feels like 1960s New York. Loud, social, memorable.</div>
+      <div class="card-meta">Cuisine: Italian · Vibe: Classic Scene · Loud + Social</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('carbone','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('carbone','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('carbone','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-carbone"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-lpm">
+    <div class="card-icon">🥂</div>
+    <div class="card-body">
+      <div class="card-title">LPM Restaurant</div>
+      <div class="card-desc">French Mediterranean, Brickell Bay. Elegant and social — a long dinner that turns into a night out. More dinner-focused than club but still very much a scene.</div>
+      <div class="card-meta">Cuisine: French Mediterranean · Vibe: Elegant Scene</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('lpm','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('lpm','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('lpm','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-lpm"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ RESTAURANTS ═══ -->
+<div class="panel" id="panel-restaurants">
+  <div class="day-hd">
+    <h2>🍽️ Restaurants</h2>
+    <p>Great food, great vibe — not a party venue</p>
+  </div>
+
+  <div class="sec-intro">
+    <strong>South American focus</strong> — Miami has a world-class Latin American dining scene and these spots let the food do the talking. Perfect for one of the dinners if you want something more intimate than a club-restaurant. Cotoa is literally minutes from Phil's place.
+  </div>
+
+  <div class="card is-top" id="c-cotoa">
+    <div class="card-icon">🇪🇨</div>
+    <div class="card-body">
+      <div class="card-title">Cotoa <span class="badge badge-top">Michelin</span> <span class="badge badge-scene" style="background:rgba(78,205,196,0.1);color:var(--teal)">5 min away</span></div>
+      <div class="card-desc">Ecuadorian, North Miami. The first Ecuadorian restaurant in the U.S. Michelin Guide. Chef Alejandra Espinoza's modern take on Ecuadorian cuisine — bold, precise, and unlike anything in Miami. At 12475 NE 6th Ct, this is basically in Phil's backyard.</div>
+      <div class="card-meta">Cuisine: Ecuadorian · Michelin Guide · North Miami</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('cotoa','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('cotoa','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('cotoa','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-cotoa"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-ceviche105">
+    <div class="card-icon">🐟</div>
+    <div class="card-body">
+      <div class="card-title">CVI.CHE 105</div>
+      <div class="card-desc">Miami's iconic Peruvian restaurant. Beloved since 2007 — ceviche, tiradito, lomo saltado done right. Lively atmosphere without being a nightclub. Two locations: Downtown (105 NE 3rd Ave) and Lincoln Rd.</div>
+      <div class="card-meta">Cuisine: Peruvian · Downtown + Lincoln Rd · Iconic</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('ceviche105','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('ceviche105','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('ceviche105','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-ceviche105"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-lamar">
+    <div class="card-icon">🌊</div>
+    <div class="card-body">
+      <div class="card-title">La Mar by Gastón Acurio</div>
+      <div class="card-desc">Peruvian at the Mandarin Oriental on Brickell Key. Gastón Acurio is the godfather of modern Peruvian cuisine. Waterfront terrace, ceviche bar, beautiful setting. Upscale without trying too hard.</div>
+      <div class="card-meta">Cuisine: Peruvian · Mandarin Oriental · Waterfront</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('lamar','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('lamar','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('lamar','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-lamar"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-coya">
+    <div class="card-icon">🇵🇪</div>
+    <div class="card-body">
+      <div class="card-title">COYA Miami</div>
+      <div class="card-desc">Peruvian-inspired, Collins Ave. Upscale and designed, with a great bar program and pisco cocktails. A step between "scene" and "serious restaurant" — stylish but food-first.</div>
+      <div class="card-meta">Cuisine: Peruvian-inspired · Collins Ave · Stylish</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('coya','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('coya','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('coya','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-coya"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ACTIVITIES ═══ -->
+<div class="panel" id="panel-activities">
+  <div class="day-hd">
+    <h2>🏄 Activities</h2>
+    <p>Things to do in and around Miami</p>
+  </div>
+
+  <div class="sec-label">🔒 Already in the Plan</div>
+
+  <div class="card is-locked" id="c-act-pickleball">
+    <div class="card-icon">🏓</div>
+    <div class="card-body">
+      <div class="card-title">Pickleball <span class="badge badge-locked">Friday AM</span></div>
+      <div class="card-desc">On-property at Shoreline Solé Mia. Phil's courts, no travel needed.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🏐</div>
+    <div class="card-body">
+      <div class="card-title">Beach Volleyball <span class="badge badge-locked">Friday AM</span></div>
+      <div class="card-desc">On-property beach volleyball courts at the lagoon. Sand, sun, competition.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">⛳</div>
+    <div class="card-body">
+      <div class="card-title">Golf Simulator <span class="badge badge-locked">Thu + Fri flex</span></div>
+      <div class="card-desc">State-of-the-art sim at Shoreline Solé Mia. Open until 11 PM — use anytime.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-act-nexus">
+    <div class="card-icon">🎯</div>
+    <div class="card-body">
+      <div class="card-title">Nexus Shooting Range <span class="badge badge-locked">TBD · See Options tab</span></div>
+      <div class="card-desc">2600 Davie Rd, Davie FL. South Florida's #1-rated indoor range. 5-star, advanced video targeting lanes. Closes 10 PM on Fridays.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked" id="c-act-wynwood">
+    <div class="card-icon">🎨</div>
+    <div class="card-body">
+      <div class="card-title">Wynwood + Design District <span class="badge badge-locked">Thursday</span></div>
+      <div class="card-desc">Street art, galleries, bars. One of Miami's most walkable neighborhoods.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🥪</div>
+    <div class="card-body">
+      <div class="card-title">Little Havana Food Tour <span class="badge badge-locked">Thursday</span></div>
+      <div class="card-desc">Sanguich de Miami + El Rey de las Fritas. Calle Ocho, the real deal.</div>
+    </div>
+  </div>
+
+  <div class="card is-locked">
+    <div class="card-icon">🏄</div>
+    <div class="card-body">
+      <div class="card-title">Nikki Beach <span class="badge badge-locked">Saturday</span></div>
+      <div class="card-desc">1 Ocean Drive, South Beach. Iconic beach club. July 4th afternoon.</div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Optional Add-Ons</span></div>
+  <div class="sec-label">🗳️ Extra Activities — Vote</div>
+
+</div>
+
+<!-- ═══ KEY LARGO ═══ -->
+<div class="panel" id="panel-keylargo">
+  <div class="day-hd">
+    <h2>🐠 Key Largo Day Trip</h2>
+    <p>~1 hr south of Miami · The Florida Keys start here</p>
+  </div>
+
+  <div class="sec-intro">
+    <strong>Key Largo is the diving capital of the world</strong> — first in the Florida Keys chain, easiest from Miami. Leave North Miami around 9:30–10AM, you're in the Keys by 11. The vibe shift is immediate: slower, saltier, more tropical. Full list of what to do — vote on your picks and lock in what you want.
+  </div>
+
+  <div class="divider"><span>On The Water — Top Picks</span></div>
+
+  <div class="card is-top" id="c-kl-pennekamp">
+    <div class="card-icon">🤿</div>
+    <div class="card-body">
+      <div class="card-title">John Pennekamp Coral Reef State Park <span class="badge badge-top">Top Pick</span></div>
+      <div class="card-desc">The first underwater state park in the US. Snorkel tours depart straight from the park out to living coral reef — barracudas, moray eels, sea turtles, vibrant formations. July water temps hit 85–88°F with 60+ ft visibility. The most iconic Key Largo experience and completely worth it for first-timers.</div>
+      <div class="card-meta">📍 MM 102.5, Key Largo · Snorkel tour ~$35–40/pp · ~2.5 hrs on water</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-pennekamp','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-pennekamp','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-pennekamp','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-pennekamp"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kl-charter">
+    <div class="card-icon">⛵</div>
+    <div class="card-body">
+      <div class="card-title">Private Boat Charter</div>
+      <div class="card-desc">Rent a private boat with captain for a fully custom day — snorkel the reef, hit a sandbar, crack drinks in the open water, maybe spot dolphins or manatees. Birthday energy on the water with no strangers. Multiple operators: KL Boat Charters, Sea-EO, Key Largo Adventures. BYO drinks — they provide the cooler.</div>
+      <div class="card-meta">📍 Key Largo Marina · ~$400–700 for the boat (split 4 ways) · Half or full day</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-charter','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-charter','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-charter','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-charter"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kl-tiki">
+    <div class="card-icon">🌺</div>
+    <div class="card-body">
+      <div class="card-title">Tiki Boat Cruise</div>
+      <div class="card-desc">A floating tiki bar with a captain — bring your drinks, cruise the backcountry waterways, hit a sandbar. Fits 6 people max on the small boat, up to 28 on the party version. Cruisin Tikis and Key Largo Tiki Tours both operate here. Ridiculous and fun in the best way.</div>
+      <div class="card-meta">📍 Key Largo · 2 hr cruise · From ~$300 for the boat</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-tiki','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-tiki','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-tiki','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-tiki"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kl-glassbottom">
+    <div class="card-icon">🪟</div>
+    <div class="card-body">
+      <div class="card-title">Glass Bottom Boat — Key Largo Princess</div>
+      <div class="card-desc">75-ft motor yacht with a panoramic glass floor — you see the reef without getting wet. Sip cocktails on the sundeck while the reef passes underneath. Best midday when sunlight hits the coral. Good option if someone in the group isn't feeling the swim.</div>
+      <div class="card-meta">📍 John Pennekamp Park Marina · ~$35/pp · 2.5 hrs</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-glassbottom','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-glassbottom','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-glassbottom','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-glassbottom"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kl-africanqueen">
+    <div class="card-icon">🚢</div>
+    <div class="card-body">
+      <div class="card-title">The African Queen</div>
+      <div class="card-desc">The actual steamboat from the 1951 Katharine Hepburn / Humphrey Bogart film — docked and operating in Key Largo. Canal cruises and dinner cruises available. More of a quirky, interesting thing to see/do than a thrill activity, but genuinely cool if you appreciate the history.</div>
+      <div class="card-meta">📍 MM 99.7, Key Largo · Canal cruise ~$59/pp · 1 hr</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-africanqueen','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-africanqueen','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-africanqueen','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-africanqueen"></div>
+    </div>
+  </div>
+
+  <div class="divider"><span>Eat + Drink</span></div>
+
+  <div class="card is-top" id="c-kl-fisheries">
+    <div class="card-icon">🦞</div>
+    <div class="card-body">
+      <div class="card-title">Key Largo Fisheries <span class="badge badge-top">Top Pick</span></div>
+      <div class="card-desc">They've been unloading fishing boats directly into their kitchen since 1972. Florida lobster, stone crab, mahi, shrimp — as fresh as it gets anywhere in the Keys. Casual waterfront setting, nothing fancy, just excellent fish. Perfect fuel stop before or after a water activity.</div>
+      <div class="card-meta">📍 1313 Ocean Bay Dr, Key Largo · Casual · Outdoor waterfront</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-fisheries','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-fisheries','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-fisheries','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-fisheries"></div>
+    </div>
+  </div>
+
+  <div class="card is-optional" id="c-kl-snappers">
+    <div class="card-icon">🍹</div>
+    <div class="card-body">
+      <div class="card-title">Snapper's Waterfront Bar</div>
+      <div class="card-desc">Classic Keys waterfront bar — 3 different bars, sunset views, live music on Fridays and Saturdays, cold drinks. The kind of place where you sit down for one drink and end up staying for three hours. Locals and tourists mixed, zero pretension.</div>
+      <div class="card-meta">📍 139 Seaside Ave, Key Largo · Casual bar · Live music Fri & Sat</div>
+      <div class="vote-row">
+        <button class="vbtn" onclick="vote('kl-snappers','in',this)">✅ In</button>
+        <button class="vbtn" onclick="vote('kl-snappers','maybe',this)">🤷 Maybe</button>
+        <button class="vbtn" onclick="vote('kl-snappers','pass',this)">❌ Pass</button>
+      </div>
+      <div class="vote-pills" id="vp-kl-snappers"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ AMENITIES ═══ -->
+<div class="panel" id="panel-amenities">
+  <div class="day-hd">
+    <h2>🏠 The Shoreline at Solé Mia</h2>
+    <p>Phil's place in North Miami — the home base for the trip</p>
+  </div>
+
+  <div class="amenity-hero">
+    <h3>🌊 Laguna Solé — The Crystal Lagoon</h3>
+    <p>A Caribbean-quality swim lagoon right in North Miami. Crystal clear, swimmable, with a full beach club experience on-property.</p>
+    <span class="lagoon-stat">7 Acres</span>
+    <span class="lagoon-label">= 21 Olympic-sized pools · Kayak · Paddleboard · Swim</span>
+    <div class="amenity-links" style="justify-content:center; margin-top:14px">
+      <a href="https://www.shorelinesolemia.com/amenities/laguna-sole/" class="amenity-link" target="_blank" rel="noopener">🌊 Lagoon Page</a>
+      <a href="https://www.shorelinesolemia.com/gallery/virtual-tour/" class="amenity-link secondary" target="_blank" rel="noopener">📸 Virtual Tour</a>
+    </div>
+  </div>
+
+  <div class="sec-label">On-Property Amenities</div>
+  <div class="amenity-grid">
+    <div class="amenity-card">
+      <div class="amenity-icon">🏓</div>
+      <div>
+        <div class="amenity-name">Pickleball Courts</div>
+        <div class="amenity-desc">On-property courts — no booking, just show up and play</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">⛳</div>
+      <div>
+        <div class="amenity-name">Golf Simulator</div>
+        <div class="amenity-desc">State-of-the-art sim, 18 holes without leaving the building. Open until 11 PM</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🏐</div>
+      <div>
+        <div class="amenity-name">Beach Volleyball</div>
+        <div class="amenity-desc">Sand courts at the lagoon beach</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🏊</div>
+      <div>
+        <div class="amenity-name">Pool Deck + Cabanas</div>
+        <div class="amenity-desc">Resort-style pool with private cabanas, firepit overlooking the lagoon, grilling lounge</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🛶</div>
+      <div>
+        <div class="amenity-name">Kayak + Paddleboard</div>
+        <div class="amenity-desc">Rentals available at the lagoon beach club. Concierge arranges on the spot</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🏋️</div>
+      <div>
+        <div class="amenity-name">Fitness Studio + Yoga Lawn</div>
+        <div class="amenity-desc">Full gym + outdoor yoga lawn for the morning people in the group</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🔥</div>
+      <div>
+        <div class="amenity-name">Firepit Lounge</div>
+        <div class="amenity-desc">Firepit overlooking the lagoon — perfect for late nights before going out</div>
+      </div>
+    </div>
+    <div class="amenity-card">
+      <div class="amenity-icon">🏀</div>
+      <div>
+        <div class="amenity-name">Basketball Court</div>
+        <div class="amenity-desc">Full basketball court on-property</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="amenity-links">
+    <a href="https://www.shorelinesolemia.com/" class="amenity-link" target="_blank" rel="noopener">🏠 Shoreline Website</a>
+    <a href="https://www.shorelinesolemia.com/gallery/virtual-tour/" class="amenity-link secondary" target="_blank" rel="noopener">📸 See the Gallery</a>
+  </div>
+</div>
+
+<!-- ═══ MAP ═══ -->
+<div class="panel" id="panel-map">
+  <div id="map-el"></div>
+</div>
+
+<!-- ═══ WEATHER ═══ -->
+<div class="panel" id="panel-weather">
+  <div class="day-hd"><h2>Miami Weather</h2><p>July 2–5, 2026 · Typical Forecast</p></div>
+  <div class="wx-grid" id="wx-grid"></div>
+  <div class="wx-tip">☀️ <strong>Miami in July:</strong> Morning sunshine, heat building to 90°F+ by afternoon, and near-daily thunderstorms that usually blow through in under an hour then clear completely. Humidity is real — you will sweat. Mornings are prime outdoor time. Ocean is ~85°F. Bring SPF 50+, UV is extreme every day. Pack a small poncho — afternoon downpours clear fast but they hit suddenly.</div>
+</div>
+
+<!-- ═══ PACK ═══ -->
+<div class="panel" id="panel-pack">
+  <div class="day-hd"><h2>What to Pack</h2><p>Miami July · 4 Nights · Click to check off</p></div>
+  <div id="pack-root"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+// ── STATE ──────────────────────────────────────────
+const S = { person: 'Phil', votes: {} };
+
+// ── TABS ───────────────────────────────────────────
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'map') setTimeout(initMap, 60);
+}
+
+function showTabById(id) {
+  const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes("'" + id + "'"));
+  if (btn) showTab(id, btn);
+}
+
+// ── PERSON ─────────────────────────────────────────
+function setPerson(name, btn) {
+  S.person = name;
+  document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  Object.keys(S.votes).forEach(id => refreshBtns(id));
+}
+
+// ── VOTING ─────────────────────────────────────────
+function vote(id, choice, btn) {
+  if (!S.votes[id]) S.votes[id] = {};
+  S.votes[id][S.person] = S.votes[id][S.person] === choice ? undefined : choice;
+  if (!S.votes[id][S.person]) delete S.votes[id][S.person];
+  refreshBtns(id);
+  refreshPills(id);
+}
+
+function refreshBtns(id) {
+  const card = document.getElementById('c-' + id);
+  if (!card) return;
+  const btns = card.querySelectorAll('.vbtn');
+  btns.forEach(b => b.classList.remove('v-in','v-maybe','v-pass'));
+  const cur = S.votes[id] && S.votes[id][S.person];
+  if (cur === 'in')    btns[0].classList.add('v-in');
+  if (cur === 'maybe') btns[1].classList.add('v-maybe');
+  if (cur === 'pass')  btns[2].classList.add('v-pass');
+}
+
+function refreshPills(id) {
+  const el = document.getElementById('vp-' + id);
+  if (!el) return;
+  const v = S.votes[id] || {};
+  el.innerHTML = ['Phil','Jon','Monique','Nelie'].map(p => {
+    if (!v[p]) return '';
+    const cls = v[p] === 'in' ? 'in' : v[p] === 'maybe' ? 'maybe' : 'pass';
+    const em  = v[p] === 'in' ? '✅' : v[p] === 'maybe' ? '🤷' : '❌';
+    return `<span class="vpill ${cls}">${em} ${p}</span>`;
+  }).join('');
+}
+
+// ── CARD LINKS ─────────────────────────────────────
+const cardLinks = {
+  'sesame':      { maps: 'https://www.google.com/maps/search/?api=1&query=Sesame+Miami', site: 'https://www.seasamemiami.com/', label: 'Website' },
+  'foodtour':    { maps: 'https://www.google.com/maps/search/?api=1&query=Sanguich+de+Miami+2057+SW+8th+St', site: 'https://www.google.com/maps/search/?api=1&query=El+Rey+de+las+Fritas+Miami', label: 'El Rey Maps' },
+  'wynwood':     { maps: 'https://www.google.com/maps/search/?api=1&query=Wynwood+Walls+Miami', site: 'https://www.wynwoodwalls.com/', label: 'Website' },
+  'coralgables': { maps: 'https://www.google.com/maps/search/?api=1&query=Miracle+Mile+Coral+Gables+FL', site: 'https://www.google.com/maps/search/?api=1&query=restaurants+Miracle+Mile+Coral+Gables', label: 'Browse Spots' },
+  'designdistrict': { maps: 'https://www.google.com/maps/search/?api=1&query=Miami+Design+District', site: 'https://www.miamidesigndistrict.net/', label: 'Website' },
+  'lagoon':      { maps: 'https://www.google.com/maps/search/?api=1&query=Shoreline+Sole+Mia+North+Miami', site: 'https://www.shorelinesolemia.com/', label: 'Website' },
+  'nexus':       { maps: 'https://www.google.com/maps/search/?api=1&query=Nexus+Shooting+2600+Davie+Rd+Davie+FL', site: 'https://www.nexusshooting.com/', label: 'Book Range' },
+  'hardrock':    { maps: 'https://www.google.com/maps/search/?api=1&query=Seminole+Hard+Rock+Hollywood+FL', site: 'https://www.seminolehardrockhollywood.com/', label: 'Website' },
+  'lagoon-yoga': { maps: 'https://www.google.com/maps/search/?api=1&query=Laguna+Sole+Shoreline+Sole+Mia+North+Miami', site: 'https://www.shorelinesolemia.com/amenities/laguna-sole/', label: 'Lagoon Info' },
+  'jaya':        { maps: 'https://www.google.com/maps/search/?api=1&query=Jaya+at+The+Setai+2001+Collins+Ave+Miami+Beach', site: 'https://www.thesetaihotel.com/miami-beach-restaurants/jaya', label: 'Website' },
+  'nikkibeach':  { maps: 'https://www.google.com/maps/search/?api=1&query=Nikki+Beach+1+Ocean+Drive+Miami+Beach', site: 'https://miamibeach.nikkibeach.com/', label: 'Website' },
+  'e11even':     { maps: 'https://www.google.com/maps/search/?api=1&query=E11even+29+NE+11th+St+Miami', site: 'https://www.e11even.com/', label: 'Tickets' },
+  'biltmore':    { maps: 'https://www.google.com/maps/search/?api=1&query=Biltmore+Hotel+1200+Anastasia+Ave+Coral+Gables', site: 'https://biltmorehotel.com/miami-resort-calendar/', label: 'Event Info' },
+  'cruise':      { maps: 'https://www.google.com/maps/search/?api=1&query=Bayside+Marketplace+401+Biscayne+Blvd+Miami', site: 'https://www.miamionthewater.com/tours/miami-4th-of-july-cruise/', label: 'Book Cruise' },
+  // Seen & Be Seen
+  'casaneos':    { maps: 'https://www.google.com/maps/search/?api=1&query=Casa+Neos+Miami', site: 'https://www.casaneos.com/', label: 'Website' },
+  'kiki':        { maps: 'https://www.google.com/maps/search/?api=1&query=Kiki+on+the+River+450+NW+North+River+Dr+Miami', site: 'https://resy.com/cities/miami-fl/kiki-on-the-river', label: 'Reserve' },
+  'gekko':       { maps: 'https://www.google.com/maps/search/?api=1&query=Gekko+8+SE+8th+St+Miami', site: 'https://gekko.com/', label: 'Website' },
+  'swan':        { maps: 'https://www.google.com/maps/search/?api=1&query=Swan+90+NE+39th+St+Miami', site: 'https://swanmiami.com/', label: 'Website' },
+  'sexyfish':    { maps: 'https://www.google.com/maps/search/?api=1&query=Sexy+Fish+Miami+Beach', site: 'https://sexyfish.com/miami/', label: 'Website' },
+  'claudie':     { maps: 'https://www.google.com/maps/search/?api=1&query=Claudie+1101+Brickell+Ave+Miami', site: 'https://claudiemiami.com/', label: 'Website' },
+  'carbone':     { maps: 'https://www.google.com/maps/search/?api=1&query=Carbone+49+Collins+Ave+Miami+Beach', site: 'https://carbonemiami.com/', label: 'Website' },
+  'lpm':         { maps: 'https://www.google.com/maps/search/?api=1&query=LPM+Restaurant+1300+Brickell+Bay+Dr+Miami', site: 'https://lpmrestaurant.com/miami/', label: 'Website' },
+  // Restaurants
+  'cotoa':       { maps: 'https://www.google.com/maps/search/?api=1&query=Cotoa+12475+NE+6th+Ct+Miami', site: 'https://cotoa.rest/', label: 'Reserve' },
+  'ceviche105':  { maps: 'https://www.google.com/maps/search/?api=1&query=CVI.CHE+105+105+NE+3rd+Ave+Miami', site: 'https://www.ceviche105.com/', label: 'Website' },
+  'lamar':       { maps: 'https://www.google.com/maps/search/?api=1&query=La+Mar+Mandarin+Oriental+Miami', site: 'https://www.mandarinoriental.com/en/miami/brickell-key/dine/la-mar', label: 'Reserve' },
+  'coya':        { maps: 'https://www.google.com/maps/search/?api=1&query=COYA+Miami+2801+Collins+Ave', site: 'https://coyarestaurant.com/miami/', label: 'Website' },
+  // Activities
+  'anhinga':       { maps: 'https://www.google.com/maps/search/?api=1&query=Anhinga+Trail+Everglades+National+Park+Florida', site: 'https://www.nps.gov/ever/planyourvisit/anhinga-trail.htm', label: 'NPS Info' },
+  'gatorgrill':    { maps: 'https://www.google.com/maps/search/?api=1&query=Everglades+Gator+Grill+36650+SW+192nd+Ave+Homestead+FL', site: 'https://www.facebook.com/evergladesgatorgrill/', label: 'Info' },
+  // Key Largo
+  'kl-pennekamp':    { maps: 'https://www.google.com/maps/search/?api=1&query=John+Pennekamp+Coral+Reef+State+Park+Key+Largo', site: 'https://www.floridastateparks.org/parks-and-trails/john-pennekamp-coral-reef-state-park', label: 'Park Info' },
+  'kl-charter':      { maps: 'https://www.google.com/maps/search/?api=1&query=Key+Largo+Boat+Charters', site: 'https://klboatcharters.com/', label: 'Book Charter' },
+  'kl-tiki':         { maps: 'https://www.google.com/maps/search/?api=1&query=Cruisin+Tikis+Key+Largo', site: 'https://cruisintikis.com/key-largo/', label: 'Book Tiki' },
+  'kl-glassbottom':  { maps: 'https://www.google.com/maps/search/?api=1&query=Key+Largo+Princess+Glass+Bottom+Boat', site: 'https://www.pennekamppark.com/glass-bottom-boat-tours/', label: 'Book Tour' },
+  'kl-africanqueen': { maps: 'https://www.google.com/maps/search/?api=1&query=African+Queen+Key+Largo+Florida', site: 'https://www.africanqueenflkeys.com/', label: 'Book Cruise' },
+  'kl-fisheries':    { maps: 'https://www.google.com/maps/search/?api=1&query=Key+Largo+Fisheries+1313+Ocean+Bay+Dr', site: 'https://www.keylargofisheries.com/', label: 'Website' },
+  'kl-snappers':     { maps: 'https://www.google.com/maps/search/?api=1&query=Snappers+Waterfront+Bar+Key+Largo', site: 'https://www.snapperskeylargo.com/', label: 'Website' },
+};
+
+(function injectLinks() {
+  Object.entries(cardLinks).forEach(([id, lnk]) => {
+    const card = document.getElementById('c-' + id);
+    if (!card) return;
+    const div = document.createElement('div');
+    div.className = 'card-links';
+    div.innerHTML =
+      (lnk.maps ? `<a href="${lnk.maps}" class="card-link" target="_blank" rel="noopener">🗺️ Maps</a>` : '') +
+      (lnk.site ? `<a href="${lnk.site}" class="card-link" target="_blank" rel="noopener">🌐 ${lnk.label||'Website'}</a>` : '');
+    const voteRow  = card.querySelector('.vote-row');
+    const cardTime = card.querySelector('.card-time');
+    const cardMeta = card.querySelector('.card-meta');
+    const cardDesc = card.querySelector('.card-desc');
+    if (voteRow)       voteRow.before(div);
+    else if (cardMeta) cardMeta.after(div);
+    else if (cardTime) cardTime.after(div);
+    else if (cardDesc) cardDesc.after(div);
+  });
+})();
+
+// ── MAP ────────────────────────────────────────────
+let mapDone = false;
+function initMap() {
+  if (mapDone) return;
+  mapDone = true;
+  const map = L.map('map-el').setView([25.84, -80.20], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 18 }).addTo(map);
+
+  const pins = [
+    // Phil's home base
+    { n:'🏠 Shoreline Solé Mia', lat:25.9040, lng:-80.1450, cat:'home', d:'Phil\'s place — lagoon, pickleball, golf sim, beach volleyball' },
+    // Thursday
+    { n:'✈️ Miami International Airport', lat:25.7959, lng:-80.2870, cat:'locked', d:'AA2799 lands 8:39 AM' },
+    { n:'🥪 Sanguich de Miami', lat:25.7648, lng:-80.2196, cat:'locked', d:'Best Cuban sandwich in Little Havana' },
+    { n:'🍔 El Rey de las Fritas', lat:25.7642, lng:-80.2255, cat:'locked', d:'Best frita in Miami · Calle Ocho' },
+    { n:'🎨 Wynwood Walls', lat:25.8001, lng:-80.1994, cat:'locked', d:'Street art + bar hopping · Thursday evening' },
+    { n:'🛍️ Design District', lat:25.8138, lng:-80.1940, cat:'locked', d:'Shopping + galleries · Thursday evening' },
+    // Friday
+    { n:'🎯 Nexus Shooting Range', lat:26.0724, lng:-80.2367, cat:'optional', d:'2600 Davie Rd · 5-star indoor range · Open until 10 PM · TBD night' },
+    { n:'🎰 Hard Rock Hollywood', lat:26.0023, lng:-80.1924, cat:'optional', d:'Seminole Hard Rock Casino · Minutes from Nexus · TBD night' },
+    // Saturday
+    { n:'🦞 Jaya at The Setai', lat:25.7904, lng:-80.1301, cat:'locked', d:'Fancy seafood brunch · July 4th · Locked' },
+    { n:'🏄 Nikki Beach', lat:25.7667, lng:-80.1302, cat:'locked', d:'Iconic beach club · South Beach · Saturday PM' },
+    { n:'🎪 E11even Miami', lat:25.7786, lng:-80.1918, cat:'locked', d:'24-hour club · 11 PM Saturday · Locked' },
+    // Optional events
+    { n:'🎆 Biltmore Hotel', lat:25.7425, lng:-80.2688, cat:'optional', d:'July 4th VIP Party · $180/pp · Open bar + drone show' },
+    { n:'🚢 Bayside (Fireworks Cruise)', lat:25.7793, lng:-80.1873, cat:'optional', d:'Fireworks cruise departure · 8–10 PM' },
+    // Seen & Be Seen
+    { n:'🍝 Carbone', lat:25.7700, lng:-80.1313, cat:'scene', d:'Italian · South of Fifth' },
+    { n:'🇬🇷 Kiki on the River', lat:25.7788, lng:-80.2017, cat:'scene', d:'Greek · Miami River · DJ + plate smashing' },
+    { n:'🦎 Gekko', lat:25.7642, lng:-80.1927, cat:'scene', d:'Latin steakhouse · Brickell · DJ' },
+    { n:'🦢 Swan', lat:25.8146, lng:-80.1932, cat:'scene', d:'Scene · Design District · DJ' },
+    { n:'🥂 LPM Restaurant', lat:25.7622, lng:-80.1873, cat:'scene', d:'French Mediterranean · Brickell Bay' },
+    { n:'🏛️ Casa Neos', lat:25.7800, lng:-80.1948, cat:'scene', d:'Greek Mediterranean · Top Pick' },
+    { n:'🐟 Sexy Fish', lat:25.7718, lng:-80.1341, cat:'scene', d:'Seafood · DJ · Designed space' },
+    { n:'🎭 Claudie', lat:25.7591, lng:-80.1940, cat:'scene', d:'French Riviera · Cabaret · Brickell' },
+    // Restaurants
+    { n:'🇪🇨 Cotoa', lat:25.8940, lng:-80.1724, cat:'restaurant', d:'Michelin Ecuadorian · North Miami · 5 min from Phil\'s' },
+    { n:'🐟 CVI.CHE 105', lat:25.7752, lng:-80.1926, cat:'restaurant', d:'Peruvian · Downtown Miami' },
+    { n:'🌊 La Mar', lat:25.7640, lng:-80.1850, cat:'restaurant', d:'Peruvian · Mandarin Oriental · Brickell Key' },
+    { n:'🇵🇪 COYA Miami', lat:25.8040, lng:-80.1310, cat:'restaurant', d:'Peruvian-inspired · Collins Ave' },
+    // Activities
+    { n:'🐊 Anhinga Trail', lat:25.3922, lng:-80.6081, cat:'activity', d:'Wild gators · Free boardwalk · Everglades NP · Friday stop' },
+  ];
+
+  const col = { home:'#FFD166', locked:'#4ECDC4', optional:'#FF8E53', scene:'#C77DFF', restaurant:'#FF6B6B', activity:'#4FC3F7' };
+  const sz  = { home:11, locked:9, optional:8, scene:7, restaurant:7, activity:8 };
+
+  pins.forEach(p => {
+    L.circleMarker([p.lat, p.lng], { radius: sz[p.cat]||7, fillColor: col[p.cat]||'#aaa', color: '#0f1117', weight: 2, opacity: 1, fillOpacity: 0.92 })
+      .addTo(map)
+      .bindPopup(`<div style="font-family:-apple-system,sans-serif;min-width:150px"><strong style="font-size:.88rem">${p.n}</strong><div style="font-size:.76rem;color:#555;margin-top:3px">${p.d}</div></div>`);
+  });
+
+  const leg = L.control({ position: 'bottomright' });
+  leg.onAdd = () => {
+    const d = L.DomUtil.create('div');
+    d.style.cssText = 'background:rgba(15,17,23,0.94);padding:10px 13px;border-radius:9px;color:#e0e0e0;font-size:.72rem;line-height:2;border:1px solid rgba(255,255,255,0.08)';
+    d.innerHTML = '<strong>Map Key</strong><br>'
+      + '<span style="color:#FFD166">●</span> Home Base<br>'
+      + '<span style="color:#4ECDC4">●</span> Locked in plan<br>'
+      + '<span style="color:#FF8E53">●</span> Optional events<br>'
+      + '<span style="color:#C77DFF">●</span> Seen &amp; Be Seen<br>'
+      + '<span style="color:#FF6B6B">●</span> Restaurants<br>'
+      + '<span style="color:#4FC3F7">●</span> Activities';
+    return d;
+  };
+  leg.addTo(map);
+}
+
+// ── WEATHER ────────────────────────────────────────
+(function initWeather() {
+  const days = [
+    { date:'Thu Jul 2', icon:'⛅', hi:91, lo:78, desc:'Partly cloudy, afternoon storm possible', hum:'78%', rain:'55%', uv:'11 – Extreme', wind:'12 mph SE', sea:'85°F' },
+    { date:'Fri Jul 3', icon:'🌤️', hi:90, lo:79, desc:'Mostly sunny, evening thunderstorm', hum:'76%', rain:'60%', uv:'11 – Extreme', wind:'10 mph E', sea:'85°F' },
+    { date:'Sat Jul 4', icon:'☀️', hi:92, lo:78, desc:'Sunny morning, storms clear by evening', hum:'75%', rain:'50%', uv:'11 – Extreme', wind:'11 mph SE', sea:'85°F' },
+    { date:'Sun Jul 5', icon:'⛅', hi:90, lo:78, desc:'Partly cloudy, smooth travel day', hum:'77%', rain:'40%', uv:'10 – Very High', wind:'13 mph E', sea:'85°F' },
+  ];
+  document.getElementById('wx-grid').innerHTML = days.map(d => `
+    <div class="wx-card">
+      <div class="wx-date">${d.date}</div>
+      <div class="wx-icon">${d.icon}</div>
+      <div class="wx-temp">${d.hi}° / ${d.lo}°F</div>
+      <div class="wx-desc">${d.desc}</div>
+      <div class="wx-rows">
+        <div class="wx-row"><span>💧 Humidity</span><span>${d.hum}</span></div>
+        <div class="wx-row"><span>🌧️ Rain</span><span>${d.rain}</span></div>
+        <div class="wx-row"><span>☀️ UV Index</span><span>${d.uv}</span></div>
+        <div class="wx-row"><span>💨 Wind</span><span>${d.wind}</span></div>
+        <div class="wx-row"><span>🌊 Sea</span><span>${d.sea}</span></div>
+      </div>
+    </div>`).join('');
+})();
+
+// ── PACK LIST ──────────────────────────────────────
+(function initPack() {
+  const cats = [
+    { title:'👕 Clothing (4 nights)', items:['Light linen/cotton shirts (3–4)','Swim trunks (2)','Shorts (3)','Light jogger or pants','Going-out outfit ×2','Loafers or clean shoes for nightlife','Sandals / flip flops','White sneakers'] },
+    { title:'🎽 E11even Dress Code', items:['NO athletic wear (strictly enforced)','NO plain white tees','Fitted button-down or nice top','Clean sneakers or dress shoes','Valid government ID (required)','Card or cash for the night'] },
+    { title:'🏖️ Beach & Outdoors', items:['SPF 50+ sunscreen','Polarized sunglasses','Wide-brim sun hat','Beach towel','Reusable water bottle','Packable rain poncho','Waterproof phone pouch','Reef-safe sunscreen'] },
+    { title:'💊 Miami Survival Kit', items:['After-sun lotion / aloe','Electrolyte packets (Liquid IV)','Anti-humidity hair products','Ibuprofen','Hangover support (DripDrop)','Insect repellent','Blotting papers','Blister patches'] },
+    { title:'📱 Tech & Misc', items:['Portable phone charger','USB-C + Lightning cables','Headphones / AirPods','Small crossbody bag for nights','Cash for tips','Luggage lock'] },
+  ];
+  document.getElementById('pack-root').innerHTML = cats.map(cat => `
+    <div class="pack-cat">
+      <div class="pack-cat-title">${cat.title}</div>
+      <div class="pack-grid">
+        ${cat.items.map(item => `
+          <div class="pack-item" onclick="this.classList.toggle('done');this.querySelector('.pack-check').textContent=this.classList.contains('done')?'✓':''">
+            <div class="pack-check"></div><span>${item}</span>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+})();
+</script>
+</body>
+</html>
