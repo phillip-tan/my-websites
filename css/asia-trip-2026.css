@@ -1229,3 +1229,91 @@
     transition: background 0.15s;
   }
   .amex-checkin-btn:hover { background: rgba(255,255,255,0.1); color: #ddd; }
+
+  /* ── AMEX: two-account hero ── */
+  .amex-accounts-box {
+    min-width: 220px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+  }
+  .amex-account-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .amex-account-row:last-of-type { border-bottom: none; }
+  .amex-account-who {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    width: 42px;
+    flex-shrink: 0;
+  }
+  .amex-account-pts {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #c9a84c;
+    flex: 1;
+  }
+  .amex-account-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .amex-account-tag-high { background: rgba(94,175,120,0.15); color: #8ecfa3; }
+  .amex-account-tag-low  { background: rgba(255,160,60,0.12); color: #f0a050; }
+  .amex-account-note {
+    font-size: 0.7rem;
+    color: #666;
+    margin-top: 0.6rem;
+    line-height: 1.4;
+  }
+
+  /* ── AMEX: person headers ── */
+  .amex-person-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: 0;
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+  .amex-person-nelie { background: rgba(94,175,120,0.12); color: #8ecfa3; }
+  .amex-person-phil  { background: rgba(255,160,60,0.1);  color: #f0a050; }
+
+  /* ── AMEX: split calculator ── */
+  .amex-calc-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+  @media (max-width: 650px) { .amex-calc-split { grid-template-columns: 1fr; } }
+  .amex-calc-account {
+    display: flex;
+    flex-direction: column;
+  }
+  .amex-calc-account-header {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.55rem 1.1rem;
+    border-radius: 10px 10px 0 0;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-bottom: none;
+  }
+  .amex-account-nelie-hdr { background: rgba(94,175,120,0.1); color: #8ecfa3; border-color: rgba(94,175,120,0.25); }
+  .amex-account-phil-hdr  { background: rgba(255,160,60,0.08); color: #f0a050; border-color: rgba(255,160,60,0.2); }
+  .amex-account-nelie-hdr + .amex-calc-featured { border-color: rgba(94,175,120,0.25); }
+  .amex-account-phil-hdr  + .amex-calc-featured { border-color: rgba(255,160,60,0.2); }
