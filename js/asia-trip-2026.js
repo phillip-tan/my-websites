@@ -23,27 +23,29 @@ const COUNTRY_LABELS = {
 const STOPS = [
   { id:'seoul',     num:1,  country:'korea',     name:'Seoul',            nights:11, lat:37.5172, lng:127.0473, dates:'Sep 26 – Oct 7',  note:'Gangnam procedures + exploring. Best September weather in East Asia. No visa required.',
     vibe:'Skincare, cafes & city exploring', weather:'☀️ 72°F · dry' },
-  { id:'beijing',   num:2,  country:'china',     name:'Beijing',          nights:4,  lat:39.9042, lng:116.4074, dates:'Oct 8 – 12',      note:'Great Wall, Forbidden City, hutongs, Summer Palace. Arriving after Golden Week — no crowds.',
+  { id:'beijing',   num:2,  country:'china',     name:'Beijing',          nights:3,  lat:39.9042, lng:116.4074, dates:'Oct 8 – 11',      note:'Great Wall, Forbidden City, hutongs, Summer Palace. Arriving after Golden Week — no crowds.',
     vibe:'Imperial history, Great Wall & hutongs', weather:'🌤️ 61°F · clear' },
-  { id:'zjj',       num:3,  country:'china',     name:'Zhangjiajie',      nights:3,  lat:29.1171, lng:110.4792, dates:'Oct 12 – 15',     note:'Avatar mountains, Bailong elevator, hiking. Post-Golden Week, crystal clear skies.',
+  { id:'zjj',       num:3,  country:'china',     name:'Zhangjiajie',      nights:2,  lat:29.1171, lng:110.4792, dates:'Oct 11 – 13',     note:'Avatar mountains, Bailong elevator, hiking. Post-Golden Week, crystal clear skies.',
     vibe:'Avatar mountains & serious hiking', weather:'🌤️ 64°F · mild' },
-  { id:'chongqing', num:4,  country:'china',     name:'Chongqing',        nights:3,  lat:29.5630, lng:106.5516, dates:'Oct 15 – 18',     note:'Cyberpunk vertical city built into cliffsides. Neon bridges, authentic hot pot.',
+  { id:'chongqing', num:4,  country:'china',     name:'Chongqing',        nights:2,  lat:29.5630, lng:106.5516, dates:'Oct 13 – 15',     note:'Cyberpunk vertical city built into cliffsides. Neon bridges, authentic hot pot.',
     vibe:'Cyberpunk city built into cliffs', weather:'⛅ 68°F · overcast' },
-  { id:'chengdu',   num:5,  country:'china',     name:'Chengdu',          nights:3,  lat:30.5728, lng:104.0668, dates:'Oct 18 – 21',     note:'Giant pandas, Sichuan teahouses, dan dan noodles.',
+  { id:'chengdu',   num:5,  country:'china',     name:'Chengdu',          nights:2,  lat:30.5728, lng:104.0668, dates:'Oct 15 – 17',     note:'Giant pandas, Sichuan teahouses, dan dan noodles.',
     vibe:'Giant pandas & Sichuan teahouse culture', weather:'⛅ 64°F · misty' },
-  { id:'shanghai',  num:6,  country:'china',     name:'Shanghai',         nights:4,  lat:31.2304, lng:121.4737, dates:'Oct 21 – 25',     note:'The Bund, French Concession, futuristic Pudong skyline. Exit city → fly Osaka.',
-    vibe:'The Bund, French Concession & skyline', weather:'🌤️ 68°F · clear' },
-  { id:'osaka',     num:7,  country:'japan',     name:'Osaka',            nights:25, lat:34.6937, lng:135.5023, dates:'Oct 25 – Nov 19', note:'Home base with Jose. Neighborhoods, food, cafes, AI deep work. Day trips to Kyoto, Nara, Hiroshima.',
+  { id:'guangzhou', num:6,  country:'china',     name:'Guangzhou',        nights:2,  lat:23.1291, lng:113.2644, dates:'Oct 17 – 19',     note:'Dim sum capital of the world. Cantonese food, Shamian Island, Pearl River delta. Exit city → fly Osaka.',
+    vibe:'Dim sum capital & Pearl River vibes', weather:'🌤️ 77°F · warm & clear' },
+  { id:'osaka',     num:7,  country:'japan',     name:'Osaka',            nights:31, lat:34.6937, lng:135.5023, dates:'Oct 19 – Nov 19', note:'Home base with Jose. Exactly one month. Neighborhoods, food, cafes, AI deep work. Day trips to Kyoto, Nara, Hiroshima.',
     vibe:'Japanese immersion, remote work & Pokémon', weather:'🍂 63°F · autumn foliage' },
   { id:'hcmc',      num:8,  country:'vietnam',   name:'Ho Chi Minh City', nights:4,  lat:10.8231, lng:106.6297, dates:'Nov 20 – 24',     note:'Street food, Ben Thanh market, Cu Chi tunnels, Mekong day trip. First time.',
     vibe:'Street food, history & first-time Vietnam', weather:'☀️ 82°F · dry season' },
   { id:'danang',    num:9,  country:'vietnam',   name:'Da Nang',          nights:2,  lat:16.0471, lng:108.2068, dates:'Nov 24 – 26',     note:'Hoi An Ancient Town day trip (30 min away) is the main draw.',
     vibe:'Gateway to Hoi An Ancient Town', weather:'🌧️ 77°F · rainy season' },
-  { id:'siemreap',  num:10, country:'cambodia',  name:'Siem Reap',        nights:6,  lat:13.3633, lng:103.8564, dates:'Nov 26 – Dec 2',  note:'Angkor Wat at sunrise, Angkor Thom + the Bayon, Ta Prohm jungle ruins.',
+  { id:'phnompenh', num:10, country:'cambodia',  name:'Phnom Penh',       nights:3,  lat:11.5564, lng:104.9282, dates:'Nov 26 – Nov 29', note:'Royal Palace, Silver Pagoda, Tuol Sleng Genocide Museum, riverside night market. First stop in Cambodia.',
+    vibe:'Royal city, dark history & Mekong riverfront', weather:'☀️ 84°F · dry season' },
+  { id:'siemreap',  num:11, country:'cambodia',  name:'Siem Reap',        nights:3,  lat:13.3633, lng:103.8564, dates:'Nov 29 – Dec 2',  note:'Angkor Wat at sunrise, Angkor Thom + the Bayon, Ta Prohm jungle ruins.',
     vibe:'Angkor Wat at sunrise — unmissable', weather:'☀️ 82°F · dry season' },
-  { id:'bangkok',   num:11, country:'bangkok',   name:'Bangkok',          nights:5,  lat:13.7563, lng:100.5018, dates:'Dec 2 – 6',       note:'Pokémon Center Bangkok, Wat Pho, Wat Arun, Chatuchak market.',
+  { id:'bangkok',   num:12, country:'bangkok',   name:'Bangkok',          nights:5,  lat:13.7563, lng:100.5018, dates:'Dec 2 – 6',       note:'Pokémon Center Bangkok, Wat Pho, Wat Arun, Chatuchak market.',
     vibe:'Pokémon Center, temples & street food', weather:'☀️ 84°F · peak season' },
-  { id:'chiangmai', num:12, country:'chiangmai', name:'Chiang Mai',       nights:30, lat:18.7883, lng:98.9853,  dates:'Dec 7 – Jan 6',   note:'Soul-searching base. World-class cafes, coworking, mountain temples.',
+  { id:'chiangmai', num:13, country:'chiangmai', name:'Chiang Mai',       nights:30, lat:18.7883, lng:98.9853,  dates:'Dec 7 – Jan 6',   note:'Soul-searching base. World-class cafes, coworking, mountain temples.',
     vibe:'Expat base, remote work & soul-searching', weather:'☀️ 72°F · coolest & driest' },
 ];
 
@@ -138,7 +140,7 @@ const CITY_PAGES = {
     ]
   },
   guangzhou: {
-    country:'china', dates:'Oct 11 – 13 · 2 nights', tagline:'The dim sum capital of the world',
+    country:'china', dates:'Oct 17 – 19 · 2 nights', tagline:'The dim sum capital of the world',
     highlights:[
       { name:'Yum Cha Breakfast', emoji:'🥟',
         img:'https://upload.wikimedia.org/wikipedia/commons/3/30/Dim_Sum_Steam_Baskets_by_tracyhunter_in_HK.jpg',
@@ -170,7 +172,7 @@ const CITY_PAGES = {
     ]
   },
   osaka: {
-    country:'japan', dates:'Oct 25 – Nov 19 · 25 nights', tagline:'Home base. Eat everything.',
+    country:'japan', dates:'Oct 19 – Nov 19 · 31 nights', tagline:'Home base. Eat everything.',
     highlights:[
       { name:'Dotonbori', emoji:'🌃',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Dotonbori%2C_Osaka%2C_at_night%2C_November_2016.jpg/960px-Dotonbori%2C_Osaka%2C_at_night%2C_November_2016.jpg',
@@ -219,8 +221,25 @@ const CITY_PAGES = {
         desc:"Hoi An's signature dish — delicate rice paper dumplings that exist almost nowhere else. Eat them at their origin." },
     ]
   },
+  phnompenh: {
+    country:'cambodia', dates:'Nov 26 – Nov 29 · 3 nights', tagline:'The Kingdom\'s capital — royal, brutal, beautiful.',
+    highlights:[
+      { name:'Royal Palace & Silver Pagoda', emoji:'👑',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Royal_Palace%2C_Phnom_Penh.jpg/960px-Royal_Palace%2C_Phnom_Penh.jpg',
+        desc:"The working royal residence. The Silver Pagoda inside the complex has a floor of 5,000 silver tiles and a life-size solid gold Buddha encrusted with diamonds. Stunning even by the standards of the region." },
+      { name:'Tuol Sleng Genocide Museum', emoji:'🕯️',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Tuol_Sleng_Phnom_Penh.jpg/960px-Tuol_Sleng_Phnom_Penh.jpg',
+        desc:"S-21 — the Khmer Rouge's most notorious interrogation prison, now a museum. One of the most sobering and important sites in Southeast Asia. Go before Angkor to understand the country's context." },
+      { name:'Riverside Night Market', emoji:'🌆',
+        img:null,
+        desc:"The Mekong and Tonlé Sap rivers meet just north of the palace. The riverfront promenade comes alive at dusk — street food, vendors, locals on motorbikes. Low-key, very Phnom Penh." },
+      { name:'Central Market (Phsar Thmey)', emoji:'🛒',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Central_Market_Phnom_Penh.jpg/960px-Central_Market_Phnom_Penh.jpg',
+        desc:"Art deco dome from 1937 with four wings of vendors. Jewellery, spices, clothes, street food. The building itself is the attraction." },
+    ]
+  },
   siemreap: {
-    country:'cambodia', dates:'Nov 26 – Dec 2 · 6 nights', tagline:'One of the great sites on earth',
+    country:'cambodia', dates:'Nov 29 – Dec 2 · 3 nights', tagline:'One of the great sites on earth',
     highlights:[
       { name:'Angkor Wat Sunrise', emoji:'🌅',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Angkor_Wat_at_sunrise_3.jpg/960px-Angkor_Wat_at_sunrise_3.jpg',
