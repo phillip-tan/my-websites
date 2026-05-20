@@ -1317,3 +1317,27 @@
   .amex-account-phil-hdr  { background: rgba(255,160,60,0.08); color: #f0a050; border-color: rgba(255,160,60,0.2); }
   .amex-account-nelie-hdr + .amex-calc-featured { border-color: rgba(94,175,120,0.25); }
   .amex-account-phil-hdr  + .amex-calc-featured { border-color: rgba(255,160,60,0.2); }
+
+  /* ── AMEX: calc refinements ── */
+  .amex-calc-note {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    line-height: 1.55;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.025);
+    border-radius: 7px;
+    border-left: 2px solid rgba(201,168,76,0.3);
+  }
+  .amex-calc-account-mini {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.63rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+    display: inline-block;
+  }
+  .amex-account-nelie-mini { background: rgba(94,175,120,0.1); color: #8ecfa3; }
+  .amex-account-phil-mini  { background: rgba(255,160,60,0.1); color: #f0a050; }
