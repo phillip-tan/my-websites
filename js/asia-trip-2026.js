@@ -74,10 +74,14 @@ const CITY_PAGES = {
       { name:'Yeonnam-dong Cafes', emoji:'☕',
         img:null,
         desc:"Seoul's most dense cafe neighborhood — converted hanoks, specialty roasters, and design studios packed into a single walkable district. Excellent wifi. The perfect base for laptop work during recovery days." },
+      { name:'Samwon Garden — 삼원가든 Korean BBQ', emoji:'🔥',
+        youtube:'bKFie9B4L7E', short:false,
+        link:'https://www.google.com/maps/search/?api=1&query=Samwon+Garden+Apgujeong+Seoul+Korean+BBQ',
+        desc:"The gold standard of Seoul Korean BBQ since 1976 — open-air garden setting in Apgujeong, 10 min from Gangnam clinics. Charcoal-grilled marinated Hanwoo (Korean beef) galbi (short ribs). Where Koreans take guests for milestone occasions. Reserve before you land." },
     ]
   },
   beijing: {
-    country:'china', dates:'Oct 8 – 12 · 4 nights', tagline:"China's imperial heartland",
+    country:'china', dates:'Oct 8 – 11 · 3 nights', tagline:"China's imperial heartland",
     highlights:[
       { name:'Great Wall of China', emoji:'🏯',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Badaling_China_Great-Wall-of-China-01.jpg/960px-Badaling_China_Great-Wall-of-China-01.jpg',
@@ -99,24 +103,26 @@ const CITY_PAGES = {
       { name:'Tianzi Mountain', emoji:'⛰️',
         img:'https://upload.wikimedia.org/wikipedia/commons/7/77/1_tianzishan_wulingyuan_zhangjiajie_2012.jpg',
         desc:"The towering sandstone pillars that inspired Pandora's Hallelujah Mountains. Mist rolls through at dawn — worth the early wake-up." },
-      { name:'Bailong Elevator', emoji:'🛗', img:null,
+      { name:'Bailong Elevator', emoji:'🛗', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Bailong_Elevator_april_2008.jpg/960px-Bailong_Elevator_april_2008.jpg',
         desc:"World's tallest outdoor elevator at 326m — glass-sided, running straight up a cliff face. More thrilling than it sounds." },
-      { name:'Tianmen Mountain', emoji:'🌫️', img:null,
+      { name:'Tianmen Mountain', emoji:'🌫️', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Tian_Menshan_Mountain_11.jpg/960px-Tian_Menshan_Mountain_11.jpg',
         desc:"Glass-bottomed walkway pinned to a clifftop 1,400m up. Below: nothing. Reached by the world's longest cable car." },
       { name:'Forest Park Trails', emoji:'🥾', img:null,
         desc:"Hike the ridgelines between pillar formations. Best in morning mist before tour groups show up. Carry snacks." },
     ]
   },
   chongqing: {
-    country:'china', dates:'Oct 15 – 18 · 3 nights', tagline:'The city that looks like a Cyberpunk city',
+    country:'china', dates:'Oct 14 – 16 · 2 nights', tagline:'The city that looks like a Cyberpunk city',
     highlights:[
       { name:'Hongya Cave', emoji:'🌆',
         img:'https://upload.wikimedia.org/wikipedia/commons/8/86/Hongya_Cave_20180520.jpg',
         desc:"11-story stacked cliffside complex lit up in neon at night. Restaurants, bars, and the insane view over the river. Go after dark." },
-      { name:'Chongqing Hot Pot', emoji:'🫕',
+      { name:'Chongqing Hot Pot — De Zhuang 德庄', emoji:'🫕',
         img:'https://upload.wikimedia.org/wikipedia/commons/c/c6/Chongqing_Hot_Pot.jpg',
-        desc:"The original. Numbing Sichuan peppercorn broth with everything cooked tableside. This is where the dish was invented — don't skip it." },
-      { name:'Liziba Monorail', emoji:'🚝', img:null,
+        youtube:'ZsLYbCChFc4', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=De+Zhuang+hotpot+Chongqing',
+        desc:"The original. Numbing mala broth cooked tableside — this is where hot pot was invented. Try De Zhuang (德庄), the locals' pick. Must-order: mao du (honeycomb tripe), duck blood curd, beef aorta. Order the nine-grid pot (九宫格) to control cook time by section." },
+      { name:'Liziba Monorail', emoji:'🚝', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Liziba_Station.jpg/960px-Liziba_Station.jpg',
         desc:"A metro line that passes directly through floors 6–8 of a residential tower. The residents just live with it. Wild urban engineering." },
       { name:'Yangtze Riverfront', emoji:'🌉',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Chongqing_Skyline_At_Night.png/960px-Chongqing_Skyline_At_Night.png',
@@ -124,35 +130,42 @@ const CITY_PAGES = {
     ]
   },
   chengdu: {
-    country:'china', dates:'Oct 18 – 21 · 3 nights', tagline:'Pandas, teahouses, and Sichuan fire',
+    country:'china', dates:'Oct 16 – 18 · 2 nights', tagline:'Pandas, teahouses, and Sichuan fire',
     highlights:[
       { name:'Giant Panda Base', emoji:'🐼',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Panda_eating_bamboo_in_Panda_Base.jpg/960px-Panda_eating_bamboo_in_Panda_Base.jpg',
         desc:"The world's best giant panda conservation center. Over 80 pandas across the facility. Go at 8am — they're most active feeding in the morning." },
-      { name:'Sichuan Hot Pot', emoji:'🌶️',
+      { name:'Chen Mapo Tofu — 陈麻婆豆腐 est. 1862', emoji:'🌶️',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/Dandan_noodles_%28%E6%93%94%E6%93%94%E9%BA%B5%29.jpg/960px-Dandan_noodles_%28%E6%93%94%E6%93%94%E9%BA%B5%29.jpg',
-        desc:"Dan dan noodles, mapo tofu, and the real Chengdu hot pot. The Sichuan peppercorn numbs your lips in the best possible way." },
+        youtube:'scTIZSueC9o', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Chen+Mapo+Tofu+Restaurant+Chengdu',
+        desc:"The birthplace of mapo tofu, founded in the Qing dynasty. Fermented black beans, Sichuan peppercorn oil, silken tofu — no chain replicates it. Also do the dan dan mian: sesame paste, chili oil, preserved vegetables, ground pork. Michelin-recognized. Main branch on Qinghua Road." },
       { name:'Jinli Old Street', emoji:'🏮',
         img:'https://upload.wikimedia.org/wikipedia/commons/d/de/ChengduJinli.jpg',
         desc:"Lantern-lit pedestrian street with snacks, tea stalls, and occasional Sichuan opera face-changing performances." },
-      { name:'Teahouse Culture', emoji:'🍵', img:null,
-        desc:"Chengdu's parks fill with locals playing mahjong, getting ear-cleaning, and drinking tea all day. Sit down and join them." },
+      { name:'Heming Teahouse — 鹤鸣茶社 est. 1923', emoji:'🍵', img:null,
+        youtube:'0n0rqjFu8dg', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Heming+Teahouse+Renmin+Park+Chengdu',
+        desc:"Inside Renmin Park since 1923. Bamboo chairs, bottomless pot of tea for ¥10, roaming ear-cleaning specialists, and Kung Fu tea poured from a 3-foot long-spout kettle. Locals spend entire afternoons here playing mahjong. Zero tourists. Budget 2 hours minimum." },
     ]
   },
   guangzhou: {
     country:'china', dates:'Oct 18 – 20 · 2 nights', tagline:'The dim sum capital of the world',
     highlights:[
-      { name:'Yum Cha Breakfast', emoji:'🥟',
+      { name:'Tao Tao Ju — 陶陶居 est. 1880', emoji:'🥟',
         img:'https://upload.wikimedia.org/wikipedia/commons/3/30/Dim_Sum_Steam_Baskets_by_tracyhunter_in_HK.jpg',
-        desc:"Guangzhou invented dim sum. The morning tea ritual here is serious — locals arrive at 6am for the best trolleys. Order everything." },
+        youtube:'Of4IBjfczlk', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Tao+Tao+Ju+Guangzhou+dim+sum',
+        desc:"Guangzhou's oldest dim sum house, still packed with locals for morning yum cha. Order: har gow (shrimp dumplings — the benchmark dish), siu mai, cheung fun (rice noodle rolls), and dan tat (egg tarts). Arrive 6–7am to watch the trolley service in full swing. Michelin Guide listed." },
       { name:'Canton Tower', emoji:'📡',
         img:'https://upload.wikimedia.org/wikipedia/commons/7/79/Canton_tower_in_asian_games_opening_ceremony.jpg',
         desc:"600m twisting lattice tower. The observation deck gives you all of the Pearl River Delta spread out below." },
       { name:'Shamian Island', emoji:'🌳',
         img:'https://upload.wikimedia.org/wikipedia/commons/f/f2/Our_Lady_of_Lourdes_Chapel.jpg',
         desc:"Quiet colonial-era island of French and British concession buildings. Leafy, calm, barely any tourists — a total contrast to central GZ." },
-      { name:'Night Food Markets', emoji:'🍜', img:null,
-        desc:"Late-night roast goose joints, rice noodle soup stalls, and barbecue spots. Eat like a local and stay out late." },
+      { name:'Roast Goose & Late-Night Eats', emoji:'🍜', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Roast_goose_in_yat_lok_restaurant.JPG/960px-Roast_goose_in_yat_lok_restaurant.JPG',
+        link:'https://www.google.com/maps/search/?api=1&query=roast+goose+restaurant+Guangzhou+night+market',
+        desc:"Guangzhou's signature late-night move: siu ngap (烧鹅, roast goose) with lacquered crispy skin, rice noodle soup stalls open past midnight, and BBQ joints where the menu is on the wall in Chinese only. Ask your hotel where the locals go — these spots have no tourist presence." },
     ]
   },
   shanghai: {
@@ -186,6 +199,14 @@ const CITY_PAGES = {
       { name:'Nara Deer Park', emoji:'🦌',
         img:'https://upload.wikimedia.org/wikipedia/commons/a/ac/Sika_deer_in_Nara_Park%2C_November_2016.jpg',
         desc:"Wild sika deer bow in exchange for crackers. Easy half-day from Osaka. More surreal than any guidebook prepares you for." },
+      { name:'Takoyaki Doraku Wanaka', emoji:'🐙',
+        youtube:'a2KS5ViQFyI', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Takoyaki+Wanaka+Dotonbori+Osaka',
+        desc:"The standout takoyaki on Dotonbori: crispy shell, molten center, large chewy octopus, topped with dancing katsuobushi flakes. This is the benchmark version of Osaka's most iconic street food. Queue is part of the experience — worth it." },
+      { name:'Kushikatsu Daruma — 串かつだるま', emoji:'🍢',
+        youtube:'ZCYTiUL_bHs', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Kushikatsu+Daruma+Shinsekai+Osaka',
+        desc:"Deep-fried skewers of meat, seafood, and vegetables at the 1929 original in Shinsekai. The sacred rule: never double-dip in the communal sauce. Order the standard mix and let the kitchen run it. Shinsekai branch over Dotonbori — more atmosphere, less tourist." },
     ]
   },
   hcmc: {
@@ -200,9 +221,11 @@ const CITY_PAGES = {
       { name:'Mekong Delta', emoji:'🚤',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Ferry_boat_on_Mekong_River_in_My_Tho.jpg/960px-Ferry_boat_on_Mekong_River_in_My_Tho.jpg',
         desc:"Day trip by boat through floating markets, orchards, and river villages. A completely different side of Vietnam from the city." },
-      { name:'Saigon Street Food', emoji:'🍜',
+      { name:'Bánh Mì Huỳnh Hoa — The One', emoji:'🥖',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Ho-Chi-Minh-City_Vietnam_Hawker-01.jpg/960px-Ho-Chi-Minh-City_Vietnam_Hawker-01.jpg',
-        desc:"Banh mi for $1, pho for breakfast, com tam (broken rice) for lunch. Some of the best eating in the world at the cheapest prices." },
+        youtube:'t-taP4jU2Es', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Banh+Mi+Huynh+Hoa+26+Le+Thi+Rieng+Ho+Chi+Minh+City',
+        desc:"Saigon's most famous bánh mì: overflowing with pâté, three cuts of cold meat, pickled daikon, and cilantro — the sandwich barely closes. 35+ years, long queues nightly. 26 Lê Thị Riêng, District 1. Opens 3pm, cash only. Beyond bánh mì: pho for breakfast, com tam (broken rice) for lunch." },
     ]
   },
   danang: {
@@ -217,8 +240,9 @@ const CITY_PAGES = {
       { name:'Marble Mountains', emoji:'⛰️',
         img:'https://upload.wikimedia.org/wikipedia/commons/9/9d/Marble_Mountains_-_Ngu_Hanh_Son_District_-_South_of_Da_Nang_City_-_Vietnam_%281%29.jpg',
         desc:"Five marble and limestone hills with Buddhist shrines, caves, and natural grottos cut inside. Short climb, big reward." },
-      { name:'White Rose Dumplings', emoji:'🌸', img:null,
-        desc:"Hoi An's signature dish — delicate rice paper dumplings that exist almost nowhere else. Eat them at their origin." },
+      { name:'White Rose Dumplings (Bánh Vạc)', emoji:'🌸', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/White_Rose_Hoi_An.JPG/960px-White_Rose_Hoi_An.JPG',
+        link:'https://www.google.com/maps/search/?api=1&query=White+Rose+Restaurant+Hoi+An+Vietnam',
+        desc:"Hoi An's most delicate dish — translucent rice paper cups filled with shrimp, shaped like white roses. Made exclusively by one family in Hoi An and sold citywide. Eat them at the White Rose Restaurant (533 Hai Bà Trưng) where they're actually produced." },
     ]
   },
   phnompenh: {
@@ -230,9 +254,9 @@ const CITY_PAGES = {
       { name:'Tuol Sleng Genocide Museum', emoji:'🕯️',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Tuol_Sleng_Phnom_Penh.jpg/960px-Tuol_Sleng_Phnom_Penh.jpg',
         desc:"S-21 — the Khmer Rouge's most notorious interrogation prison, now a museum. One of the most sobering and important sites in Southeast Asia. Go before Angkor to understand the country's context." },
-      { name:'Riverside Night Market', emoji:'🌆',
-        img:null,
-        desc:"The Mekong and Tonlé Sap rivers meet just north of the palace. The riverfront promenade comes alive at dusk — street food, vendors, locals on motorbikes. Low-key, very Phnom Penh." },
+      { name:'Sisowath Quay Riverside', emoji:'🌆',
+        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/SisowathQuay_Above.JPG/960px-SisowathQuay_Above.JPG',
+        desc:"The Mekong and Tonlé Sap rivers meet just north of the palace. Sisowath Quay promenade comes alive at dusk — street food, vendors, locals on motorbikes. The best place to decompress after Tuol Sleng." },
       { name:'Central Market (Phsar Thmey)', emoji:'🛒',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Central_Market_Phnom_Penh.jpg/960px-Central_Market_Phnom_Penh.jpg',
         desc:"Art deco dome from 1937 with four wings of vendors. Jewellery, spices, clothes, street food. The building itself is the attraction." },
@@ -422,21 +446,34 @@ function openCityPage(cityId) {
   const color = COLORS[data.country];
 
   const cardsHTML = data.highlights.map(h => {
-    const hasImg = !!h.img;
-    const imgURL = hasImg ? h.img : '';
-    const imgTag = hasImg
-      ? `<img src="${imgURL}" alt="${h.name}" onerror="this.parentElement.classList.add('no-img')">`
-      : '';
     const grad = `linear-gradient(135deg, color-mix(in srgb, ${color} 28%, transparent), color-mix(in srgb, ${color} 10%, transparent))`;
+    let mediaHTML;
+    if (h.youtube) {
+      mediaHTML = `<div class="photo-card-video">
+        <iframe src="https://www.youtube.com/embed/${h.youtube}?rel=0&modestbranding=1"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen loading="lazy"></iframe>
+      </div>`;
+    } else {
+      const hasImg = !!h.img;
+      const imgTag = hasImg
+        ? `<img src="${h.img}" alt="${h.name}" onerror="this.parentElement.classList.add('no-img')">`
+        : '';
+      mediaHTML = `<div class="photo-card-img${hasImg ? '' : ' no-img'}">
+        ${imgTag}
+        <div class="photo-card-fallback" style="background:${grad}">${h.emoji}</div>
+      </div>`;
+    }
+    const mapsBtn = h.link
+      ? `<a class="maps-btn" href="${h.link}" target="_blank" rel="noopener">📍 View on Maps</a>`
+      : '';
     return `
       <div class="photo-card" style="border-top:3px solid ${color}">
-        <div class="photo-card-img${hasImg ? '' : ' no-img'}">
-          ${imgTag}
-          <div class="photo-card-fallback" style="background:${grad}">${h.emoji}</div>
-        </div>
+        ${mediaHTML}
         <div class="photo-card-body">
           <div class="photo-card-name">${h.name}</div>
           <div class="photo-card-desc">${h.desc}</div>
+          ${mapsBtn}
         </div>
       </div>`;
   }).join('');
