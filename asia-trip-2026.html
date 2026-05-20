@@ -33,6 +33,7 @@
   <button class="tab-btn" data-tab="procedures" onclick="switchTab('procedures')" style="color:var(--korea)">Korea Rx</button>
   <button class="tab-btn" data-tab="constraints" onclick="switchTab('constraints')">Constraints</button>
   <button class="tab-btn" data-tab="packing" onclick="switchTab('packing')">Packing</button>
+  <button class="tab-btn" data-tab="amex" onclick="switchTab('amex')" style="color:#c9a84c">AMEX ✦</button>
 </nav>
 
 <div id="tab-overview" class="tab-pane active">
@@ -1404,6 +1405,334 @@
 <div id="tab-packing" class="tab-pane">
 <div class="packing-wrap" id="packing-list"></div>
 </div><!-- /tab-packing -->
+
+<!-- ═══════════════════════════ AMEX TAB ═══════════════════════════ -->
+<div id="tab-amex" class="tab-pane">
+<div class="amex-wrap">
+
+  <!-- HERO BANNER -->
+  <div class="amex-hero">
+    <div class="amex-hero-left">
+      <div class="amex-logo">✦ AMEX Membership Rewards</div>
+      <div class="amex-hero-title">Points Strategy for 100 Nights in Asia</div>
+      <div class="amex-hero-sub">~250,000 MR points · Sep 2026 – Jan 2027 · SFO → ICN, then CNX → SFO</div>
+    </div>
+    <div class="amex-balance-box">
+      <div class="amex-balance-label">Points Balance</div>
+      <div class="amex-balance-val">250,000</div>
+      <div class="amex-balance-note">~$2,500 at 1¢/pt · up to $12,500+ at premium redemptions</div>
+    </div>
+  </div>
+
+  <!-- TL;DR VERDICT -->
+  <div class="amex-verdict">
+    <div class="amex-verdict-icon">★</div>
+    <div>
+      <div class="amex-verdict-title">TL;DR — Your move</div>
+      <div class="amex-verdict-body">Transfer to <strong>Air Canada Aeroplan</strong> for both flights. Book SFO → ICN (Seoul) one-way for <strong>50k pts economy or 75k pts business</strong>, then BKK → SFO one-way for ~<strong>55k pts economy</strong>. Total: ~105k pts for economy both ways, leaving 145k for future trips. Your open-jaw routing (fly <em>in</em> to Seoul, fly <em>out</em> of Chiang Mai/Bangkok) means a round-trip ticket is impossible anyway — one-ways are the only play, and that's actually ideal with points.</div>
+    </div>
+  </div>
+
+  <!-- ONE-WAY ANALYSIS BOX -->
+  <div class="amex-section">
+    <div class="amex-section-title">One-way vs. Round-trip — answered</div>
+    <div class="amex-ow-grid">
+      <div class="amex-ow-card amex-ow-yes">
+        <div class="amex-ow-label">✓ Book two one-ways</div>
+        <ul class="amex-ul">
+          <li>Your routing is an <strong>open-jaw</strong> (different origin/destination) — you literally cannot buy a single round-trip</li>
+          <li>With points, one-ways typically cost exactly half of round-trip rates on most programs</li>
+          <li>Flexibility: mix programs — e.g. Aeroplan inbound, Flying Blue return if a promo drops</li>
+          <li>Aeroplan allows open-jaw and one-way awards with no penalty vs. round-trip pricing</li>
+        </ul>
+      </div>
+      <div class="amex-ow-card amex-ow-cash">
+        <div class="amex-ow-label">💡 What about cash fares?</div>
+        <ul class="amex-ul">
+          <li>For <em>cash</em> tickets, international one-ways are usually 40–70% more expensive than half a round-trip</li>
+          <li>But with <em>points</em>, this penalty doesn't apply — most programs price one-way at exactly half</li>
+          <li>Domestic legs (CNX → BKK, within Asia) are cheap on regional carriers — pay cash, don't burn points</li>
+          <li>Book CNX → BKK separately on Thai AirAsia or Bangkok Airways (~$30–60 cash)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTE PLANNER -->
+  <div class="amex-section">
+    <div class="amex-section-title">Route-by-route award playbook</div>
+    <div class="amex-route-grid">
+
+      <!-- Flight 1 -->
+      <div class="amex-route-card amex-priority-high">
+        <div class="amex-route-header">
+          <div class="amex-route-flag">✈ Priority #1</div>
+          <div class="amex-route-label">SFO → ICN (Seoul)</div>
+          <div class="amex-route-date">Dep. Sep 26, 2026</div>
+        </div>
+        <div class="amex-route-body">
+          <div class="amex-route-rec">
+            <div class="amex-route-program">Air Canada Aeroplan <span class="amex-transfer-badge">AMEX 1:1</span></div>
+            <div class="amex-route-pts">50,000 pts economy · 75,000 pts business</div>
+            <div class="amex-route-note">Books on Korean Air (KE), Asiana (OZ), or Air Canada codeshare. ~$50–80 in taxes/fees. Nonstop options on KE and OZ are excellent. Business class on Korean Air is a <em>steal</em> at 75k.</div>
+          </div>
+          <div class="amex-route-alt">
+            <strong>Alt:</strong> Flying Blue (AMEX 1:1) — ~62,500 pts economy (dynamic pricing, check monthly Promo Rewards for discounts up to 50%)
+          </div>
+          <div class="amex-route-action">
+            <a href="https://www.aircanada.com/us/en/aco/home/aeroplan/redeem/flights.html" target="_blank" class="amex-link-btn">Search Aeroplan →</a>
+            <a href="https://roame.travel" target="_blank" class="amex-link-btn amex-link-alt">Check Roame →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Flight 2 -->
+      <div class="amex-route-card amex-priority-high">
+        <div class="amex-route-header">
+          <div class="amex-route-flag">✈ Priority #2</div>
+          <div class="amex-route-label">BKK → SFO (Return)</div>
+          <div class="amex-route-date">Dep. ~Jan 6–8, 2027</div>
+        </div>
+        <div class="amex-route-body">
+          <div class="amex-route-rec">
+            <div class="amex-route-program">Air Canada Aeroplan <span class="amex-transfer-badge">AMEX 1:1</span></div>
+            <div class="amex-route-pts">55,000 pts economy · 80,000 pts business</div>
+            <div class="amex-route-note">Books on Thai Airways (Star Alliance), United (through BKK), or Air Canada partners. Get to BKK separately from CNX (Thai AirAsia, ~$30–60 cash — don't burn points on this). Fly BKK → SFO as the award leg.</div>
+          </div>
+          <div class="amex-route-alt">
+            <strong>Alt:</strong> ANA Mileage Club (AMEX 1:1) — ~45,000 pts economy via Thai Airways codeshare to connect through Tokyo. Up to 48hr transfer processing.
+          </div>
+          <div class="amex-route-action">
+            <a href="https://www.aircanada.com/us/en/aco/home/aeroplan/redeem/flights.html" target="_blank" class="amex-link-btn">Search Aeroplan →</a>
+            <a href="https://seats.aero" target="_blank" class="amex-link-btn amex-link-alt">Check Seats.aero →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Osaka note -->
+      <div class="amex-route-card amex-priority-low">
+        <div class="amex-route-header">
+          <div class="amex-route-flag">ℹ Within-trip</div>
+          <div class="amex-route-label">All Asia internal flights</div>
+          <div class="amex-route-date">ICN→PEK, CAN→KIX, KIX→SGN, etc.</div>
+        </div>
+        <div class="amex-route-body">
+          <div class="amex-route-rec">
+            <div class="amex-route-program">Pay cash — don't burn points</div>
+            <div class="amex-route-pts">$60–180 each leg · budget carriers</div>
+            <div class="amex-route-note">Internal Asia flights (Jeju Air, Air Asia, Scoot, Vietjet) are already cheap. Award redemptions for short-haul intra-Asia on Aeroplan/ANA are poor value. Save your remaining ~145k points for future international travel.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hotel note -->
+      <div class="amex-route-card amex-priority-low">
+        <div class="amex-route-header">
+          <div class="amex-route-flag">🏨 Hotels?</div>
+          <div class="amex-route-label">Hilton / Marriott transfers</div>
+          <div class="amex-route-date">Japan is the only candidate</div>
+        </div>
+        <div class="amex-route-body">
+          <div class="amex-route-rec">
+            <div class="amex-route-program">Generally: skip, use airlines instead</div>
+            <div class="amex-route-pts">Hilton: 1:2 ratio (250k → 500k pts)</div>
+            <div class="amex-route-note">Hotel transfers rarely exceed 0.5¢–0.8¢ per point. Airlines routinely deliver 3–8¢. Exception: if you want a splurge night at the <strong>Conrad Osaka</strong> or <strong>Hilton Osaka</strong>, 500k Hilton would cover ~5 nights at a $350+/night property. But since you're doing a 30-night Airbnb w/ Jose, hotel points aren't the move this trip.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- POINTS CALCULATOR -->
+  <div class="amex-section">
+    <div class="amex-section-title">250k points — what you can do</div>
+    <div class="amex-calc-grid">
+      <div class="amex-calc-option">
+        <div class="amex-calc-scenario">Option A — Economy both ways</div>
+        <div class="amex-calc-breakdown">
+          <div class="amex-calc-row"><span>SFO → ICN economy</span><span class="amex-calc-pts">50,000</span></div>
+          <div class="amex-calc-row"><span>BKK → SFO economy</span><span class="amex-calc-pts">55,000</span></div>
+          <div class="amex-calc-row amex-calc-total"><span>Total used</span><span class="amex-calc-pts">105,000</span></div>
+          <div class="amex-calc-row amex-calc-remain"><span>Remaining for future</span><span class="amex-calc-pts">145,000</span></div>
+        </div>
+        <div class="amex-calc-value">Saves ~$1,600–2,200 on flights</div>
+      </div>
+      <div class="amex-calc-option amex-calc-featured">
+        <div class="amex-calc-scenario">Option B — Biz inbound, eco return <span class="amex-rec-badge">Recommended</span></div>
+        <div class="amex-calc-breakdown">
+          <div class="amex-calc-row"><span>SFO → ICN <em>business class</em></span><span class="amex-calc-pts">75,000</span></div>
+          <div class="amex-calc-row"><span>BKK → SFO economy</span><span class="amex-calc-pts">55,000</span></div>
+          <div class="amex-calc-row amex-calc-total"><span>Total used</span><span class="amex-calc-pts">130,000</span></div>
+          <div class="amex-calc-row amex-calc-remain"><span>Remaining for future</span><span class="amex-calc-pts">120,000</span></div>
+        </div>
+        <div class="amex-calc-value">Korean Air biz class = ~$3,000–4,500 cash value. Best redemption by far.</div>
+      </div>
+      <div class="amex-calc-option">
+        <div class="amex-calc-scenario">Option C — Biz both ways</div>
+        <div class="amex-calc-breakdown">
+          <div class="amex-calc-row"><span>SFO → ICN business</span><span class="amex-calc-pts">75,000</span></div>
+          <div class="amex-calc-row"><span>BKK → SFO business</span><span class="amex-calc-pts">80,000</span></div>
+          <div class="amex-calc-row amex-calc-total"><span>Total used</span><span class="amex-calc-pts">155,000</span></div>
+          <div class="amex-calc-row amex-calc-remain"><span>Remaining for future</span><span class="amex-calc-pts">95,000</span></div>
+        </div>
+        <div class="amex-calc-value">Use this only if you're prioritizing max comfort over future travel</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRANSFER PARTNERS QUICK REF -->
+  <div class="amex-section">
+    <div class="amex-section-title">AMEX transfer partners — Asia-relevant</div>
+    <div class="amex-partner-grid">
+      <div class="amex-partner-card amex-partner-top">
+        <div class="amex-partner-name">Air Canada Aeroplan</div>
+        <div class="amex-partner-ratio">1:1 ratio · 1–3 day transfer</div>
+        <div class="amex-partner-why">Best for this trip. Books Korean Air, Asiana, Thai Airways, and United on all routes. Allows open-jaw awards at no extra cost. Sweet spot: SFO→ICN at 50k/75k pts.</div>
+        <a href="https://www.aircanada.com/us/en/aco/home/aeroplan.html" target="_blank" class="amex-partner-link">Aeroplan →</a>
+      </div>
+      <div class="amex-partner-card amex-partner-top">
+        <div class="amex-partner-name">Flying Blue (Air France/KLM)</div>
+        <div class="amex-partner-ratio">1:1 ratio · instant transfer</div>
+        <div class="amex-partner-why">Monthly Promo Rewards can cut award prices 25–50%. Dynamic pricing so SFO→Asia fluctuates — check every month. Can book Korean Air on some partner awards. Sign up for their email alerts for free.</div>
+        <a href="https://www.flyingblue.com/en" target="_blank" class="amex-partner-link">Flying Blue →</a>
+      </div>
+      <div class="amex-partner-card">
+        <div class="amex-partner-name">ANA Mileage Club</div>
+        <div class="amex-partner-ratio">1:1 ratio · up to 48hr transfer</div>
+        <div class="amex-partner-why">Sweet spot for Japan-specific premium cabin flights. SFO→OSA business ~55k miles on ANA metal. Less useful for your routing since you're not flying SFO→Japan directly.</div>
+        <a href="https://www.ana.co.jp/en/us/amc/" target="_blank" class="amex-partner-link">ANA AMC →</a>
+      </div>
+      <div class="amex-partner-card">
+        <div class="amex-partner-name">Singapore KrisFlyer</div>
+        <div class="amex-partner-ratio">1:1 ratio · instant transfer</div>
+        <div class="amex-partner-why">Best for Singapore Airlines premium cabin flights. Less relevant for your routing unless you route through SIN. Good to know for future Southeast Asia travel.</div>
+        <a href="https://www.singaporeair.com/en_UK/us/ppsclub-krisflyer/krisflyer/about-krisflyer/" target="_blank" class="amex-partner-link">KrisFlyer →</a>
+      </div>
+      <div class="amex-partner-card amex-partner-warn">
+        <div class="amex-partner-name">⚠ Korean Air SkyPass</div>
+        <div class="amex-partner-ratio">No AMEX transfer path</div>
+        <div class="amex-partner-why">Korean Air ended all US transfer partnerships. You cannot move AMEX points to SkyPass. Book Korean Air flights through Aeroplan instead — same availability, lower fees.</div>
+      </div>
+      <div class="amex-partner-card amex-partner-warn">
+        <div class="amex-partner-name">⚠ Etihad Guest</div>
+        <div class="amex-partner-ratio">Partnership ends Jun 30, 2026</div>
+        <div class="amex-partner-why">Transfer window closes in weeks. Do not transfer here unless you have a specific booking lined up immediately — points transferred after June 30 will be stranded.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEAL ALERT SYSTEM -->
+  <div class="amex-section">
+    <div class="amex-section-title">Deal alert system — when to check &amp; what to watch</div>
+    <div class="amex-alert-banner">
+      <div class="amex-alert-icon">⏰</div>
+      <div>
+        <strong>You're 4 months out.</strong> This is actually a critical window — award seats for Sep 2026 are available now but will thin out. Business class on Korean Air SFO→ICN especially goes fast. <strong>Check availability this week.</strong>
+      </div>
+    </div>
+    <div class="amex-alert-grid">
+
+      <div class="amex-alert-card">
+        <div class="amex-alert-tool">Seats.aero</div>
+        <div class="amex-alert-tier">Free + Pro ($10/mo)</div>
+        <div class="amex-alert-desc">Set a route alert for SFO→ICN and BKK→SFO on Aeroplan. Free tier: specific date alerts. Pro: "any date in range" alerts — great if you're flexible on exact day.</div>
+        <div class="amex-alert-when">Set up today, check weekly</div>
+        <a href="https://seats.aero" target="_blank" class="amex-link-btn" style="margin-top:0.75rem;display:inline-block">Open Seats.aero →</a>
+      </div>
+
+      <div class="amex-alert-card">
+        <div class="amex-alert-tool">Roame.travel</div>
+        <div class="amex-alert-tier">Free</div>
+        <div class="amex-alert-desc">Search award availability across Aeroplan, Flying Blue, ANA, and more in one place. No account needed to search. Good for a quick cross-program comparison before you transfer points.</div>
+        <div class="amex-alert-when">Use before transferring any points</div>
+        <a href="https://roame.travel" target="_blank" class="amex-link-btn" style="margin-top:0.75rem;display:inline-block">Open Roame →</a>
+      </div>
+
+      <div class="amex-alert-card">
+        <div class="amex-alert-tool">Flying Blue Promo Rewards</div>
+        <div class="amex-alert-tier">Free email signup</div>
+        <div class="amex-alert-desc">Air France/KLM releases discounted award tickets on select routes every month — up to 50% off. SFO→ICN on Korean Air occasionally appears. Sign up for their newsletter to get notified the day promos drop.</div>
+        <div class="amex-alert-when">Check the 1st of each month</div>
+        <a href="https://www.flyingblue.com/en/spend/promo-awards" target="_blank" class="amex-link-btn" style="margin-top:0.75rem;display:inline-block">Promo Rewards →</a>
+      </div>
+
+      <div class="amex-alert-card">
+        <div class="amex-alert-tool">Thrifty Traveler Premium</div>
+        <div class="amex-alert-tier">~$8/month</div>
+        <div class="amex-alert-desc">Sends email alerts for both cash flight deals AND award availability — specifically tailored to your routes if you set preferences. Good if you want to be notified without actively checking. Also catches error fares.</div>
+        <div class="amex-alert-when">Subscribe now through Jan 2027</div>
+        <a href="https://thriftytraveler.com/premium/" target="_blank" class="amex-link-btn" style="margin-top:0.75rem;display:inline-block">Thrifty Traveler →</a>
+      </div>
+
+      <div class="amex-alert-card">
+        <div class="amex-alert-tool">point.me</div>
+        <div class="amex-alert-tier">Free (limited) · $12/mo full access</div>
+        <div class="amex-alert-desc">Shows award availability with step-by-step booking instructions. Especially useful if you're newer to award travel. Search SFO→ICN to see exactly which programs have space and how to book each one.</div>
+        <div class="amex-alert-when">Use to validate before transferring</div>
+        <a href="https://www.point.me" target="_blank" class="amex-link-btn" style="margin-top:0.75rem;display:inline-block">point.me →</a>
+      </div>
+
+      <div class="amex-alert-card amex-alert-important">
+        <div class="amex-alert-tool">⚡ Key rule: never transfer blind</div>
+        <div class="amex-alert-tier">Always confirm availability first</div>
+        <div class="amex-alert-desc">AMEX → Aeroplan transfers take 1–3 days. Award seats can disappear in hours. Use Roame or Seats.aero to confirm a seat exists, <em>then</em> transfer your points. Once transferred, points cannot come back.</div>
+        <div class="amex-alert-when">Before every transfer</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CHECK-IN TRACKER -->
+  <div class="amex-section">
+    <div class="amex-section-title">Monthly check-in calendar</div>
+    <div class="amex-checkin-note">Tap a month after you've checked award availability to log it. These are saved in your browser.</div>
+    <div class="amex-checkin-grid" id="amex-checkin-grid">
+      <!-- rendered by inline script below -->
+    </div>
+    <div style="margin-top:1.25rem;font-size:0.78rem;color:#666">
+      Flying Blue Promo Rewards reset the 1st of each month. Aeroplan award space for Sep–Jan typically peaks 6–9 months out and again when airlines release last-minute inventory (~3 weeks before). <strong>Jun 2026</strong> is likely the last good window for Sep departure business class.
+    </div>
+  </div>
+
+</div><!-- /amex-wrap -->
+</div><!-- /tab-amex -->
+
+<script>
+(function() {
+  const months = [
+    { id: 'may26',  label: 'May 2026',  note: 'Search now — 4 months out', urgent: true },
+    { id: 'jun26',  label: 'Jun 2026',  note: 'Last good window for Sep biz class', urgent: true },
+    { id: 'jul26',  label: 'Jul 2026',  note: 'Flying Blue promo drops Jun 1 + Jul 1' },
+    { id: 'aug26',  label: 'Aug 2026',  note: 'Last chance before departure' },
+    { id: 'sep26',  label: 'Sep 2026',  note: 'Return flight: check BKK→SFO Jan inventory' },
+    { id: 'oct26',  label: 'Oct 26 – Dec', note: 'Monitor BKK→SFO availability for Jan 2027' },
+  ];
+  function renderCheckins() {
+    const grid = document.getElementById('amex-checkin-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    months.forEach(function(m) {
+      const checked = localStorage.getItem('amex_check_' + m.id);
+      const card = document.createElement('div');
+      card.className = 'amex-checkin-card' + (checked ? ' amex-checked' : '') + (m.urgent ? ' amex-checkin-urgent' : '');
+      card.innerHTML =
+        '<div class="amex-checkin-month">' + m.label + (m.urgent && !checked ? ' <span class="amex-urgent-dot">●</span>' : '') + '</div>' +
+        '<div class="amex-checkin-note">' + m.note + '</div>' +
+        (checked
+          ? '<div class="amex-checkin-status">✓ Checked ' + new Date(parseInt(checked)).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + '</div>'
+          : '<button class="amex-checkin-btn" onclick="amexMarkChecked(\'' + m.id + '\')">Mark checked</button>');
+      grid.appendChild(card);
+    });
+  }
+  window.amexMarkChecked = function(id) {
+    localStorage.setItem('amex_check_' + id, Date.now().toString());
+    renderCheckins();
+  };
+  document.addEventListener('DOMContentLoaded', renderCheckins);
+  setTimeout(renderCheckins, 100);
+})();
+</script>
 
 <!-- ═══════════════════════════ CITY PAGE OVERLAY ═══════════════════════════ -->
 <div id="city-page" class="city-page" aria-hidden="true">
