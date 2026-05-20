@@ -72,7 +72,7 @@ const CITY_PAGES = {
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Bugaksan_from_Bukhansan.jpg/960px-Bugaksan_from_Bukhansan.jpg',
         desc:"Granite ridgelines rising directly out of the city to 836m. Well-marked trails, pagodas on the summits, and views over the entire Seoul basin. A 30-min subway ride from Gangnam. Perfect for recovery-day light hiking." },
       { name:'Yeonnam-dong Cafes', emoji:'☕',
-        img:null,
+        img:null, youtube:'c0mD1jWrogw', short:true,
         desc:"Seoul's most dense cafe neighborhood — converted hanoks, specialty roasters, and design studios packed into a single walkable district. Excellent wifi. The perfect base for laptop work during recovery days." },
       { name:'Samwon Garden — 삼원가든 Korean BBQ', emoji:'🔥',
         youtube:'bKFie9B4L7E', short:false,
@@ -108,6 +108,7 @@ const CITY_PAGES = {
       { name:'Tianmen Mountain', emoji:'🌫️', img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Tian_Menshan_Mountain_11.jpg/960px-Tian_Menshan_Mountain_11.jpg',
         desc:"Glass-bottomed walkway pinned to a clifftop 1,400m up. Below: nothing. Reached by the world's longest cable car." },
       { name:'Forest Park Trails', emoji:'🥾', img:null,
+        youtube:'05dFPj3cPc8', short:false,
         desc:"Hike the ridgelines between pillar formations. Best in morning mist before tour groups show up. Carry snacks." },
     ]
   },
@@ -283,7 +284,9 @@ const CITY_PAGES = {
     country:'bangkok', dates:'Dec 2 – 6 · 5 nights', tagline:'Temples, street food, and a Pokémon Center',
     highlights:[
       { name:'Pokémon Center Bangkok', emoji:'⚡', img:null,
-        desc:"Priority stop for the business. Thailand-exclusive merch, limited editions. Scout inventory, buy product, enjoy it." },
+        youtube:'ZfWrA2A9_5s', short:true,
+        link:'https://www.google.com/maps/search/?api=1&query=Pokemon+Center+Bangkok+CentralWorld',
+        desc:"Priority stop for the business. Thailand-exclusive merch, limited editions. Scout inventory, buy product, enjoy it. Opening 2026 at CentralWorld." },
       { name:'Wat Pho', emoji:'🙏',
         img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Wat_Pho%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_02.jpg/960px-Wat_Pho%2C_Bangkok%2C_Tailandia%2C_2013-08-22%2C_DD_02.jpg',
         desc:"Home of the 46m gold reclining Buddha. The temple complex surrounding it is one of the most beautiful in Bangkok — and it predates the city itself." },
