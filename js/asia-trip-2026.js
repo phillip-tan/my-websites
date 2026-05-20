@@ -169,22 +169,6 @@ const CITY_PAGES = {
         desc:"Guangzhou's signature late-night move: siu ngap (烧鹅, roast goose) with lacquered crispy skin, rice noodle soup stalls open past midnight, and BBQ joints where the menu is on the wall in Chinese only. Ask your hotel where the locals go — these spots have no tourist presence." },
     ]
   },
-  shanghai: {
-    country:'china', dates:'Oct 21 – 25 · 4 nights', tagline:'The future and the past, side by side',
-    highlights:[
-      { name:'The Bund', emoji:'🌇',
-        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Pudong_Shanghai_November_2017_HDR_panorama.jpg/960px-Pudong_Shanghai_November_2017_HDR_panorama.jpg',
-        desc:"The colonial waterfront promenade, facing the Pudong skyline across the river. Iconic in daylight. Transcendent at night." },
-      { name:'French Concession', emoji:'🌿',
-        img:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Yongkang_Road_Shanghai_11.jpg/960px-Yongkang_Road_Shanghai_11.jpg',
-        desc:"Tree-lined streets with boutiques, cafes, and art deco architecture. Best neighborhood in Shanghai for aimless wandering." },
-      { name:'Pudong Skyline', emoji:'🏙️', img:null,
-        desc:"Oriental Pearl, Shanghai Tower, Jin Mao — the most photogenic skyline in Asia, lit up every night." },
-      { name:'Tianzifang Lanes', emoji:'☕',
-        img:'https://upload.wikimedia.org/wikipedia/commons/a/a6/Tianzifangbyday.jpg',
-        desc:"Narrow alleyway district of galleries, coffee shops, and boutiques. Good contrast to the grand scale of everything else." },
-    ]
-  },
   osaka: {
     country:'japan', dates:'Oct 20 – Nov 19 · 30 nights', tagline:'Home base. Eat everything.',
     highlights:[
