@@ -454,7 +454,11 @@
     display: flex;
     gap: 0;
     border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
   }
+  .tab-nav::-webkit-scrollbar { display: none; }
   .tab-btn {
     background: none;
     border: none;
@@ -485,6 +489,8 @@
   .tab-btn[data-tab="procedures"].active   { color: var(--korea); border-bottom-color: var(--korea); }
   .tab-btn[data-tab="constraints"].active  { color: #e8916a;      border-bottom-color: #e8916a; }
   .tab-btn[data-tab="packing"].active      { color: #8ecfa3;      border-bottom-color: #8ecfa3; }
+  .tab-btn[data-tab="amex"]               { color: #c9a84c; white-space: nowrap; }
+  .tab-btn[data-tab="amex"].active        { color: #c9a84c;      border-bottom-color: #c9a84c; }
   .tab-pane { display: none; }
   .tab-pane.active { display: block; }
 
