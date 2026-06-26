@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sleeper Slabs — 2026 Show Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f0f;
+    --surface: #181818;
+    --surface2: #222;
+    --border: #2a2a2a;
+    --text: #e8e8e8;
+    --muted: #888;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200,169,110,0.15);
+    --confirmed: #6aab8e;
+    --confirmed-dim: rgba(106,171,142,0.12);
+    --viable: #6a8eab;
+    --viable-dim: rgba(106,142,171,0.12);
+    --florida: #ab8e6a;
+    --florida-dim: rgba(171,142,106,0.12);
+    --pnw: #6ab5ab;
+    --pnw-dim: rgba(106,181,171,0.12);
+    --lasd: #ab7aab;
+    --lasd-dim: rgba(171,122,171,0.12);
+    --yes: #6aab8e;
+    --no: #888;
+    --alert: #c8a96e;
+    --alert-dim: rgba(200,169,110,0.1);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.15;
+  }
+
+  header h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .header-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    line-height: 1.55;
+  }
+
+  .header-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.4rem;
+  }
+
+  .meta-item {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .meta-item span {
+    color: var(--text);
+    margin-left: 0.4rem;
+  }
+
+  /* ── ALERT BANNER ── */
+  .alert-banner {
+    max-width: 860px;
+    margin: 1.5rem auto 0;
+    padding: 0 2rem;
+  }
+
+  .alert {
+    background: var(--alert-dim);
+    border: 1px solid rgba(200,169,110,0.3);
+    border-radius: 8px;
+    padding: 0.9rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .alert-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .alert-text {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .alert-text strong {
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-top: 1.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.75rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    margin-bottom: -1px;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  /* ── TAB PANES ── */
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .pane-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .section-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .section-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* ── SHOW TABLE ── */
+  .show-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 2.5rem;
+  }
+
+  .show-table th {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 0.6rem 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .show-table td {
+    padding: 0.85rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+
+  .show-table tr:last-child td { border-bottom: none; }
+
+  .show-table tbody tr {
+    transition: background 0.1s;
+  }
+
+  .show-table tbody tr:hover {
+    background: rgba(255,255,255,0.025);
+  }
+
+  .date-cell {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .show-name {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .show-name.confirmed-row { color: var(--text); }
+
+  .location-cell {
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .badge-yes {
+    background: rgba(106,171,142,0.15);
+    color: var(--confirmed);
+  }
+
+  .badge-no {
+    background: rgba(136,136,136,0.12);
+    color: var(--muted);
+  }
+
+  .badge-show {
+    font-size: 0.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    margin-left: 0.4rem;
+  }
+
+  .tag-confirmed-show {
+    background: rgba(106,171,142,0.12);
+    color: var(--confirmed);
+  }
+
+  .tag-cac {
+    background: rgba(106,142,171,0.12);
+    color: var(--viable);
+  }
+
+  .tag-cp {
+    background: rgba(200,169,110,0.12);
+    color: var(--accent);
+  }
+
+  .tag-fr {
+    background: rgba(171,142,106,0.12);
+    color: var(--florida);
+  }
+
+  .tag-worlds {
+    background: rgba(180,100,180,0.12);
+    color: #c88ed4;
+  }
+
+  /* ── DEADLINE CARD ── */
+  .deadline-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .deadline-card h3 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  .deadline-card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .deadline-card p strong {
+    color: var(--text);
+  }
+
+  .deadline-card a {
+    color: var(--accent);
+    text-decoration: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .deadline-card a:hover { text-decoration: underline; }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* ── PROXIMITY PILL ── */
+  .proximity {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .proximity.close { color: var(--confirmed); }
+
+  /* ── BACK LINK ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-decoration: none;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .back-link:hover { color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .footer-links a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .footer-links a:hover { color: var(--accent); }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* ── NOTES ── */
+  .notes {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.1rem 1.3rem;
+    margin-top: 1.5rem;
+  }
+
+  .notes h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .notes ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .notes ul li {
+    font-size: 0.87rem;
+    color: var(--muted);
+    padding: 0.25rem 0;
+    padding-left: 1rem;
+    position: relative;
+    line-height: 1.5;
+  }
+
+  .notes ul li::before {
+    content: '◆';
+    position: absolute;
+    left: 0;
+    font-size: 0.55rem;
+    top: 0.45rem;
+    color: var(--accent);
+  }
+
+  .notes ul li strong {
+    color: var(--text);
+  }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.8rem; }
+    .show-table th:nth-child(4),
+    .show-table td:nth-child(4) { display: none; }
+    .pane-wrap { padding: 1.5rem 1rem 3rem; }
+    header { padding: 2.5rem 1rem 1.5rem; }
+    .alert-banner { padding: 0 1rem; }
+    .tab-nav { padding: 0 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="back-link">← Phil's Sites</a>
+  <p class="eyebrow" style="margin-top:1rem">2026 Show Circuit</p>
+  <h1>Sleeper <em>Slabs</em></h1>
+  <p class="header-sub">Card show schedule, vendor status, and registration deadlines.</p>
+  <div class="header-meta">
+    <div class="meta-item">Brand <span>Sleeper Slabs</span></div>
+    <div class="meta-item">Team <span>Phil · David</span></div>
+    <div class="meta-item">Base <span>West Coast</span></div>
+    <div class="meta-item">Focus <span>Sun & Moon · Japanese Promos · Pikachu</span></div>
+  </div>
+</header>
+
+<div class="alert-banner">
+  <div class="alert">
+    <div class="alert-icon">⏰</div>
+    <div class="alert-text">
+      <strong>DEADLINE · JUL 8 · 12:00 PM CST</strong> — Collect A Con San Francisco vendor tables go live.
+      <a href="https://collectaconusa.com/san-francisco-vendors" target="_blank" style="margin-left:0.5rem">Reserve a table →</a>
+    </div>
+  </div>
+</div>
+
+<nav class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+  <button class="tab-btn" onclick="switchTab('bayarea')">Bay Area</button>
+  <button class="tab-btn" onclick="switchTab('pnw')">PNW</button>
+  <button class="tab-btn" onclick="switchTab('lasd')">LA / SD</button>
+  <button class="tab-btn" onclick="switchTab('florida')">Miami</button>
+</nav>
+
+<!-- ═══ OVERVIEW ═══ -->
+<div id="tab-overview" class="tab-pane active">
+  <div class="pane-wrap">
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--confirmed)"></div>Table secured</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div>Table not secured</div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--confirmed)"></div>
+      <span class="section-label">Confirmed Shows</span>
+    </div>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Location</th>
+          <th>Table Secured</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Jul 24–26</td>
+          <td><span class="show-name">Card Party</span> <span class="tag tag-cp">CP</span></td>
+          <td class="location-cell">Fort Lauderdale, FL</td>
+          <td><span class="badge badge-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Aug 15–16</td>
+          <td><span class="show-name">Collect A Con</span> <span class="tag tag-cac">CAC</span></td>
+          <td class="location-cell">San Antonio, TX</td>
+          <td><span class="badge badge-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Aug 28–30</td>
+          <td><span class="show-name">Pokémon World Championships</span> <span class="tag tag-worlds">Worlds</span></td>
+          <td class="location-cell">San Francisco, CA</td>
+          <td><span class="badge badge-yes">Yes</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 12–13</td>
+          <td><span class="show-name">Collect A Con</span> <span class="tag tag-cac">CAC</span></td>
+          <td class="location-cell">San Francisco, CA</td>
+          <td><span class="badge badge-no">No</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--viable)"></div>
+      <span class="section-label">Viable Shows</span>
+      <span class="section-count">West coast, after Aug 12 · all require table reservations</span>
+    </div>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Location</th>
+          <th>Table Secured</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 5–6</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">Pasadena, CA</td>
+          <td><span class="badge badge-no">No</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 19–20</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">San Diego, CA</td>
+          <td><span class="badge badge-no">No</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 3–4</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">Portland, OR</td>
+          <td><span class="badge badge-no">No</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Dec 19–20</td>
+          <td><span class="show-name">Collect A Con</span> <span class="tag tag-cac">CAC</span></td>
+          <td class="location-cell">Los Angeles, CA</td>
+          <td><span class="badge badge-no">No</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--alert)"></div>
+      <span class="section-label">Registration Deadlines</span>
+    </div>
+
+    <div class="deadline-card">
+      <h3>⚡ Urgent — Collect A Con San Francisco</h3>
+      <p>Vendor tables go live <strong>July 8, 2026 at 12:00 PM CST</strong>. This is the first Collect A Con SF ever — expect high demand. Tables sell out fast at debut shows. Set a calendar reminder.</p>
+      <p style="margin-top:0.6rem"><a href="https://collectaconusa.com/san-francisco-vendors" target="_blank">→ collectaconusa.com/san-francisco-vendors</a></p>
+    </div>
+
+    <div class="deadline-card" style="border-left-color:var(--viable)">
+      <h3>Front Row Card Show — Vendor Info</h3>
+      <p>Front Row doesn't announce vendor tables as far in advance. Check <strong>frontrowcardshow.com/collections/dealers</strong> for each city's table availability as the show date approaches.</p>
+      <p style="margin-top:0.6rem"><a href="https://frontrowcardshow.com/collections/dealers" target="_blank">→ frontrowcardshow.com/collections/dealers</a></p>
+    </div>
+
+    <div class="deadline-card" style="border-left-color:var(--florida)">
+      <h3>Collect A Con — General Registration Pattern</h3>
+      <p>Tables typically go live ~8–10 weeks before each show at noon CST. Limit of <strong>10 tables per company</strong>. 10% cancellation fee if cancelled &lt;30 days out. Set-up is Friday 9am–7pm.</p>
+      <p style="margin-top:0.6rem"><a href="https://collectaconusa.com" target="_blank">→ collectaconusa.com</a></p>
+    </div>
+
+    <table class="show-table" style="margin-top:2rem">
+      <thead>
+        <tr>
+          <th>Show</th>
+          <th>Show Date</th>
+          <th>Est. Table Open</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="show-name">CAC San Antonio</span></td>
+          <td class="date-cell">Aug 15–16</td>
+          <td class="date-cell">~Jun 2026</td>
+          <td><span class="badge badge-yes">Secured</span></td>
+        </tr>
+        <tr>
+          <td><span class="show-name">CAC San Francisco</span></td>
+          <td class="date-cell">Sep 12–13</td>
+          <td class="date-cell">Jul 8 · 12pm CST</td>
+          <td><span class="badge badge-no">Not yet</span></td>
+        </tr>
+        <tr>
+          <td><span class="show-name">FR Pasadena</span></td>
+          <td class="date-cell">Sep 5–6</td>
+          <td class="date-cell">TBD</td>
+          <td><span class="badge badge-no">Not yet</span></td>
+        </tr>
+        <tr>
+          <td><span class="show-name">FR San Diego</span></td>
+          <td class="date-cell">Sep 19–20</td>
+          <td class="date-cell">TBD</td>
+          <td><span class="badge badge-no">Not yet</span></td>
+        </tr>
+        <tr>
+          <td><span class="show-name">FR Portland</span></td>
+          <td class="date-cell">Oct 3–4</td>
+          <td class="date-cell">TBD</td>
+          <td><span class="badge badge-no">Not yet</span></td>
+        </tr>
+        <tr>
+          <td><span class="show-name">CAC Los Angeles</span></td>
+          <td class="date-cell">Dec 19–20</td>
+          <td class="date-cell">~Oct 2026</td>
+          <td><span class="badge badge-no">Not yet</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+
+<!-- ═══ FLORIDA / MIAMI WINDOW ═══ -->
+<div id="tab-florida" class="tab-pane">
+  <div class="pane-wrap">
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem">Local Florida shows available before leaving Miami (~Aug 12). These are small community shows — low lift, good for moving inventory.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Location</th>
+          <th>Distance from Miami</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Jul 16 (Thu)</td>
+          <td><span class="show-name">Wellington Card Show</span></td>
+          <td class="location-cell">Wellington, FL</td>
+          <td><span class="proximity close">~1.5 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 17</td>
+          <td><span class="show-name">Orlando Card Show</span></td>
+          <td class="location-cell">Apopka (Orlando area)</td>
+          <td><span class="proximity">~4 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 18</td>
+          <td><span class="show-name">SGT Card Show</span></td>
+          <td class="location-cell">Pompano Beach, FL</td>
+          <td><span class="proximity close">~30 min</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 18</td>
+          <td><span class="show-name">Port Charlotte Card Market</span></td>
+          <td class="location-cell">Port Charlotte, FL</td>
+          <td><span class="proximity">~2 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 19</td>
+          <td><span class="show-name">Collectors World</span></td>
+          <td class="location-cell">Orlando, FL</td>
+          <td><span class="proximity">~4 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 19</td>
+          <td><span class="show-name">Nona Nerds Card Show</span></td>
+          <td class="location-cell">Orlando (Lake Nona)</td>
+          <td><span class="proximity">~4 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jul 19</td>
+          <td><span class="show-name">Coral Springs Trading Card Show</span></td>
+          <td class="location-cell">Coral Springs, FL</td>
+          <td><span class="proximity close">~45 min</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Aug 1</td>
+          <td><span class="show-name">Battlezone Epic Card Show</span></td>
+          <td class="location-cell">Sanford, FL</td>
+          <td><span class="proximity">~3.5 hrs</span></td>
+        </tr>
+        <tr>
+          <td class="date-cell">Aug 1</td>
+          <td><span class="show-name">Delray Card Show</span></td>
+          <td class="location-cell">Delray Beach, FL</td>
+          <td><span class="proximity close">~1 hr</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      <h4>Notes</h4>
+      <ul>
+        <li>Best Miami-area options: <strong>SGT Card Show (Jul 18)</strong> and <strong>Coral Springs (Jul 19)</strong> are both under an hour away.</li>
+        <li>Jul 16–19 is a dense window — possible to hit 2–3 shows in one trip if driving to the Broward/Palm Beach area.</li>
+        <li>Orlando shows are a 4-hour drive — probably only worth it if there's a strong reason to go.</li>
+        <li>Card Party Fort Lauderdale (Jul 24–26) is the biggest Florida show of the window — already confirmed.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PNW LOCAL SHOWS ═══ -->
+<div id="tab-pnw" class="tab-pane">
+  <div class="pane-wrap">
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem">Local shows in the Portland and Seattle areas, Sep 2026 through Q1 2027. Good for filling out the calendar once based west coast.</p>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--pnw)"></div>
+      <span class="section-label">Portland, OR</span>
+    </div>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Oct 3–4</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">Portland Expo Center</td>
+          <td class="location-cell">480 tables · Trade Night Sat</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Dec 6–7</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">Oregon Convention Center</td>
+          <td class="location-cell">440 tables · Trade Night Sat</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--pnw)"></div>
+      <span class="section-label">Seattle / Eastside, WA — CardFest NW</span>
+      <span class="section-count">cardfestnw.com</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Monthly local shows across Bellevue, Lynnwood, and Everett. 100+ dealers. Pokemon, sports cards, and more.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>City</th>
+          <th>Venue</th>
+          <th>Hours</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 5</td>
+          <td><span class="show-name">Everett, WA</span></td>
+          <td class="location-cell">Edward D. Hansen Conference Center</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 19–20</td>
+          <td><span class="show-name">Lynnwood, WA</span></td>
+          <td class="location-cell">Lynnwood Event Center</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 26–27</td>
+          <td><span class="show-name">Bellevue, WA</span></td>
+          <td class="location-cell">Embassy Suites Bellevue</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 3</td>
+          <td><span class="show-name">Everett, WA</span></td>
+          <td class="location-cell">Edward D. Hansen Conference Center</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 10–11</td>
+          <td><span class="show-name">Bellevue, WA</span></td>
+          <td class="location-cell">Embassy Suites Bellevue</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 7</td>
+          <td><span class="show-name">Everett, WA</span></td>
+          <td class="location-cell">Edward D. Hansen Conference Center</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 22</td>
+          <td><span class="show-name">Bellevue, WA</span></td>
+          <td class="location-cell">Embassy Suites Bellevue</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Dec 19–20</td>
+          <td><span class="show-name">Bellevue, WA</span></td>
+          <td class="location-cell">Embassy Suites Bellevue</td>
+          <td class="location-cell">12pm–5pm (10am VIP)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--pnw);opacity:0.6"></div>
+      <span class="section-label" style="opacity:0.7">Q1 2027 — Not Yet Announced</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Dates below are pattern-based projections from 2026 cadence. None have been officially announced yet. Check organizer sites in Nov–Dec 2026.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Est. Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>Basis</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell" style="color:var(--muted);opacity:0.6">Late Jan 2027</td>
+          <td><span class="show-name" style="opacity:0.5">CardFest NW</span></td>
+          <td class="location-cell" style="opacity:0.5">Lynnwood Event Center</td>
+          <td class="location-cell" style="opacity:0.5">Ran Jan 31, 2026</td>
+        </tr>
+        <tr>
+          <td class="date-cell" style="color:var(--muted);opacity:0.6">Late Feb / Early Mar 2027</td>
+          <td><span class="show-name" style="opacity:0.5">Front Row Portland</span></td>
+          <td class="location-cell" style="opacity:0.5">Portland Expo Center</td>
+          <td class="location-cell" style="opacity:0.5">Ran Feb 28–Mar 1, 2026</td>
+        </tr>
+        <tr>
+          <td class="date-cell" style="color:var(--muted);opacity:0.6">Mar 2027</td>
+          <td><span class="show-name" style="opacity:0.5">CardFest NW</span></td>
+          <td class="location-cell" style="opacity:0.5">Lynnwood / Everett</td>
+          <td class="location-cell" style="opacity:0.5">Ran Mar 21–22 & 28, 2026</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      <h4>Notes</h4>
+      <ul>
+        <li>Front Row Portland <strong>Oct 3–4</strong> is already in the Viable tab — conflicts with CardFest Everett Oct 3.</li>
+        <li>Front Row Portland <strong>Dec 6–7</strong> is a second Portland show at Oregon Convention Center — confirmed on oregoncc.org.</li>
+        <li><strong>Twin Oaks Shows</strong> runs weekly Saturday shows at The Lloyd Center (2201 Lloyd Center, Portland) — 10am–4pm, free parking, free admission. Fall dates not yet posted; check <a href="https://twinoaksshows.com" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82rem">twinoaksshows.com</a> as they're added weekly. Q1 2027 will continue the same pattern.</li>
+        <li>CardFest NW is a local recurring series with 100+ dealers in the Seattle suburbs. Good for scouting deals, low vendor cost. Check <a href="https://cardfestnw.com" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82rem">cardfestnw.com</a> for vendor table pricing.</li>
+        <li>No Card Party or Collect A Con in Seattle/Portland in 2026.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ BAY AREA LOCAL SHOWS ═══ -->
+<div id="tab-bayarea" class="tab-pane">
+  <div class="pane-wrap">
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem">Bay Area + Sacramento shows, Sep 2026 through Q1 2027. CAC SF (Sep 12–13) is already in the Confirmed tab. Sacramento is ~90 min from SF and worth including as extended home-base range.</p>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--viable)"></div>
+      <span class="section-label">East Bay Card Show — Tenth Inning Productions</span>
+      <span class="section-count">tenthinningcardshow.com</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Larger regional shows rotating between San Mateo County Event Center and Hyatt Regency SF Airport. Grading services on-site. PSA, Beckett, CGC accepted.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Oct 24–25</td>
+          <td><span class="show-name">East Bay Card Show</span></td>
+          <td class="location-cell">San Mateo County Event Center</td>
+          <td class="location-cell">San Mateo, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 28–29</td>
+          <td><span class="show-name">East Bay Card Show</span></td>
+          <td class="location-cell">San Mateo County Event Center</td>
+          <td class="location-cell">San Mateo, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jan 2–3, 2027</td>
+          <td><span class="show-name">East Bay Card Show</span></td>
+          <td class="location-cell">Hyatt Regency SF Airport</td>
+          <td class="location-cell">Burlingame, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--viable)"></div>
+      <span class="section-label">Silicon Valley Cards & Collectibles Show</span>
+      <span class="section-count">cardshows.io · Westgate Center Saratoga, San Jose</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Monthly show in South Bay, 9am–5pm. Consistent and mid-size. Q1 2027 dates not yet announced but cadence has been reliable.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 5–6</td>
+          <td><span class="show-name">Silicon Valley Cards & Collectibles</span></td>
+          <td class="location-cell">Westgate Center Saratoga</td>
+          <td class="location-cell">San Jose, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 3–4</td>
+          <td><span class="show-name">Silicon Valley Cards & Collectibles</span></td>
+          <td class="location-cell">Westgate Center Saratoga</td>
+          <td class="location-cell">San Jose, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 14–15</td>
+          <td><span class="show-name">Silicon Valley Cards & Collectibles</span></td>
+          <td class="location-cell">Westgate Center Saratoga</td>
+          <td class="location-cell">San Jose, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Dec 12–13</td>
+          <td><span class="show-name">Silicon Valley Cards & Collectibles</span></td>
+          <td class="location-cell">Westgate Center Saratoga</td>
+          <td class="location-cell">San Jose, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell" style="color:var(--muted);opacity:0.6">Q1 2027 TBD</td>
+          <td><span class="show-name" style="opacity:0.5">Silicon Valley Cards & Collectibles</span></td>
+          <td class="location-cell" style="opacity:0.5">Westgate Center Saratoga</td>
+          <td class="location-cell" style="opacity:0.5">San Jose, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--viable)"></div>
+      <span class="section-label">Sacramento — All World Card Shows</span>
+      <span class="section-count">allworldcardshows.com · Sacramento Pocket/Greenhaven area</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Small local community shows at Portuguese Hall and Elks Lodge #6, off I-5 in south Sacramento. Good for scouting. Separate from the larger Sacramento Card Show (D&P Sports) which runs quarterly conventions at the SAFE Credit Union Convention Center downtown.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 12</td>
+          <td><span class="show-name">All World Card Show</span></td>
+          <td class="location-cell">Elks Lodge #6</td>
+          <td class="location-cell">Sacramento, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 31</td>
+          <td><span class="show-name">All World Card Show</span></td>
+          <td class="location-cell">Elks Lodge #6</td>
+          <td class="location-cell">Sacramento, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 28</td>
+          <td><span class="show-name">All World Card Show</span></td>
+          <td class="location-cell">Elks Lodge #6</td>
+          <td class="location-cell">Sacramento, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Dec 19</td>
+          <td><span class="show-name">All World Card Show</span></td>
+          <td class="location-cell">Elks Lodge #6</td>
+          <td class="location-cell">Sacramento, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--viable)"></div>
+      <span class="section-label">Downtown Card Show — The Card Attic (Fairfield)</span>
+      <span class="section-count">cardshows.io · weekly Saturdays</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Weekly Saturday shows in Fairfield (midway between SF and Sacramento on I-80). 11am–5pm. Small and casual, free admission. Confirmed through Sep; fall/winter dates follow same weekly cadence but not yet listed.</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 5</td>
+          <td><span class="show-name">Downtown Card Show</span></td>
+          <td class="location-cell">The Card Attic</td>
+          <td class="location-cell">Fairfield, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 12</td>
+          <td><span class="show-name">Downtown Card Show</span></td>
+          <td class="location-cell">The Card Attic</td>
+          <td class="location-cell">Fairfield, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 19</td>
+          <td><span class="show-name">Downtown Card Show</span></td>
+          <td class="location-cell">The Card Attic</td>
+          <td class="location-cell">Fairfield, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Sep 26</td>
+          <td><span class="show-name">Downtown Card Show</span></td>
+          <td class="location-cell">The Card Attic</td>
+          <td class="location-cell">Fairfield, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell" style="color:var(--muted);opacity:0.6">Oct–Dec (weekly)</td>
+          <td><span class="show-name" style="opacity:0.5">Downtown Card Show</span></td>
+          <td class="location-cell" style="opacity:0.5">The Card Attic</td>
+          <td class="location-cell" style="opacity:0.5">Fairfield, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      <h4>Notes</h4>
+      <ul>
+        <li><strong>Collect-A-Con SF (Sep 12–13)</strong> at San Mateo County Event Center is the headliner — same venue as East Bay Card Show in Oct and Nov.</li>
+        <li><strong>Nov 28–29</strong> East Bay Card Show is Black Friday/Small Business Saturday weekend — typically strong buyer turnout.</li>
+        <li><strong>East Bay Card Show Jan 2–3, 2027</strong> is confirmed on their events page — good first show of the year.</li>
+        <li>Sacramento is ~90 min drive from SF. All World shows are small community events — worth scouting inventory but may not be worth a vendor table unless you're already nearby.</li>
+        <li>Sacramento Card Show (D&P Sports) runs 3-day conventions at the SAFE Credit Union Convention Center. Show 4.0 is Jul 11–13; a fall/winter 5.0 is expected but not yet announced. Follow <a href="https://www.instagram.com/sacramentocardshow/" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82rem">@sacramentocardshow</a>.</li>
+        <li>Check <a href="https://tenthinningcardshow.com/east-bay-card-show-events" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82rem">tenthinningcardshow.com</a> for East Bay vendor registration.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ LA / SD LOCAL SHOWS ═══ -->
+<div id="tab-lasd" class="tab-pane">
+  <div class="pane-wrap">
+    <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1.5rem">Local shows in Los Angeles and San Diego, Sep 2026 through Q1 2027. FR Pasadena (Sep 5–6), FR San Diego (Sep 19–20), and CAC LA (Dec 19–20) are already in the Viable tab.</p>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--lasd)"></div>
+      <span class="section-label">Los Angeles</span>
+    </div>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Oct 31–Nov 1</td>
+          <td><span class="show-name">TCG NOW</span></td>
+          <td class="location-cell">Warner Center Marriott</td>
+          <td class="location-cell">Woodland Hills, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 21–22</td>
+          <td><span class="show-name">Front Row Card Show</span> <span class="tag tag-fr">FR</span></td>
+          <td class="location-cell">Pasadena Convention Center</td>
+          <td class="location-cell">Pasadena, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--lasd)"></div>
+      <span class="section-label">San Diego</span>
+    </div>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:1rem">Two distinct SD brands: <strong>SD Collectibles</strong> (Liberty Station, community-level, 20+ shows/year, sandiegocardshows.com) and <strong>SD Card Show</strong> (larger, Del Mar or DoubleTree Mission Valley).</p>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Sep 12</td>
+          <td><span class="show-name">SD Collectibles Card Show</span></td>
+          <td class="location-cell">Liberty Station Conference Center</td>
+          <td class="location-cell">San Diego, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Oct 2–4</td>
+          <td><span class="show-name">Trading Card Con SD</span></td>
+          <td class="location-cell">Sheraton San Diego Resort, 1380 Harbor Island Dr</td>
+          <td class="location-cell">San Diego, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Nov 30</td>
+          <td><span class="show-name">SD Card Show</span></td>
+          <td class="location-cell">DoubleTree by Hilton Mission Valley</td>
+          <td class="location-cell">San Diego, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-divider"></div>
+
+    <div class="section-header">
+      <div class="section-dot" style="background:var(--lasd);opacity:0.6"></div>
+      <span class="section-label" style="opacity:0.7">Q1 2027</span>
+    </div>
+    <table class="show-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Show</th>
+          <th>Venue</th>
+          <th>City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="date-cell">Jan 24–25</td>
+          <td><span class="show-name">SD Card Show — TCG Only</span></td>
+          <td class="location-cell">DoubleTree by Hilton Mission Valley</td>
+          <td class="location-cell">San Diego, CA</td>
+        </tr>
+        <tr>
+          <td class="date-cell">Jan 31–Feb 1</td>
+          <td><span class="show-name">SD Collectibles Card Show</span></td>
+          <td class="location-cell">Liberty Station Conference Center</td>
+          <td class="location-cell">San Diego, CA</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="notes">
+      <h4>Notes</h4>
+      <ul>
+        <li><strong>FR Pasadena Sep 5–6</strong> and <strong>FR San Diego Sep 19–20</strong> are in the Viable tab. FR Pasadena Nov 21–22 is a second Pasadena show this year.</li>
+        <li><strong>Trading Card Con SD (Oct 2–4)</strong> is at the Sheraton on Harbor Island — a proper 3-day convention format, worth tracking for vendor table cost vs. expected foot traffic.</li>
+        <li><strong>TCG NOW (Oct 31–Nov 1)</strong> in Woodland Hills is a newer SoCal TCG-focused show. Warner Center Marriott in the San Fernando Valley.</li>
+        <li><strong>CAC LA (Dec 19–20)</strong> is already in the Viable tab — Collect-A-Con, larger format.</li>
+        <li><strong>SD Card Show TCG-Only (Jan 24–25)</strong> at DoubleTree Mission Valley is a good opening show for 2027 — confirmed date from their site.</li>
+        <li>SD Collectibles runs ~2x/month throughout the year from Liberty Station. Check <a href="https://sandiegocardshows.com" target="_blank" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:0.82rem">sandiegocardshows.com</a> for full schedule.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p class="eyebrow">Sleeper Slabs</p>
+  <div class="footer-links">
+    <a href="https://sleeperslabs.com" target="_blank">sleeperslabs.com</a>
+    <a href="https://instagram.com/sleeperslabs" target="_blank">@sleeperslabs</a>
+    <a href="https://collectaconusa.com" target="_blank">collectaconusa.com</a>
+    <a href="https://frontrowcardshow.com" target="_blank">frontrowcardshow.com</a>
+    <a href="https://card.party" target="_blank">card.party</a>
+    <a href="index.html">← Back to Phil's Sites</a>
+  </div>
+</footer>
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.currentTarget.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
