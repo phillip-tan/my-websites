@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asia Sabbatical 2026 — Phil & Nelie</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --border: #2a2a2a;
+  --text: #e8e8e8;
+  --muted: #888;
+  --accent: #c9a96e;
+  --korea: #5b7fa6;
+  --japan: #c0392b;
+  --bangkok: #e67e22;
+  --sea: #27ae60;
+  --r: 10px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  padding: 3.5rem 2rem 2.5rem;
+  max-width: 860px;
+  margin: 0 auto;
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+}
+header h1 em { font-style: italic; color: var(--accent); }
+header p.sub {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  color: var(--muted);
+  font-size: 1rem;
+  margin-bottom: 1.75rem;
+  max-width: 560px;
+  line-height: 1.6;
+}
+.header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+.meta-item {
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'DM Mono', monospace;
+}
+.meta-item span {
+  display: block;
+  color: var(--text);
+  font-size: 0.88rem;
+  letter-spacing: 0;
+  text-transform: none;
+  margin-top: 0.2rem;
+}
+
+/* ── MAIN ── */
+main { max-width: 860px; margin: 0 auto; padding: 2rem; }
+
+/* ── TIMELINE ── */
+.timeline-wrap { margin-bottom: 2.5rem; }
+.timeline-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+.timeline {
+  display: flex;
+  height: 44px;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.seg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 0.15s, opacity 0.15s;
+  position: relative;
+}
+.seg:hover { filter: brightness(1.25); }
+.seg-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+/* proportional widths: Korea1=4, Japan1=30, Japan2=30, BKK=5, SEA=14, Japan3=30, Korea2=4 = 117 days total */
+.seg[data-country="korea1"]  { background: var(--korea);   flex: 4; }
+.seg[data-country="japan1"]  { background: var(--japan);   flex: 30; }
+.seg[data-country="japan2"]  { background: #a93226;        flex: 30; }
+.seg[data-country="bangkok"] { background: var(--bangkok); flex: 5; }
+.seg[data-country="sea"]     { background: var(--sea);     flex: 14; }
+.seg[data-country="japan3"]  { background: #922b21;        flex: 30; }
+.seg[data-country="korea2"]  { background: #4a6a8f;        flex: 4; }
+
+.timeline-dates {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+.hint {
+  font-size: 0.72rem;
+  color: #555;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* ── LEGEND ── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── STAT ROW ── */
+.stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+}
+.stat {
+  background: var(--bg2);
+  flex: 1;
+  min-width: 120px;
+  padding: 1rem 1.25rem;
+}
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── DETAIL PANELS ── */
+.detail-wrap { display: flex; flex-direction: column; gap: 1px; }
+.detail-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  gap: 1rem;
+}
+.panel-header:hover { background: var(--bg3); }
+.panel-header-inner { display: flex; align-items: center; gap: 0.9rem; }
+.color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.panel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.panel-dates {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-top: 0.1rem;
+}
+.panel-right { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+.panel-duration {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+.chevron {
+  color: var(--muted);
+  font-size: 0.85rem;
+  transition: transform 0.2s;
+}
+.panel-body {
+  display: none;
+  padding: 1.4rem;
+  gap: 1.5rem;
+  flex-direction: column;
+}
+.panel-body.open { display: flex; }
+
+h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 0.75rem;
+}
+.highlight-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+.highlight-list li { display: flex; gap: 0.6rem; font-size: 0.9rem; }
+.bullet { color: var(--accent); flex-shrink: 0; font-size: 0.7rem; margin-top: 0.2rem; }
+
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+  margin-right: 0.4rem;
+  margin-top: 0.3rem;
+}
+
+.japan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(192,57,43,0.15);
+  border: 1px solid rgba(192,57,43,0.3);
+  color: #e74c3c;
+  font-size: 0.72rem;
+  font-family: 'DM Mono', monospace;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #444;
+  font-family: 'DM Mono', monospace;
+  max-width: 860px;
+  margin: 2rem auto 0;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Sep 2026 — Jan 2027 · Updated Plan</p>
+  <h1>Asia <em>Sabbatical</em> 2026</h1>
+  <p class="sub">Japan-first. 90 days across three Tokyo stays, bookended by Seoul skin treatments, with a two-week Southeast Asia loop to see David and family.</p>
+  <div class="header-meta">
+    <div class="meta-item">Who <span>Phil & Nelie</span></div>
+    <div class="meta-item">Departure <span>Sep 26, SFO</span></div>
+    <div class="meta-item">Return <span>~Jan 23, 2027</span></div>
+    <div class="meta-item">Countries <span>Korea · Japan · Thailand · Vietnam · Cambodia</span></div>
+  </div>
+</header>
+
+<main>
+
+  <!-- TIMELINE -->
+  <div class="timeline-wrap">
+    <p class="timeline-label">Trip timeline — click a segment</p>
+    <div class="timeline">
+      <div class="seg" data-country="korea1"  onclick="toggle('korea1')">  <span class="seg-label">KOR</span></div>
+      <div class="seg" data-country="japan1"  onclick="toggle('japan1')">  <span class="seg-label">Japan I</span></div>
+      <div class="seg" data-country="japan2"  onclick="toggle('japan2')">  <span class="seg-label">Japan II</span></div>
+      <div class="seg" data-country="bangkok" onclick="toggle('bangkok')"> <span class="seg-label">BKK</span></div>
+      <div class="seg" data-country="sea"     onclick="toggle('sea')">     <span class="seg-label">SEA</span></div>
+      <div class="seg" data-country="japan3"  onclick="toggle('japan3')">  <span class="seg-label">Japan III</span></div>
+      <div class="seg" data-country="korea2"  onclick="toggle('korea2')">  <span class="seg-label">KOR</span></div>
+    </div>
+    <div class="timeline-dates">
+      <span>Sep 26</span>
+      <span>Sep 30</span>
+      <span>Oct 30</span>
+      <span>Nov 29</span>
+      <span>Dec 6</span>
+      <span>Dec 20</span>
+      <span>Jan 19</span>
+      <span>Jan 23</span>
+    </div>
+    <p class="hint">↑ tap any segment for details</p>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item" onclick="toggle('korea1')"><div class="legend-dot" style="background:var(--korea)"></div> Korea (bookends)</div>
+    <div class="legend-item" onclick="toggle('japan1')"><div class="legend-dot" style="background:var(--japan)"></div> Japan — 90 days total</div>
+    <div class="legend-item" onclick="toggle('bangkok')"><div class="legend-dot" style="background:var(--bangkok)"></div> Bangkok (David)</div>
+    <div class="legend-item" onclick="toggle('sea')"><div class="legend-dot" style="background:var(--sea)"></div> Cambodia/Vietnam (family)</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">90</div>
+      <div class="stat-label">Days in Japan</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Tokyo Areas</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Korea Rx Days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">~119</div>
+      <div class="stat-label">Total Days</div>
+    </div>
+  </div>
+
+  <!-- DETAIL PANELS -->
+  <div class="detail-wrap">
+
+    <!-- KOREA 1 -->
+    <div class="detail-panel" id="panel-korea1">
+      <div class="panel-header" onclick="toggle('korea1')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:var(--korea)"></div>
+          <div>
+            <div class="panel-title">Korea — Round 1</div>
+            <div class="panel-dates">Sep 26 – Sep 30 · 4 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">4 days</span>
+          <span class="chevron" id="chevron-korea1">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-korea1">
+        <div>
+          <h3>Purpose</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Aesthetic procedures at Gangnam clinics — masseter botox, pico laser, RF microneedling</li>
+            <li><span class="bullet">◆</span>Front-load procedures days 1–2, recovery + exploration days 3–4</li>
+            <li><span class="bullet">◆</span>30–50% cheaper than US prices for same or better quality</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Base</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Seoul — Gangnam district</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>No visa required for US citizens — 90 days on arrival</li>
+            <li><span class="bullet">◆</span>Sep 26 is peak fall season — excellent weather (20–26°C)</li>
+            <li><span class="bullet">◆</span>Fly ICN → TYO on Sep 30</li>
+          </ul>
+          <div style="margin-top:0.75rem">
+            <span class="tag" style="background:rgba(91,127,166,0.2);color:#a3bdd6">Medical tourism</span>
+            <span class="tag" style="background:rgba(91,127,166,0.15);color:#a3bdd6">Round 1 of 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JAPAN I -->
+    <div class="detail-panel" id="panel-japan1">
+      <div class="panel-header" onclick="toggle('japan1')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:var(--japan)"></div>
+          <div>
+            <div class="panel-title">Japan — Stay I</div>
+            <div class="panel-dates">Sep 30 – Oct 30 · 30 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">30 days</span>
+          <span class="chevron" id="chevron-japan1">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-japan1">
+        <div>
+          <div class="japan-badge">🇯🇵 Stay 1 of 3 · Tokyo Area TBD</div>
+          <h3>Focus</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Settle in, find a neighborhood base, establish daily rhythm</li>
+            <li><span class="bullet">◆</span>Work on Sleeper Slabs — Pokémon card sourcing, store visits, market research</li>
+            <li><span class="bullet">◆</span>AI power user work — Claude Architect, building tools, courses</li>
+            <li><span class="bullet">◆</span>Oct = peak fall foliage begins — ideal for day trips (Nikko, Kamakura)</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Pokémon angle</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Visit Akihabara card shops, Card Rush, Surugaya</li>
+            <li><span class="bullet">◆</span>Source Japanese exclusives and promos unavailable in US</li>
+            <li><span class="bullet">◆</span>Assess feasibility of buying and shipping cards back</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>US citizens get 90 days visa-free in Japan — each stay resets on re-entry</li>
+            <li><span class="bullet">◆</span>Register for IC card (Suica/Pasmo) on arrival</li>
+            <li><span class="bullet">◆</span>Fly TYO → BKK on ~Nov 29 (brief transit to Bangkok stay)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- JAPAN II -->
+    <div class="detail-panel" id="panel-japan2">
+      <div class="panel-header" onclick="toggle('japan2')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:#a93226"></div>
+          <div>
+            <div class="panel-title">Japan — Stay II</div>
+            <div class="panel-dates">Oct 30 – Nov 29 · 30 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">30 days</span>
+          <span class="chevron" id="chevron-japan2">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-japan2">
+        <div>
+          <div class="japan-badge">🇯🇵 Stay 2 of 3 · Tokyo Area TBD</div>
+          <h3>Focus</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Different Tokyo neighborhood — explore a new area and vibe</li>
+            <li><span class="bullet">◆</span>Nov = peak koyo (fall foliage) — day trips to Kyoto, Nikko, Hakone</li>
+            <li><span class="bullet">◆</span>Deeper integration — language, routine, local community</li>
+            <li><span class="bullet">◆</span>Continue Sleeper Slabs sourcing and engineering work</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Nov is arguably the best month in Japan — clear, cool, spectacular foliage</li>
+            <li><span class="bullet">◆</span>Fly TYO → BKK ~Nov 29 for the SEA interlude</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANGKOK -->
+    <div class="detail-panel" id="panel-bangkok">
+      <div class="panel-header" onclick="toggle('bangkok')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:var(--bangkok)"></div>
+          <div>
+            <div class="panel-title">Bangkok</div>
+            <div class="panel-dates">Dec 2 – Dec 6 · 5 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">5 days</span>
+          <span class="chevron" id="chevron-bangkok">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-bangkok">
+        <div>
+          <h3>Who</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>David is based here — hang with cousin and Sleeper Slabs co-founder</li>
+            <li><span class="bullet">◆</span>Strategy session for the business while we're together in person</li>
+          </ul>
+        </div>
+        <div>
+          <h3>While there</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Bangkok street food — one of the best food cities in the world</li>
+            <li><span class="bullet">◆</span>Dec = dry season, low humidity, best time to visit</li>
+            <li><span class="bullet">◆</span>Chatuchak Weekend Market if timing works</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEA -->
+    <div class="detail-panel" id="panel-sea">
+      <div class="panel-header" onclick="toggle('sea')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:var(--sea)"></div>
+          <div>
+            <div class="panel-title">Cambodia & Vietnam</div>
+            <div class="panel-dates">Dec 6 – Dec 20 · ~14 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">~14 days</span>
+          <span class="chevron" id="chevron-sea">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-sea">
+        <div>
+          <h3>Who</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Family trip — parents joining for this leg</li>
+            <li><span class="bullet">◆</span>Cambodian heritage connection — family roots</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Itinerary (TBD)</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Cambodia — Phnom Penh and/or Siem Reap (Angkor Wat)</li>
+            <li><span class="bullet">◆</span>Vietnam — Ho Chi Minh City and/or coastal stops TBD</li>
+            <li><span class="bullet">◆</span>Dec = dry season across all of mainland SEA — ideal timing</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Fly back to Tokyo ~Dec 20 for final Japan stay</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- JAPAN III -->
+    <div class="detail-panel" id="panel-japan3">
+      <div class="panel-header" onclick="toggle('japan3')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:#922b21"></div>
+          <div>
+            <div class="panel-title">Japan — Stay III</div>
+            <div class="panel-dates">Dec 20 – Jan 19 · 30 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">30 days</span>
+          <span class="chevron" id="chevron-japan3">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-japan3">
+        <div>
+          <div class="japan-badge">🇯🇵 Stay 3 of 3 · Tokyo Area TBD</div>
+          <h3>Focus</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Third and final Tokyo base — different neighborhood again</li>
+            <li><span class="bullet">◆</span>Japanese New Year (Shōgatsu) — one of the most culturally rich times to be in Japan</li>
+            <li><span class="bullet">◆</span>Hatsumode (first shrine visit of the year) at Meiji Jingu or Sensoji</li>
+            <li><span class="bullet">◆</span>Final push on Sleeper Slabs card sourcing before heading home</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Dec 28 – Jan 3: Japan is on holiday — many shops closed, trains packed. Plan around it.</li>
+            <li><span class="bullet">◆</span>Winter in Tokyo: 4–10°C, dry, clear skies. Bring layers.</li>
+            <li><span class="bullet">◆</span>Fly TYO → ICN ~Jan 19 for final Korea round</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- KOREA 2 -->
+    <div class="detail-panel" id="panel-korea2">
+      <div class="panel-header" onclick="toggle('korea2')">
+        <div class="panel-header-inner">
+          <div class="color-dot" style="background:#4a6a8f"></div>
+          <div>
+            <div class="panel-title">Korea — Round 2</div>
+            <div class="panel-dates">Jan 19 – Jan 23 · 4 days</div>
+          </div>
+        </div>
+        <div class="panel-right">
+          <span class="panel-duration">4 days</span>
+          <span class="chevron" id="chevron-korea2">▼</span>
+        </div>
+      </div>
+      <div class="panel-body" id="body-korea2">
+        <div>
+          <h3>Purpose</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Follow-up aesthetic procedures — second round after initial treatments in September</li>
+            <li><span class="bullet">◆</span>Results review and any maintenance treatments</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Notes</h3>
+          <ul class="highlight-list">
+            <li><span class="bullet">◆</span>Jan = off-peak in Seoul, fewer tourists, potentially better clinic availability</li>
+            <li><span class="bullet">◆</span>Fly ICN → SFO Jan 23 — home</li>
+          </ul>
+          <div style="margin-top:0.75rem">
+            <span class="tag" style="background:rgba(91,127,166,0.2);color:#a3bdd6">Medical tourism</span>
+            <span class="tag" style="background:rgba(91,127,166,0.15);color:#a3bdd6">Round 2 of 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /detail-wrap -->
+</main>
+
+<footer>
+  asia-sabbatical-2026 · updated plan · china removed · 90 days japan · ~119 days total
+</footer>
+
+<script>
+function toggle(id) {
+  const body = document.getElementById('body-' + id);
+  const chevron = document.getElementById('chevron-' + id);
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.textContent = isOpen ? '▼' : '▲';
+}
+</script>
+</body>
+</html>
